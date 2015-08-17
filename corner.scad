@@ -6,8 +6,11 @@ inside_rad = .5;
 corner();
 
 
-//a standard corner, with a slight twist - one beam is internal, the other two are surface-mount.
+//a standard corner, with a slight twist - one beam is internal, the other two are surface-mount.  TODO: add flanges for the beams, to lock them against flexing?  Shouldn't be necessary with all corners installed, though.
 module corner(){
+	echo("BOM: 1, corner.scad");
+	echo("BOM: 3, screws, M5, 10mm");  
+	translate([0,0,-wall]) 
 	difference(){
 		union(){
 			hull(){
@@ -15,6 +18,8 @@ module corner(){
 				translate([0,beam/2+wall/2,beam/2+wall*3/4]) cube([beam, wall, beam+wall/2], center=true);
 				translate([-beam/2-wall/2,0,beam/2+wall*3/4]) cube([wall, beam, beam+wall/2], center=true);
 			}
+			translate([-beam/2-wall/2,0,-beam/2+wall*3/4]) cube([wall, beam, beam+wall/2], center=true);
+			translate([-beam/2-wall/2,beam,beam/2+wall*3/4]) cube([wall, beam, beam+wall/2], center=true);
 		}
 
 		//hollow out the center
