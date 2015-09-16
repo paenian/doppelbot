@@ -7,6 +7,7 @@ beam = 20;
 bed_screw_sep = 209;
 bed = 214;
 
+layer_height=.15;
 
 
 //frame lengths - may be dependent on wall above.

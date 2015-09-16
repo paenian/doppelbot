@@ -1,10 +1,39 @@
 include <configuration.scad>
 include <functions.scad>
+use <beam.scad>
 
 inside_rad = .5;
 
-corner();
+corner_2040();
 
+//corner();
+
+%translate([-(beam+wall)/2,(beam+wall)/2,wall-.1]) rotate([0,0,90]) beam_2040(height=50);
+%translate([-wall/2,-(beam+wall)/2,beam/2+wall-.1]) rotate([90,0,0]) beam_2040(height=50);
+%translate([(wall)/2,(beam+wall)/2,beam/2+wall-.1]) rotate([0,90,0]) rotate([0,0,90])beam_2040(height=50);
+
+translate([50,0,0]) beamEnd();
+
+module beamEnd(){
+    difference(){
+        cube([beam,beam,wall], center=true);
+        beamSlots(slop=.25);
+    }
+}
+
+//corner for using 2040 extrusion.
+module corner_2040(){
+    difference(){
+        union(){
+            //base, seen from the outside.
+            translate([0,0,wall/2]) cube([beam*2+wall,beam*3+wall,wall], center=true);
+            translate([0,(beam+wall)/2-.1,beam+wall-.1]) cube([wall,beam*2+.2, beam*2+.1], center=true);
+            translate([0,-beam/2,beam+wall-.1]) cube([beam*2+wall, wall, beam*2+.1], center=true);
+        }
+        
+        //screwholes
+    }
+}
 
 //a standard corner, with a slight twist - one beam is internal, the other two are surface-mount.  TODO: add flanges for the beams, to lock them against flexing?  Shouldn't be necessary with all corners installed, though.
 module corner(){
