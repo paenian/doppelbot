@@ -1,6 +1,7 @@
 wall = 5;
 
 screw_slop = .2;
+slop = .2;
 
 //these can't change - measured values.
 beam = 20;
@@ -29,8 +30,22 @@ echo("BOM: 2, reg rail, 2020", long_bed, "Bed mount");
 echo("BOM: 3, reg rail, 2020", short_bed, "Bed mount");  //might want more than three - to hold insulation well.
 
 //standard screw variables
-m5_rad = 5/2+screw_slop;
-m5_cap_rad = 9/2+screw_slop;
+m3_nut_rad = 6.01/2+slop;
+m3_nut_height = 2.4;
+m3_rad = 3/2+slop;
+m3_cap_rad = 3.25;
+m3_cap_height = 2;
+
+m4_nut_rad = 7.66/2+slop;
+m4_nut_height = 3.2;
+m4_rad = 4/2+slop;
+m4_cap_rad = 7/2+slop;
+m4_cap_height = 2.5;
+
+m5_nut_rad = 8.79/2+slop;
+m5_nut_height = 4.7;
+m5_rad = 5/2+slop;
+m5_cap_rad = 8/2+slop;
 m5_cap_height = 3;
 
 
