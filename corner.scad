@@ -5,6 +5,7 @@ use <beam.scad>
 inside_rad = .5;
 
 corner_2040(motor=true);
+translate([100,0,0]) corner_2040(idler=true);
 
 motor_w = 42;
 motor_r = 52/2;
@@ -25,7 +26,7 @@ module beamEnd(){
 }
 
 //corner for using 2040 extrusion.
-module corner_2040(motor=false){
+module corner_2040(motor=false, idler=false){
     difference(){
         union(){
             //base, seen from the outside.
@@ -38,6 +39,9 @@ module corner_2040(motor=false){
                 //motor mount
                 if(motor==true)
                     translate([motor_w/2,-beam/2+wall/2,beam*2+wall]) rotate([90,0,0]) motor_mount(solid=1);
+                //idler mount
+                if(idler==true)
+                    translate([motor_w/2,-beam/2+wall/2,beam*2+wall]) rotate([90,0,0]) idler_mount(solid=1);
             }
         }
         
@@ -56,6 +60,8 @@ module corner_2040(motor=false){
         //motor mount
         if(motor==true)
             translate([motor_w/2,-beam/2+wall/2,beam*2+wall]) rotate([90,0,0]) motor_mount(solid=-1);
+        if(idler==true)
+            translate([motor_w/2,-beam/2+wall/2,beam*2+wall]) rotate([90,0,0]) idler_mount(solid=-1);
     }
 }
 
@@ -91,7 +97,21 @@ module motor_holes(){
     
     translate([0,0,wall]) cylinder(r=center_rad, h=center_height*2, center=true);
     
-    mirror([0,0,1]) translate([0,0,-wall]) screw_hole_m5();
+    cylinder(r=m5_cap_rad, h=wall*4, center=true);
+}
+
+//the idler mount - gets attached inline on the corners.
+module idler_mount(solid=0){
+    idler_rad = 19/2;
+    
+    if(solid>=0){
+        cylinder(r=m5_cap_rad*2, h=wall);
+        translate([idler_rad, idler_rad, 0]) cylinder(r=m5_cap_rad*2, h=wall);
+    }
+    if(solid<=0){
+        mirror([0,0,1]) translate([0,0,-wall]) screw_hole_m5();
+        translate([idler_rad, idler_rad, 0]) mirror([0,0,1]) translate([0,0,-wall]) screw_hole_m5();
+    }
 }
 
 //a standard corner, with a slight twist - one beam is internal, the other two are surface-mount.  TODO: add flanges for the beams, to lock them against flexing?  Shouldn't be necessary with all corners installed, though.
