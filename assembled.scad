@@ -21,7 +21,7 @@ module top_frame(){
 		translate([-long_frame/2+beam/2,short_frame/2,beam/2]) rotate([90,0,0]) beam(short_frame,false);
 	
 		for(j=[0:1]) mirror([0,j,0])
-			translate([-long_frame/2+beam/2,-short_frame/2-beam/2-wall,0]) corner();
+			translate([-long_frame/2+beam/2,-short_frame/2-beam/2-wall,0]) rotate([0,90,0]) rotate([0,0,90]) corner_2040();
 	}
 
 	for(j=[0:1]) mirror([0,j,0])
