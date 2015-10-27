@@ -6,6 +6,7 @@ inside_rad = .5;
 
 corner_2040(motor=true);
 translate([100,0,0]) corner_2040(idler=true);
+translate([200,0,0]) corner_2040();
 
 motor_w = 42;
 motor_r = 52/2;
@@ -81,6 +82,9 @@ module motor_base(h=wall){
 		translate([0,0,h/2]) cube([motor_w, motor_w, h], center=true);
 		cylinder(r=motor_r+slop, h=h, $fn=64);
 	}
+    
+    //extra idler
+    TODO: make an extra idler above the motor, to guide the belt into the gap - belt should be 
 }
 
 module motor_holes(){
@@ -88,6 +92,8 @@ module motor_holes(){
     slot = 1;
     center_rad = 12;
     center_height = 2.5;
+    
+    %cylinder(r=14, h=100, center=true);
     
     for(i=[0:90:359]) rotate([0,0,i]){
         translate([hole_x+slot, hole_x+slot, 0]) screw_hole_m3();
@@ -109,8 +115,8 @@ module idler_mount(solid=0){
         translate([idler_rad, idler_rad, 0]) cylinder(r=m5_cap_rad*2, h=wall);
     }
     if(solid<=0){
-        mirror([0,0,1]) translate([0,0,-wall]) screw_hole_m5();
-        translate([idler_rad, idler_rad, 0]) mirror([0,0,1]) translate([0,0,-wall]) screw_hole_m5();
+        mirror([0,0,1]) translate([0,0,-wall*2+3]) rotate([0,0,180]) screw_hole_m5(cap=true, height=15);
+        translate([idler_rad, idler_rad, 0]) mirror([0,0,1]) translate([0,0,-wall*2+3]) rotate([0,0,180]) screw_hole_m5(cap=true, height=15);
     }
 }
 

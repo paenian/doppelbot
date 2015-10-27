@@ -9,30 +9,30 @@ module cap_cylinder(r=1, h=1, center=false){
 	}
 }
 
-module screw_hole_m3(cap=false, onion=0){
-    screw_hole(cap=cap, onion=onion, cap_height=m3_cap_height, rad=m3_rad, cap_rad=m3_cap_rad);
+module screw_hole_m3(cap=false, onion=0, height=wall){
+    screw_hole(cap=cap, onion=onion, cap_height=m3_cap_height, rad=m3_rad, cap_rad=m3_cap_rad, height=height);
 }
 
-module screw_hole_m4(cap=false, onion=0){
-    screw_hole(cap=cap, onion=onion, cap_height=m4_cap_height, rad=m4_rad, cap_rad=m4_cap_rad);
+module screw_hole_m4(cap=false, onion=0, height=wall){
+    screw_hole(cap=cap, onion=onion, cap_height=m4_cap_height, rad=m4_rad, cap_rad=m4_cap_rad, height=height);
 }
 
-module screw_hole_m5(cap=false, onion=0){
-    screw_hole(cap=cap, onion=onion, cap_height=m5_cap_height, rad=m5_rad, cap_rad=m5_cap_rad);
+module screw_hole_m5(cap=false, onion=0, height=wall){
+    screw_hole(cap=cap, onion=onion, cap_height=m5_cap_height, rad=m5_rad, cap_rad=m5_cap_rad, height=height);
 }
 
 //screhole with a nice recess for the cap.
-module screw_hole(cap=false, onion=0){
+module screw_hole(cap=false, onion=0, height=wall){
     translate([0,0,cap_height-.05+onion])
         if(cap==true){
-            cap_cylinder(r=rad, h=wall);
+            cap_cylinder(r=rad, h=height);
         }else{
-            cylinder(r=rad, h=wall);
+            cylinder(r=rad, h=height);
         }
-	translate([0,0,cap_height-wall])
+	translate([0,0,cap_height-height])
         if(cap==true){
-            cap_cylinder(r=cap_rad, h=wall);
+            cap_cylinder(r=cap_rad, h=height);
         }else{
-            cylinder(r=cap_rad, h=wall);
+            cylinder(r=cap_rad, h=height);
         }
 }
