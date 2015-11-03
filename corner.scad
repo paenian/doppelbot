@@ -5,14 +5,14 @@ use <beam.scad>
 inside_rad = .5;
 
 corner_2040(motor=true);
-translate([100,0,0]) corner_2040(idler=true);
-translate([200,0,0]) corner_2040();
+translate([100,0,0]) mirror([1,0,0])  corner_2040(motor=true);
+
+translate([0,0,150]) mirror([0,0,1]) corner_2040(idler=true);
+translate([100,0,150]) mirror([0,0,1]) mirror([1,0,0]) corner_2040(idler=true);
 
 motor_w = 42;
 motor_r = 52/2;
 slop=.2;
-
-//corner();
 
 %translate([-(beam+wall)/2,(beam+wall)/2,wall-.1]) rotate([0,0,90]) beam_2040(height=50);
 %translate([-wall/2,-(beam+wall)/2,beam/2+wall-.1]) rotate([90,0,0]) beam_2040(height=50);
@@ -27,7 +27,9 @@ module beamEnd(){
 }
 
 //corner for using 2040 extrusion.
-module corner_2040(motor=false, idler=false){
+module corner_2040(motor=false, idler=false, guide_bearing=true){
+    guide_offset=15;
+    
     difference(){
         union(){
             //base, seen from the outside.
@@ -43,6 +45,13 @@ module corner_2040(motor=false, idler=false){
                 //idler mount
                 if(idler==true)
                     translate([motor_w/2,-beam/2+wall/2,beam*2+wall]) rotate([90,0,0]) idler_mount(solid=1);
+                //guide bearing
+                if(guide_bearing==true)
+                    translate([idler_rad,-beam/2+wall/2,beam*2+wall+guide_offset]) rotate([90,0,0]) {
+                        cylinder(r=idler_flange_rad, h=wall);
+                        %cylinder(r=pulley_flange_rad, h=wall*3, center=true);
+                        %cylinder(r=pulley_rad, h=wall*5, center=true);
+                    }
             }
         }
         
@@ -60,20 +69,23 @@ module corner_2040(motor=false, idler=false){
         
         //motor mount
         if(motor==true)
-            translate([motor_w/2,-beam/2+wall/2,beam*2+wall]) rotate([90,0,0]) motor_mount(solid=-1);
+            translate([motor_w/2,-beam/2+wall/2,beam*2+wall]) rotate([90,0,0]) motor_mount(solid=-1, guide_bearing=guide_bearing);
         if(idler==true)
             translate([motor_w/2,-beam/2+wall/2,beam*2+wall]) rotate([90,0,0]) idler_mount(solid=-1);
+        //guide bearing
+        if(guide_bearing==true)
+            translate([idler_rad,-beam/2+wall/2+.5-wall-2,beam*2+wall+guide_offset]) rotate([-90,0,0]) screw_hole_m5(cap=true, height=15);
     }
 }
 
 //the motor mount - gets attached inline.
 //motor cutout and mount
-module motor_mount(solid=0){
+module motor_mount(solid=0, guide_bearing=false){
     if(solid>=0){
         motor_base();
     }
     if(solid<=0){
-        motor_holes();
+        motor_holes(guide_bearing);
     }
 }
 
@@ -82,23 +94,31 @@ module motor_base(h=wall){
 		translate([0,0,h/2]) cube([motor_w, motor_w, h], center=true);
 		cylinder(r=motor_r+slop, h=h, $fn=64);
 	}
-    
-    //extra idler
-    TODO: make an extra idler above the motor, to guide the belt into the gap - belt should be 
 }
 
-module motor_holes(){
+module motor_hole(hole_x = 31/2, slot = 1){
+    translate([hole_x+slot, hole_x+slot, 0]) screw_hole_m3();
+    translate([hole_x, hole_x, 0]) screw_hole_m3();
+    translate([hole_x-slot, hole_x-slot, 0]) screw_hole_m3();
+}
+
+module motor_holes(guide_bearing=false){
     hole_x = 31/2;
     slot = 1;
     center_rad = 12;
     center_height = 2.5;
     
-    %cylinder(r=14, h=100, center=true);
+    %cylinder(r=pulley_flange_rad, h=wall*3, center=true);
+    %cylinder(r=pulley_rad, h=wall*5, center=true);
     
-    for(i=[0:90:359]) rotate([0,0,i]){
-        translate([hole_x+slot, hole_x+slot, 0]) screw_hole_m3();
-        translate([hole_x, hole_x, 0]) screw_hole_m3();
-        translate([hole_x-slot, hole_x-slot, 0]) screw_hole_m3();
+    if(guide_bearing==false){
+        for(i=[0:90:359]) rotate([0,0,i]){
+            motor_hole();
+        }
+    }else{
+        for(i=[180:90:449]) rotate([0,0,i]){
+            motor_hole();
+        }
     }
     
     translate([0,0,wall]) cylinder(r=center_rad, h=center_height*2, center=true);
@@ -108,15 +128,17 @@ module motor_holes(){
 
 //the idler mount - gets attached inline on the corners.
 module idler_mount(solid=0){
-    idler_rad = 19/2;
-    
     if(solid>=0){
-        cylinder(r=m5_cap_rad*2, h=wall);
-        translate([idler_rad, idler_rad, 0]) cylinder(r=m5_cap_rad*2, h=wall);
+        //cylinder(r=idler_flange_rad, h=wall);  this is replaced by the guide wheel
+        *translate([idler_rad+pulley_rad, 0, 0]) {
+            cylinder(r=idler_flange_rad, h=wall);
+            %cylinder(r=pulley_flange_rad, h=wall*3, center=true);
+            %cylinder(r=pulley_rad, h=wall*5, center=true);
+        }
     }
     if(solid<=0){
-        mirror([0,0,1]) translate([0,0,-wall*2+3]) rotate([0,0,180]) screw_hole_m5(cap=true, height=15);
-        translate([idler_rad, idler_rad, 0]) mirror([0,0,1]) translate([0,0,-wall*2+3]) rotate([0,0,180]) screw_hole_m5(cap=true, height=15);
+        //mirror([0,0,1]) translate([0,0,-wall*2+3]) rotate([0,0,180]) screw_hole_m5(cap=true, height=15);
+        //translate([idler_rad+pulley_rad, 0, 0]) mirror([0,0,1]) translate([0,0,-wall*2+3]) rotate([0,0,180]) screw_hole_m5(cap=true, height=15);
     }
 }
 

@@ -10,6 +10,12 @@ bed = 214;
 
 layer_height=.15;
 
+idler_rad = 17.5/2;
+idler_flange_rad = 22/2;
+
+pulley_rad = 13/2;
+pulley_flange_rad = 18/2;
+
 
 //frame lengths - may be dependent on wall above.
 long_frame = 500;
