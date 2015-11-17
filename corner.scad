@@ -6,9 +6,10 @@ inside_rad = .5;
 
 corner_2040(motor=true);
 translate([100,0,0]) mirror([1,0,0])  corner_2040(motor=true);
-
 translate([0,0,150]) mirror([0,0,1]) corner_2040(idler=true);
 translate([100,0,150]) mirror([0,0,1]) mirror([1,0,0]) corner_2040(idler=true);
+
+
 
 motor_w = 42;
 motor_r = 52/2;
