@@ -2,6 +2,8 @@ include <configuration.scad>
 include <functions.scad>
 use <beam.scad>
 
+wall=3;
+
 gantry_length = 60;
 //width is defined by the beam profile.
 
@@ -9,7 +11,7 @@ cyclops_width=30;
 cyclops_drop = 18; //how far down the cyclops should be.
 
 ind_rad = 18/2+slop;
-ind_offset = beam/2+ind_rad+wall-1;
+ind_offset = beam/2+ind_rad+wall+1;
 ind_lift = 20;
 ind_height = 12;
 
@@ -49,7 +51,7 @@ module hotend_carriage(){
                 }
                 
                 //round the front corners
-                for(i=[0,1]) mirror([i,0,0]) translate([cyclops_width/2+min_rad,beam/2+m5_rad+5-1,0]) difference(){
+                for(i=[0,1]) mirror([i,0,0]) translate([cyclops_width/2+min_rad,beam/2+m5_rad+wall+1,0]) difference(){
                     translate([-min_rad-1,0,-wall]) cube([min_rad+1, min_rad+1, wall*5]);
                     cylinder(r=min_rad, h=wall*11, center=true);
                 }
@@ -68,13 +70,13 @@ module hotend_carriage(){
                         translate([-1.5,-.1,0]) cube([3, .1, cyclops_drop*2]);
                         translate([-.5,2-.1,0]) cube([1, .1, cyclops_drop*2]);
                     }
-                    cube([cyclops_width, 30, cyclops_drop*2+wall*2+10], center=true);
+                    cube([cyclops_width, 30, cyclops_drop*2+wall*2+wall*2], center=true);
                 }
                 cyclops_holes(solid=1, jut=1, wall=wall);
             }
             
             //induction sensor mount
-            translate([0, -ind_offset,-ind_height+5-ind_lift]) mirror([0,1,0]){
+            translate([0, -ind_offset,-ind_height+wall-ind_lift]) mirror([0,1,0]){
                 extruder_mount(solid=1, m_height=ind_height,  hotend_rad=ind_rad, wall=3);
             //offset the mount
                 translate([0,0,ind_height-.1]) cylinder(r=(ind_rad+wall)/cos(30), h=ind_lift+.1, $fn=6);
@@ -92,7 +94,7 @@ module hotend_carriage(){
         translate([0,beam/2+wall+1,-cyclops_drop-wall]) cyclops_holes(solid=-1, jut=0, wall=wall);
         
         //induction sensor mount
-        translate([0, -ind_offset,-ind_height+5-ind_lift]) mirror([0,1,0]){
+        translate([0, -ind_offset,-ind_height+wall-ind_lift]) mirror([0,1,0]){
                 extruder_mount(solid=0, m_height=ind_height,  hotend_rad=ind_rad, wall=3);
             //offset the mount
                 translate([0,0,ind_height-.1]) cylinder(r1=ind_rad, r2=ind_rad+2, h=ind_lift+.15);
@@ -171,8 +173,8 @@ module cyclops_holes(solid=0, jut=0){
             }
         }
         if(solid<=0) translate([0,0,-.1]) {
-            %translate([0,-5,9+wall+ind_jut+.1]) cube([30,50,18], center=true);
-            %translate([0,-5,6+wall+ind_jut+.1]) rotate([90,0,0]) cylinder(r=1, h=50, center=true);
+            %translate([0,-wall,9+wall+ind_jut+.1]) cube([30,50,18], center=true);
+            %translate([0,-wall,6+wall+ind_jut+.1]) rotate([90,0,0]) cylinder(r=1, h=50, center=true);
             rotate([0,0,180]) cap_cylinder(r=m3_rad, h=wall*2);
             rotate([0,0,180]) cap_cylinder(r=m3_cap_rad, h=m3_cap_height);
             
