@@ -4,11 +4,11 @@ use <beam.scad>
 
 inside_rad = .5;
 
-corner_2040(motor=true);
-translate([100,0,0]) mirror([1,0,0])  corner_2040(motor=true);
+corner_2040(motor=true);    //xyZ
+translate([100,0,0]) mirror([1,0,0])  corner_2040(motor=true);  //xYZ
 
-translate([0,0,150]) mirror([0,0,1]) corner_2040(idler=true);
-translate([100,0,150]) mirror([0,0,1]) mirror([1,0,0]) corner_2040(idler=true);
+translate([0,0,150]) mirror([0,0,1]) corner_2040(idler=true);   //XyZ
+translate([100,0,150]) !mirror([0,0,1]) mirror([1,0,0]) corner_2040(idler=true);    //XYZ
 
 motor_w = 42;
 motor_r = 52/2;
