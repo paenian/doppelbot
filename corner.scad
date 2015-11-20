@@ -4,11 +4,11 @@ use <beam.scad>
 
 inside_rad = .5;
 
-corner_2040(motor=true);    //xyZ
+!corner_2040(motor=true);    //xyZ
 translate([100,0,0]) mirror([1,0,0])  corner_2040(motor=true);  //xYZ
 
 translate([0,0,150]) mirror([0,0,1]) corner_2040(idler=true);   //XyZ
-translate([100,0,150]) !mirror([0,0,1]) mirror([1,0,0]) corner_2040(idler=true);    //XYZ
+translate([100,0,150]) mirror([0,0,1]) mirror([1,0,0]) corner_2040(idler=true);    //XYZ
 
 
 
@@ -76,7 +76,7 @@ module corner_2040(motor=false, idler=false, guide_bearing=true){
             translate([motor_w/2,-beam/2+wall/2,beam*2+wall]) rotate([90,0,0]) idler_mount(solid=-1);
         //guide bearing
         if(guide_bearing==true)
-            translate([idler_rad,-beam/2+wall/2+.5-wall-2,beam*2+wall+guide_offset]) rotate([-90,0,0]) screw_hole_m5(cap=true, height=15);
+            translate([idler_rad,-beam/2+wall/2+.5-wall,beam*2+wall+guide_offset]) rotate([-90,0,0]) screw_hole_m5(cap=true, height=15);
     }
 }
 
@@ -123,9 +123,9 @@ module motor_holes(guide_bearing=false){
         }
     }
     
-    translate([0,0,wall]) cylinder(r=center_rad, h=center_height*2, center=true);
+    translate([0,0,wall]) rotate([0,0,180]) cap_cylinder(r=center_rad, h=center_height*8, center=true);
     
-    cylinder(r=m5_cap_rad, h=wall*4, center=true);
+    //rotate([0,0,180]) cap_cylinder(r=m5_cap_rad, h=wall*4, center=true);
 }
 
 //the idler mount - gets attached inline on the corners.
