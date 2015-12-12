@@ -4,12 +4,17 @@ use <beam.scad>
 
 inside_rad = .5;
 
-!corner_2040(motor=true);    //xyZ
+corner_2040(motor=true);    //xyZ
 translate([100,0,0]) mirror([1,0,0])  corner_2040(motor=true);  //xYZ
 
-translate([0,0,150]) mirror([0,0,1]) corner_2040(idler=true);   //XyZ
-translate([100,0,150]) mirror([0,0,1]) mirror([1,0,0]) corner_2040(idler=true);    //XYZ
+translate([0,0,150]) rotate([180,0,0]) mirror([0,0,1]) corner_2040(idler=true);   //XyZ
+translate([100,0,150]) rotate([180,0,0]) mirror([0,0,1]) mirror([1,0,0]) corner_2040(idler=true);    //XYZ
 
+translate([0,80,0]) mirror([0,1,0]) corner_2040(guide_bearing=false);    //xyZ
+translate([100,80,0]) mirror([0,1,0]) mirror([1,0,0])  corner_2040(guide_bearing=false);  //xYZ
+
+translate([0,80,150]) mirror([0,1,0]) rotate([180,0,0]) mirror([0,0,1]) corner_2040(guide_bearing=false);   //XyZ
+translate([100,80,150]) mirror([0,1,0]) rotate([180,0,0]) mirror([0,0,1]) mirror([1,0,0]) corner_2040(guide_bearing=false);    //XYZ
 
 
 motor_w = 42;
