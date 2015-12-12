@@ -159,7 +159,7 @@ module cyclops_holes(solid=0, jut=0){
                 }
             }
             if(solid<=0) translate([0,0,-.1]) {
-                rotate([0,0,180]) cap_cylinder(r=m3_rad, h=wall*2);
+                rotate([0,0,180]) cap_cylinder(r=m3_rad, h=wall*50, center=true);
                 rotate([0,0,180]) cap_cylinder(r=m3_cap_rad, h=m3_cap_height);
             }
         }
@@ -175,7 +175,7 @@ module cyclops_holes(solid=0, jut=0){
         if(solid<=0) translate([0,0,-.1]) {
             %translate([0,-wall,9+wall+ind_jut+.1]) cube([30,50,18], center=true);
             %translate([0,-wall,6+wall+ind_jut+.1]) rotate([90,0,0]) cylinder(r=1, h=50, center=true);
-            rotate([0,0,180]) cap_cylinder(r=m3_rad, h=wall*2);
+            rotate([0,0,180]) cap_cylinder(r=m3_rad, h=wall*50, center=true);
             rotate([0,0,180]) cap_cylinder(r=m3_cap_rad, h=m3_cap_height);
             
             //cutout above the block
