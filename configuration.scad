@@ -17,10 +17,18 @@ pulley_rad = 13/2;
 pulley_flange_rad = 18/2;
 
 wheel_rad = 10.2;
+wheel_clearance = 26;
+wheel_height = 10.4;
 wheel_flange_rad = 24.5/2;
 
 eccentric_rad = 7.3/2;
 eccentric_flange_rad = 11/2;
+
+motor_w = 42;
+motor_r = 52/2;
+
+belt_thick = 6;
+belt_width = 2;
 
 
 //frame lengths - may be dependent on wall above.

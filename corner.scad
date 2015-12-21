@@ -17,8 +17,7 @@ translate([0,80,150]) mirror([0,1,0]) rotate([180,0,0]) mirror([0,0,1]) corner_2
 translate([100,80,150]) mirror([0,1,0]) rotate([180,0,0]) mirror([0,0,1]) mirror([1,0,0]) corner_2040(guide_bearing=false);    //XYZ
 
 
-motor_w = 42;
-motor_r = 52/2;
+
 slop=.2;
 
 %translate([-(beam+wall)/2,(beam+wall)/2,wall-.1]) rotate([0,0,90]) beam_2040(height=50);
