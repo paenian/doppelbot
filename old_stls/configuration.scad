@@ -1,18 +1,14 @@
-mdf_wall = 6.5;
-mdf_tab = 15;
-
 wall = 5;
 
 screw_slop = .2;
 slop = .2;
-laser_slop = .1;
 
 //these can't change - measured values.
 beam = 20;
-bed_screw_sep = 309;
-bed = 300;
+bed_screw_sep = 209;
+bed = 214;
 
-layer_height=.2;
+layer_height=.15;
 
 idler_rad = 17.5/2;
 idler_flange_rad = 22/2;
@@ -37,10 +33,12 @@ belt_width = 2;
 
 //frame lengths - may be dependent on wall above.
 long_frame = 500;
-short_frame = 500;  //leaves 25+wall on either side of bed; printer is short_frame+wall+wall+rail+rail = 300mm deep by default.
-height_frame = 500;
-
-echo("BOM: 4, reg rail, 2020", long_frame, "Frame");
+short_frame = 250;  //leaves 25+wall on either side of bed; printer is short_frame+wall+wall+rail+rail = 300mm deep by default.
+height_frame = 250;
+echo("BOM: 2, v-rail, 2020", long_frame, "Frame");
+echo("BOM: 2, reg rail, 2020", long_frame, "Frame");  //could be v-rail too, check price
+echo("BOM: 4, reg rail, 2020", short_frame, "Frame");
+echo("BOM: 4, reg rail, 2020", height_frame, "Frame");
 
 //gantry - might want to make it bigger
 echo("BOM: 1, v-rail, 2020", short_frame, "Gantry");

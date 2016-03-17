@@ -1,19 +1,20 @@
 include <configuration.scad>
 include <functions.scad>
-use <corner.scad>
 use <beam.scad>
 
 
-//top
-translate([0,0,height_frame+wall+wall+beam]) top_frame();
+//four frame members
+for(i=[0,1]) mirror([0,i,0])
+	for(j=[beam, height_frame-beam])
+		translate([-long_frame/2, short_frame/2, j]) rotate([0,90,0]) beam_2040(long_frame, true);
 
-//bottom
-translate([0,0,beam]) mirror([0,0,1]) top_frame();
+//endcaps
 
-//corner beams
-for(i=[0:1]) mirror([i,0,0])
-	for(j=[0:1]) mirror([0,j,0])
-		translate([-long_frame/2+beam/2,-short_frame/2-beam/2-wall,beam+wall]) beam(height_frame,false);
+
+//gantry
+
+//bed
+translate([0,0,beam]) cube([bed, bed, wall], center=true);
 
 
 module top_frame(){
