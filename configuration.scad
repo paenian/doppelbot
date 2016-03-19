@@ -36,20 +36,20 @@ belt_width = 2;
 
 
 //frame lengths - may be dependent on wall above.
-long_frame = 500;
-short_frame = 500;  //leaves 25+wall on either side of bed; printer is short_frame+wall+wall+rail+rail = 300mm deep by default.
-height_frame = 500;
+frame_x = 500;  //we lose more in X because of the endcaps - it's where all the motors etc. will hide.
+frame_y = 450;  //(450-300)/2-wall-beam=50mm on either side of the printer.
+frame_z = 450;  //because square is nice.
 
-echo("BOM: 4, reg rail, 2020", long_frame, "Frame");
+echo("BOM: 4, reg rail, 2020", frame_x, "Frame");
 
 //gantry - might want to make it bigger
-echo("BOM: 1, v-rail, 2020", short_frame, "Gantry");
+echo("BOM: 1, v-rail, 2020", frame_y, "Gantry");
 
 //bed lengths
-long_bed = bed_screw_sep+bed_screw_sep+(bed-bed_screw_sep)+beam;  //should allow center screws in the short_bed_beams to line up, leave a nice rim around the bed
-short_bed = bed_screw_sep-wall-wall-beam/2-beam/2;  //the screwholes on the bed should line up with the long_bed rails.
-echo("BOM: 2, reg rail, 2020", long_bed, "Bed mount");
-echo("BOM: 3, reg rail, 2020", short_bed, "Bed mount");  //might want more than three - to hold insulation well.
+bed_x = 300+beam*2;
+bed_y = 300;  //the screwholes on the bed should line up with the long_bed rails.
+echo("BOM: 2, reg rail, 2020", bed_x, "Bed mount");
+echo("BOM: 3, reg rail, 2020", bed_y, "Bed mount");  //might want more than three - to hold insulation well.
 
 //standard screw variables
 m3_nut_rad = 6.01/2+slop;

@@ -43,7 +43,10 @@ module pinconnector_male(screw = true, solid=0){
 		}
 	
 		if(solid >= 0){
-			for(i=[0,1]) mirror([i,0,0]) translate([mdf_tab, 0, 0]) cube([mdf_tab, mdf_wall*2, mdf_wall], center=true);
+			for(i=[0,1]) mirror([i,0,0]) translate([mdf_tab, 0, 0]) difference(){
+                cube([mdf_tab, mdf_wall*2, mdf_wall], center=true);
+                for(j=[0,1]) mirror([j,0,0]) translate([mdf_tab/2,-mdf_wall,0]) cylinder(r=mdf_wall/4, h=mdf_wall*2, center=true, $fn=4);
+            }
 		}
 	}
 }
