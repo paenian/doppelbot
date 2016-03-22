@@ -10,18 +10,22 @@ include <functions.scad>
 //all connectors are centered.
 
 
-translate([-30,0,0]) difference(){
-	rotate([90,0,0]) cube([50,50,mdf_wall], center=true);
-	pinconnector_female(screw=true);
-}
 
-translate([-30,mdf_wall/2,0]) difference(){
-	union(){
-		translate([0,25,0]) cube([50,50,mdf_wall], center=true);
-		pinconnector_male(screw=true, solid=1);
-	}
-	pinconnector_male(screw=true, solid=-1);
-} 
+//rotate([-90,0,0]) projection()
+    translate([-30,0,0]) difference(){
+        rotate([90,0,0]) cube([50,50,mdf_wall], center=true);
+        translate([0,mdf_wall/2,0]) pinconnector_female(screw=true);
+    }
+
+//for test lasering
+//projection()
+    translate([-30,mdf_wall/2,0]) difference(){
+        union(){
+            translate([0,25,0]) cube([50,50,mdf_wall], center=true);
+            pinconnector_male(screw=true, solid=1);
+        }
+        pinconnector_male(screw=true, solid=-1);
+    }
 
 module pinconnector_female(screw = true){
 	translate([0,-mdf_wall/2-laser_slop/2,0]) union(){
@@ -29,7 +33,7 @@ module pinconnector_female(screw = true){
 			rotate([90,0,0]) cylinder(r=m5_rad, h=mdf_wall*3, center=true);
 		}
 
-		for(i=[0,1]) mirror([i,0,0]) translate([mdf_tab, 0, 0]) cube([mdf_tab+laser_slop, mdf_wall+laser_slop, mdf_wall+laser_slop], center=true);
+		for(i=[0,1]) mirror([i,0,0]) translate([mdf_tab, 0, 0]) cube([mdf_tab+laser_slop, mdf_wall+laser_slop*2, mdf_wall+laser_slop], center=true);
 	}
 }
 
