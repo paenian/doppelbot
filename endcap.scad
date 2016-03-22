@@ -16,39 +16,44 @@ plate_sep = mdf_wall*3;
 
 //the very end.  Stuff mounts to this guy.
 end_plate();
+end_plate_connectors(gender=FEMALE);
 
 //the almost very end - used to support the rods and keep them straight.
 translate([0,0,plate_sep+mdf_wall]) support_plate();
 
 //these are cross bars used to stiffen the plates.  It's basically a torsion box.
-cross_plate();
+translate([0,300,0]) cross_plate();
 
 %for(i=[0:90:359]) rotate([0,0,i]) {
     translate([frame_y/2-beam, frame_z/2-beam, 0]) cube([beam*2, beam*2, beam*2], center=true);
 }
 
-module end_plate_connectors(slots = false, solid=solid){
+module end_plate_connectors(gender = MALE, solid=1){
     for(i=[0:90:359]) rotate([0,0,i]) {
         for(i=[-1:1]){
-            translate([(frame_y/2-beam*4)*i,-frame_y/2,0]) pinconnector_male(solid=solid);
+            translate([(frame_y/2-beam*4)*i,-frame_y/2,0]) if(gender == MALE){
+                pinconnector_male(solid=solid);
+            }else{
+                pinconnector_female();
+            }
         }
     }
 }
 
-module end_plate(slots=false){
+module end_plate(){
     difference(){
         union(){
             //the plate
             cube([frame_y, frame_z, mdf_wall], center=true);
    
             //connectors around the edge
-            end_plate_connectors(slots=false, solid=1);
+            end_plate_connectors(solid=1);
         }
         //connectors around the edge
-        end_plate_connectors(slots=false, solid=-1);
+        end_plate_connectors(solid=-1);
         
         //mounting holes for the cross plates
-        cross_plate_set(slots=true);
+        cross_plate_connectors_set(gender=FEMALE);
         
         //mounting holes for electronics etc.
         holes();
@@ -61,6 +66,31 @@ module support_plate(slots=false){
         for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0])
             for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2,0])
                 translate([-beam/2,-beam,0]) cube([beam+laser_slop, beam*2+laser_slop, mdf_wall*4], center=true);
+    }
+}
+
+module cross_plate_connectors(gender=MALE, num_spans = 10){
+    start = -frame_z/2;
+    end = frame_z/2;
+    span = frame_z/num_spans;
+    for(i=[0:num_spans-1]){
+        translate([i*span-frame_z/2+span/2,-plate_sep/2+plate_sep*(i%2),0]){
+            if(gender==MALE){
+                cube([span,mdf_wall,mdf_wall], center=true);
+            }else{
+                cube([span+laser_slop,mdf_wall+laser_slop,mdf_wall+laser_slop], center=true);
+            }
+        }
+    }
+}
+
+module cross_plate(slots=false){
+    //rotate([90,0,0])
+    difference(){
+        union(){
+            cube([frame_y,plate_sep,mdf_wall], center=true);
+            cross_plate_connectors();
+        }
     }
 }
 

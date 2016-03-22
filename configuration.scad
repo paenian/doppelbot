@@ -71,6 +71,10 @@ m5_cap_rad = 10/2+slop;
 m5_cap_height = 3;
 
 
+//some enums
+MALE = 1;
+FEMALE = -1;
+
 //makes all the holes have lots of segments
 $fs=.5;
 $fa=.1;
