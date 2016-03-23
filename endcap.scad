@@ -63,7 +63,7 @@ difference(){
 }
 
 //the top wall
-difference(){
+*difference(){
     //top - motors on one end, idlers on the other - same part, though.
     top_plate();
     
@@ -76,7 +76,7 @@ difference(){
 }
 
 //and the bottom wall
-difference(){
+*difference(){
     //top - motors on one end, idlers on the other - same part, though.
     bottom_plate();
     
