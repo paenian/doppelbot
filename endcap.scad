@@ -31,7 +31,6 @@ pulley_rad = 20/2;  //outer rad for clearance
 pulley_belt_rad = 20/2; //position of the belt
 
 
-
 //the two end plates, both need the cross plates subtracted
 difference(){
     union(){
@@ -63,9 +62,10 @@ difference(){
 }
 
 //the top wall
-*difference(){
+difference(){
     //top - motors on one end, idlers on the other - same part, though.
-    top_plate();
+    translate([0,frame_z/2+mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) 
+	#top_plate();
     
     //this subtacts the connectors from whatever part comes next.
     end_plate_connectors(gender=FEMALE);
@@ -85,11 +85,28 @@ difference(){
     translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
 }
 
+module top_plate_connectors(gender=MALE, solid=1){
+    for(i=[-1,1]){
+            translate([mdf_tab*i,frame_z/2,0]) if(gender == MALE){
+                mirror([0,1,0]) pinconnector_male(solid=solid);
+            }else{
+                mirror([0,1,0]) pinconnector_female();
+            }
+        }
+}
 
+//the uppermost plate.  Includes mounts for the motors on one side, and idlers on the other
+module top_plate(){
+    difference(){
+        union(){
+            cube([side_plate_width, frame_y+mdf_wall*3-50, mdf_wall], center=true);
+            vertical_plate_connectors(gender=MALE, solid=1);
+        }
+        vertical_plate_connectors(gender=MALE, solid=-1);
+    }
+}
 
-
-
-module vertical_plate_connectors(gender=MALE, solid=1){
+module verticle_plate_connectors(gender=MALE, solid=1){
     for(i=[-1,1]){
             translate([mdf_tab*i,frame_z/2,0]) if(gender == MALE){
                 mirror([0,1,0]) pinconnector_male(solid=solid);
@@ -108,9 +125,6 @@ module vertical_plate(){
         }
         vertical_plate_connectors(gender=MALE, solid=-1);
     }
-}
-
-module bottom_plate(){
 }
 
 module end_plate_connectors(gender = MALE, solid=1){
@@ -138,7 +152,7 @@ module end_plate(){
         end_plate_connectors(solid=-1);
         
         //mounting holes for the cross plates
-        cross_plate_connectors_set(gender=FEMALE);
+        //cross_plates_connectors(gender=FEMALE);
         
         //mounting holes for electronics etc.
         holes();
