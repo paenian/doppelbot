@@ -17,8 +17,10 @@ plate_sep = mdf_wall*3;
 num_plates = 2;
 
 //side vars
-side_plate_width=80;
-foot_height = 25;
+side_plate_width=90;
+foot_height = 60;
+
+z_offset = 25; //applies to both the lead screw and the smooth rods - they're inline.
 
 
 //motor dimensions
@@ -58,36 +60,107 @@ difference(){
     translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
     //the walls also get pinned at the bottom
-    bottom_plate_connectors(gender=FEMALE);
+    translate([0,-frame_z/2-mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) bottom_plate_connectors(gender=FEMALE);
 }
 
 //the top wall
 difference(){
     //top - motors on one end, idlers on the other - same part, though.
     translate([0,frame_z/2+mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) 
-	#top_plate();
+	top_plate();
     
     //this subtacts the connectors from whatever part comes next.
     end_plate_connectors(gender=FEMALE);
     translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
     //also gets hit by the verts
-    for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate_connectors();
+    for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
 }
 
-//and the bottom wall
-*difference(){
+//the top wall
+difference(){
     //top - motors on one end, idlers on the other - same part, though.
-    bottom_plate();
+    translate([0,-frame_z/2-mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) 
+	bottom_plate();
     
-    //this subtacts the end plate connectors
+    //this subtacts the connectors from whatever part comes next.
     end_plate_connectors(gender=FEMALE);
     translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
+    
+    //also gets hit by the verts
+    for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
 }
 
+
+//holes for the motor
+module motor_mount(){
+    cylinder(r=bump_rad, h=wall*3, center=true);
+    for(i=[0:90:359]) rotate([0,0,i]) translate([screw_w/2, screw_w/2, 0]){
+        hull(){
+            translate([-1,-1,0]) cylinder(r=screw_rad, h=wall*3, center=true);
+            translate([1,1,0]) cylinder(r=screw_rad, h=wall*3, center=true);
+        }
+    }
+}
+
+//holes for the idler
+module idler_mount(){
+    cylinder(r=m5_rad, h=wall*3, center=true);
+}
+
+module smooth_rod_holes(){
+    for(i=[0:1]) mirror([0,i,0]) translate([-plate_sep/2-z_offset,frame_y/4,0]) {
+        cylinder(r=smooth_rod_rad, h=wall*3, center=true);
+        %translate([0,0,-40]) cylinder(r=20/2, h=29, center=true);
+    }
+}
+
+module beam_holes(double = false){
+    for(i=[0:1]) for(j=[0,mdf_wall-side_plate_width/2])
+        mirror([0,i,0]) translate([j,frame_y/2-beam/2,0]){
+            cylinder(r=m5_rad, h=mdf_wall*3, center=true);
+            
+            //this is for the flat of the beam
+            if(double==true){
+                translate([0,-beam,0]) cylinder(r=m5_rad, h=mdf_wall*3, center=true);
+            }
+        }
+}
+
+//there aren't any...
 module top_plate_connectors(gender=MALE, solid=1){
-    for(i=[-1,1]){
-            translate([mdf_tab*i,frame_z/2,0]) if(gender == MALE){
+}
+
+//the uppermost plate.  Includes mounts for the motors on one side, and idlers on the other
+module top_plate(motor=true){
+    difference(){
+        union(){
+            cube([side_plate_width, frame_y+mdf_wall*3, mdf_wall], center=true);
+            top_plate_connectors(gender=MALE, solid=1);
+        }
+        top_plate_connectors(gender=MALE, solid=-1);
+        
+        //mount the idlers/motors
+        for(i=[0:1]) mirror([0,i,0]) translate([-plate_sep/2-mdf_wall-pulley_rad,frame_y/2-beam-pulley_rad,0])
+        if(motor==true){    //motor mounts
+            rotate([0,0,-45]) motor_mount();
+        }else{              //idler mounts
+            idler_mount();
+        }
+        
+        //smooth rod mounts
+        smooth_rod_holes();
+        
+        //beam holes
+        beam_holes();
+    }
+}
+
+
+//there aren't any...
+module bottom_plate_connectors(gender=MALE, solid=1){
+    for(j=[0,1]) for(i=[-1,1]){
+            mirror([0,j,0]) translate([mdf_tab*i,frame_y/2,0]) if(gender == MALE){
                 mirror([0,1,0]) pinconnector_male(solid=solid);
             }else{
                 mirror([0,1,0]) pinconnector_female();
@@ -95,18 +168,28 @@ module top_plate_connectors(gender=MALE, solid=1){
         }
 }
 
-//the uppermost plate.  Includes mounts for the motors on one side, and idlers on the other
-module top_plate(){
+//the bottom plate.  Includes mounts for the Z motor in the middle, and the smooth rods on the sides.
+module bottom_plate(){
     difference(){
         union(){
-            cube([side_plate_width, frame_y+mdf_wall*3-50, mdf_wall], center=true);
-            vertical_plate_connectors(gender=MALE, solid=1);
+            cube([side_plate_width, frame_y, mdf_wall], center=true);
+            bottom_plate_connectors(gender=MALE, solid=1);
         }
-        vertical_plate_connectors(gender=MALE, solid=-1);
+        bottom_plate_connectors(gender=MALE, solid=-1);
+        
+        //mount the motor
+        translate([-plate_sep/2-z_offset,0,0])
+            rotate([0,0,-45]) motor_mount();
+        
+        //smooth rod mounts
+        smooth_rod_holes();
+        
+        //beam holes
+        beam_holes();
     }
 }
 
-module verticle_plate_connectors(gender=MALE, solid=1){
+module vertical_plate_connectors(gender=MALE, solid=1){
     for(i=[-1,1]){
             translate([mdf_tab*i,frame_z/2,0]) if(gender == MALE){
                 mirror([0,1,0]) pinconnector_male(solid=solid);
@@ -124,13 +207,15 @@ module vertical_plate(){
             vertical_plate_connectors(gender=MALE, solid=1);
         }
         vertical_plate_connectors(gender=MALE, solid=-1);
+        
+        beam_holes(double=true);
     }
 }
 
 module end_plate_connectors(gender = MALE, solid=1){
     for(i=[0:90:359]) rotate([0,0,i]) {
-        for(i=[-1:1]){
-            translate([(frame_y/2-beam*4)*i,-frame_y/2,0]) if(gender == MALE){
+        for(i=[-1,1]){
+            translate([(frame_y/2-beam*5)*i,-frame_y/2,0]) if(gender == MALE){
                 pinconnector_male(solid=solid);
             }else{
                 pinconnector_female();
@@ -167,7 +252,7 @@ module beam_cutout(screws=true, beams=false){
         union(){
             for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0])
                 for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2,0])
-                    translate([-beam/2,-beam,0]) cube([beam+laser_slop, beam*2+laser_slop, mdf_wall*4], center=true);
+                    translate([-beam/2+.5,-beam+.5,0]) cube([beam+1, beam*2+1, mdf_wall*4], center=true);
         }
     }
     if(screws==true){
