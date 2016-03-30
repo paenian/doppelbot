@@ -33,62 +33,146 @@ pulley_rad = 20/2;  //outer rad for clearance
 pulley_belt_rad = 20/2; //position of the belt
 
 
-//the two end plates, both need the cross plates subtracted
-difference(){
-    union(){
+//view the assembly
+!assembled_endcap();
+
+//parts for laser cutting
+end_plate_projected();
+support_plate_projected();
+cross_plate_projected();
+vertical_wall_projected();
+top_wall_projected();
+bottom_wall_projected();
+
+//assemble
+module assembled_endcap(){
+    end_plate_connected();
+    support_plate_connected();
+    cross_plates();
+    vertical_walls_connected();
+    top_wall_connected();
+    bottom_wall_connected();
+}
+
+/************* Layout Section ***************
+ * The plate files don't have cutouts for their intersections
+ * with other plates - those are added here, in the layout.
+ */
+module end_plate_projected(){
+    echo("Cut One per End");
+    projection(){
+        end_plate_connected();
+    }
+}
+
+module end_plate_connected(){
+    //we ignore assembled, cuz it's always flat :-)
+    difference(){
         //the very end.  Stuff mounts to this guy.
-        end_plate();
-        
-        //the almost very end - used to support the rods and keep them straight.
+        end_plate();     
+            
+        //holes for all the stiffening cross plates
+        cross_plates_connectors(gender=FEMALE);
+    }
+}
+
+module support_plate_projected(){
+    echo("Cut One per End");
+    projection(){
+        support_plate_connected();
+    }
+}
+
+module support_plate_connected(){
+    difference(){
+        //the support plate
         translate([0,0,plate_sep+mdf_wall]) support_plate();
-    }
-    //holes for all the stiffening cross plates
-    cross_plates_connectors(gender=FEMALE);
+            
+        //holes for all the stiffening cross plates
+        cross_plates_connectors(gender=FEMALE);
+    }        
 }
 
-//these are cross bars used to stiffen the plates.  It's a torsion box.
-cross_plates();
+module cross_plate_projected(){
+    echo("Cut Two per End");
+    projection() cross_plate();
+}
 
-//the two vertical walls
-difference(){
-    union(){
-        //front and back are identical
-        for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate();
-    }
-    //this subtracts the end connectors
-    end_plate_connectors(gender=FEMALE);
-    translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
+module vertical_wall_projected(){
+    echo("Cut Two per End");
+    projection(){ 
+       rotate([0,-90,0])
+       difference(){
+            union(){
+                //front and back are identical, so we just pick one
+                translate([-frame_y/2-mdf_wall/2,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate();
+            }
+        
+            //this subtracts the end connectors
+            end_plate_connectors(gender=FEMALE);
+            translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
-    //the walls also get pinned at the bottom
-    translate([0,-frame_z/2-mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) bottom_plate_connectors(gender=FEMALE);
+            //the walls also get pinned at the bottom
+            translate([0,-frame_z/2-mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate  ([0,0,90]) rotate([0,90,0]) bottom_plate_connectors(gender=FEMALE);
+        } 
+    }
+}
+
+module vertical_walls_connected(){
+    //the two vertical walls
+    difference(){
+        union(){
+            //front and back are identical
+            for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate();
+        }
+        
+        //this subtracts the end connectors
+        end_plate_connectors(gender=FEMALE);
+        translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
+    
+        //the walls also get pinned at the bottom
+        translate([0,-frame_z/2-mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate  ([0,0,90]) rotate([0,90,0]) bottom_plate_connectors(gender=FEMALE);
+    }
+}
+
+module top_wall_projected(){
+    projection() rotate([90,0,0]) top_wall_connected();
 }
 
 //the top wall
-difference(){
-    //top - motors on one end, idlers on the other - same part, though.
-    translate([0,frame_z/2+mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) 
-	top_plate();
+module top_wall_connected(){
+    difference(){
+        //top - motors on one end, idlers on the other
+        translate([0,frame_z/2+mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) 
+        top_plate();
     
-    //this subtacts the connectors from whatever part comes next.
-    end_plate_connectors(gender=FEMALE);
-    translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
+        //this subtacts the connectors from whatever part comes next.
+        end_plate_connectors(gender=FEMALE);
+        translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
-    //also gets hit by the verts
-    for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
+        //also gets hit by the verts
+        for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
+    }
 }
 
-//the top wall
-difference(){
-    //top - motors on one end, idlers on the other - same part, though.
-    translate([0,-frame_z/2-mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) 
-	bottom_plate();
+module bottom_wall_projected(){
+    projection() rotate([90,0,0]) bottom_wall_connected();
+}
+
+//the bottom wall
+module bottom_wall_connected(){
+    difference(){
+        //bottom - z motor in the middle
+        translate([0,-frame_z/2-mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) 
+        bottom_plate();
     
-    //this subtacts the connectors from whatever part comes next.
-    end_plate_connectors(gender=FEMALE);
-    translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
+        //this subtacts the connectors from whatever part comes next.
+        end_plate_connectors(gender=FEMALE);
+        translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
     //also gets hit by the verts
-    for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
+        for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
+    }
 }
 
 
@@ -112,6 +196,9 @@ module smooth_rod_holes(){
     for(i=[0:1]) mirror([0,i,0]) translate([-plate_sep/2-z_offset,frame_y/4,0]) {
         cylinder(r=smooth_rod_rad, h=wall*3, center=true);
         %translate([0,0,-40]) cylinder(r=20/2, h=29, center=true);
+        
+        //zip tie holes, to hold the rods in
+        for(i=[-1,1]) translate([0,i*(smooth_rod_rad+wall+1),0]) cube([5,3,mdf_wall*3], center=true);
     }
 }
 
@@ -153,6 +240,9 @@ module top_plate(motor=true){
         
         //beam holes
         beam_holes();
+        
+        //hole for the Z rod
+        translate([-plate_sep/2-z_offset,0,0]) cylinder(r=4+slop, h=mdf_wall*3, center=true);
     }
 }
 
@@ -277,12 +367,12 @@ module support_plate(slots=false){
 }
 
 module cross_plate_connectors(gender=MALE, num_spans = 10){
-    start = -frame_z/2;
-    end = frame_z/2;
-    span = frame_z/num_spans;
+    //start = -frame_z/2-wall;
+    //end = frame_z/2-wall;
+    span = (frame_z-wall*2)/num_spans;
     union(){
         for(i=[0:num_spans-1]){
-            translate([i*span-frame_z/2+span/2,-plate_sep/2+plate_sep*(i%2),0]){
+            translate([i*span-frame_z/2+span/2+wall,-plate_sep/2+plate_sep*(i%2),0]){
                 if(gender==MALE){
                     difference(){
                         cube([span,mdf_wall*2,mdf_wall], center=true);
@@ -291,7 +381,7 @@ module cross_plate_connectors(gender=MALE, num_spans = 10){
                         for(j=[0,1]) mirror([j,0,0]) translate([span/2,-mdf_wall+mdf_wall*2*(i%2),0]) cylinder(r=mdf_wall/4, h=mdf_wall*2, center=true, $fn=4);
                     }
                 }else{
-                    cube([span+laser_slop,mdf_wall*2+laser_slop*2,mdf_wall+laser_slop], center=true);
+                    cube([span+laser_slop,mdf_wall*2+1,mdf_wall+laser_slop], center=true);
                 }
             }
         }

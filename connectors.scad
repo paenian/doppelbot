@@ -49,7 +49,6 @@ module test_male(){
 
 
 module pinconnector_female(screw = true){
-    echo(laser_slop);
 	translate([0,-mdf_wall/2-laser_slop/2,0]) union(){
 		if(screw){
 			rotate([90,0,0]) cylinder(r=m5_rad, h=mdf_wall+1, center=true);
