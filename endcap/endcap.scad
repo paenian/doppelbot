@@ -7,20 +7,26 @@
  * 
  */
 
-include <configuration.scad>
-include <functions.scad>
-use <beam.scad>
-use <connectors.scad>
+include <../configuration.scad>
+include <../functions.scad>
+use <../beam.scad>
+use <../connectors.scad>
 
 //cross plate vars
-plate_sep = mdf_wall*3;
+plate_sep = 20;
 num_plates = 2;
 
 //side vars
-side_plate_width=90;
-foot_height = 60;
+side_plate_width=60;    //minimum 80mm for two clips in the corners.
+num_clips = 1;          //for one clip, minimum is 60.
 
-z_offset = 25; //applies to both the lead screw and the smooth rods - they're inline.
+foot_height = 60;       //tall foot, cuz the Z motor will be underneath.
+
+
+wall_inset = (plate_sep+mdf_wall)/2+15;
+wall_inset = side_plate_width/2-mdf_wall*1.5;
+
+z_offset = 10; //applies to both the lead screw and the smooth rods - they're inline.
 
 
 //motor dimensions
@@ -105,7 +111,7 @@ module vertical_wall_projected(){
        difference(){
             union(){
                 //front and back are identical, so we just pick one
-                translate([-frame_y/2-mdf_wall/2,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate();
+                translate([-frame_y/2-mdf_wall/2,0,wall_inset]) rotate([0,90,0]) vertical_plate();
             }
         
             //this subtracts the end connectors
@@ -113,7 +119,7 @@ module vertical_wall_projected(){
             translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
             //the walls also get pinned at the bottom
-            translate([0,-frame_z/2-mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate  ([0,0,90]) rotate([0,90,0]) bottom_plate_connectors(gender=FEMALE);
+            translate([0,-frame_z/2-mdf_wall/2,wall_inset]) rotate  ([0,0,90]) rotate([0,90,0]) bottom_plate_connectors(gender=FEMALE);
         } 
     }
 }
@@ -123,7 +129,7 @@ module vertical_walls_connected(){
     difference(){
         union(){
             //front and back are identical
-            for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate();
+            for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,wall_inset]) rotate([0,90,0]) vertical_plate();
         }
         
         //this subtracts the end connectors
@@ -131,7 +137,7 @@ module vertical_walls_connected(){
         translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
         //the walls also get pinned at the bottom
-        translate([0,-frame_z/2-mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate  ([0,0,90]) rotate([0,90,0]) bottom_plate_connectors(gender=FEMALE);
+        translate([0,-frame_z/2-mdf_wall/2,wall_inset]) rotate  ([0,0,90]) rotate([0,90,0]) bottom_plate_connectors(gender=FEMALE);
     }
 }
 
@@ -143,7 +149,7 @@ module top_wall_projected(){
 module top_wall_connected(){
     difference(){
         //top - motors on one end, idlers on the other
-        translate([0,frame_z/2+mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) 
+        translate([0,frame_z/2+mdf_wall/2,wall_inset]) rotate([0,0,90]) rotate([0,90,0]) 
         top_plate();
     
         //this subtacts the connectors from whatever part comes next.
@@ -151,7 +157,7 @@ module top_wall_connected(){
         translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
         //also gets hit by the verts
-        for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
+        for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,wall_inset]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
     }
 }
 
@@ -163,7 +169,7 @@ module bottom_wall_projected(){
 module bottom_wall_connected(){
     difference(){
         //bottom - z motor in the middle
-        translate([0,-frame_z/2-mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) 
+        translate([0,-frame_z/2-mdf_wall/2,wall_inset]) rotate([0,0,90]) rotate([0,90,0]) 
         bottom_plate();
     
         //this subtacts the connectors from whatever part comes next.
@@ -171,7 +177,7 @@ module bottom_wall_connected(){
         translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
     //also gets hit by the verts
-        for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,(plate_sep+mdf_wall)/2]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
+        for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,wall_inset]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
     }
 }
 
@@ -203,7 +209,8 @@ module smooth_rod_holes(){
 }
 
 module beam_holes(double = false){
-    for(i=[0:1]) for(j=[0,mdf_wall-side_plate_width/2])
+    
+    for(i=[0:1]) for(j=[wall_inset-mdf_wall*1.5,mdf_wall*2-side_plate_width/2])
         mirror([0,i,0]) translate([j,frame_y/2-beam/2,0]){
             cylinder(r=m5_rad, h=mdf_wall*3, center=true);
             
@@ -280,13 +287,22 @@ module bottom_plate(){
 }
 
 module vertical_plate_connectors(gender=MALE, solid=1){
-    for(i=[-1,1]){
+    if(num_clips == 2){
+        for(i=[-1,1]){
             translate([mdf_tab*i,frame_z/2,0]) if(gender == MALE){
-                mirror([0,1,0]) pinconnector_male(solid=solid);
+                #mirror([0,1,0]) pinconnector_male(solid=solid);
             }else{
                 mirror([0,1,0]) pinconnector_female();
             }
         }
+    }
+    if(num_clips == 1){
+        translate([0,frame_z/2,0]) if(gender == MALE){
+            mirror([0,1,0]) pinconnector_male(solid=solid);
+        }else{
+            mirror([0,1,0]) pinconnector_female();
+        }
+    }
 }
 
 //the front and back vertical plates.  Includes feet!
