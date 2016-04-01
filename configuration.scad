@@ -5,7 +5,9 @@ wall = 5;
 
 screw_slop = .2;
 slop = .2;
-laser_slop = -.15;
+laser_slop = -.1;
+
+smooth_rod_rad = 10/2+laser_slop;
 
 //these can't change - measured values.
 beam = 20;
@@ -64,9 +66,9 @@ m4_rad = 4/2+slop;
 m4_cap_rad = 7/2+slop;
 m4_cap_height = 2.5;
 
-m5_nut_rad = 8.79/2+slop;
+m5_nut_rad = 8.79/2-.25;
 m5_nut_height = 4.7;
-m5_rad = 5/2+slop;
+m5_rad = 5/2;
 m5_cap_rad = 10/2+slop;
 m5_cap_height = 3;
 
