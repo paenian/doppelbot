@@ -5,7 +5,7 @@ wall = 5;
 
 screw_slop = .2;
 slop = .2;
-laser_slop = .1;
+laser_slop = -.15;
 
 //these can't change - measured values.
 beam = 20;

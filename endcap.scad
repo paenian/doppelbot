@@ -31,6 +31,7 @@ pulley_rad = 20/2;  //outer rad for clearance
 pulley_belt_rad = 20/2; //position of the belt
 
 
+
 //the two end plates, both need the cross plates subtracted
 difference(){
     union(){
@@ -64,8 +65,7 @@ difference(){
 //the top wall
 difference(){
     //top - motors on one end, idlers on the other - same part, though.
-    translate([0,frame_z/2+mdf_wall/2,(plate_sep+mdf_wall)/2]) rotate([0,0,90]) rotate([0,90,0]) 
-	#top_plate();
+    top_plate();
     
     //this subtacts the connectors from whatever part comes next.
     end_plate_connectors(gender=FEMALE);
@@ -76,7 +76,7 @@ difference(){
 }
 
 //and the bottom wall
-*difference(){
+difference(){
     //top - motors on one end, idlers on the other - same part, though.
     bottom_plate();
     
@@ -85,28 +85,7 @@ difference(){
     translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
 }
 
-module top_plate_connectors(gender=MALE, solid=1){
-    for(i=[-1,1]){
-            translate([mdf_tab*i,frame_z/2,0]) if(gender == MALE){
-                mirror([0,1,0]) pinconnector_male(solid=solid);
-            }else{
-                mirror([0,1,0]) pinconnector_female();
-            }
-        }
-}
-
-//the uppermost plate.  Includes mounts for the motors on one side, and idlers on the other
-module top_plate(){
-    difference(){
-        union(){
-            cube([side_plate_width, frame_y+mdf_wall*3-50, mdf_wall], center=true);
-            vertical_plate_connectors(gender=MALE, solid=1);
-        }
-        vertical_plate_connectors(gender=MALE, solid=-1);
-    }
-}
-
-module verticle_plate_connectors(gender=MALE, solid=1){
+module vertical_plate_connectors(gender=MALE, solid=1){
     for(i=[-1,1]){
             translate([mdf_tab*i,frame_z/2,0]) if(gender == MALE){
                 mirror([0,1,0]) pinconnector_male(solid=solid);
@@ -125,6 +104,9 @@ module vertical_plate(){
         }
         vertical_plate_connectors(gender=MALE, solid=-1);
     }
+}
+
+module bottom_plate(){
 }
 
 module end_plate_connectors(gender = MALE, solid=1){
@@ -152,7 +134,7 @@ module end_plate(){
         end_plate_connectors(solid=-1);
         
         //mounting holes for the cross plates
-        //cross_plates_connectors(gender=FEMALE);
+        cross_plate_connectors_set(gender=FEMALE);
         
         //mounting holes for electronics etc.
         holes();
@@ -167,7 +149,7 @@ module beam_cutout(screws=true, beams=false){
         union(){
             for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0])
                 for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2,0])
-                    translate([-beam/2,-beam,0]) cube([beam+laser_slop, beam*2+laser_slop, mdf_wall*4], center=true);
+                    translate([-beam/2+.5,-beam+.5,0]) cube([beam+laser_slop+1, beam*2+laser_slop+1, mdf_wall*4], center=true);
         }
     }
     if(screws==true){
@@ -206,7 +188,7 @@ module cross_plate_connectors(gender=MALE, num_spans = 10){
                         for(j=[0,1]) mirror([j,0,0]) translate([span/2,-mdf_wall+mdf_wall*2*(i%2),0]) cylinder(r=mdf_wall/4, h=mdf_wall*2, center=true, $fn=4);
                     }
                 }else{
-                    cube([span+laser_slop,mdf_wall*2+laser_slop*2,mdf_wall+laser_slop], center=true);
+                    cube([span+laser_slop,mdf_wall*2+1,mdf_wall+laser_slop], center=true);
                 }
             }
         }
