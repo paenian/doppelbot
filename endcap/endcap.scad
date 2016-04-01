@@ -38,17 +38,27 @@ screw_rad = m3_rad;
 pulley_rad = 20/2;  //outer rad for clearance
 pulley_belt_rad = 20/2; //position of the belt
 
-
-//view the assembly
-!assembled_endcap();
+//render everything
+part=10;
 
 //parts for laser cutting
-end_plate_projected();
-support_plate_projected();
-cross_plate_projected();
-vertical_wall_projected();
-top_wall_projected();
-bottom_wall_projected();
+if(part == 0)
+    end_plate_projected();
+if(part == 1)
+    support_plate_projected();
+if(part == 2)
+    cross_plate_projected();
+if(part == 3)
+    vertical_wall_projected();
+if(part == 4)
+    top_wall_projected();
+if(part == 5)
+    bottom_wall_projected();
+
+//view the assembly
+if(part == 10){
+    assembled_endcap();
+}
 
 //assemble
 module assembled_endcap(){
