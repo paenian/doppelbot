@@ -16,8 +16,13 @@ bed = 300;
 
 layer_height=.2;
 
+//this is for using the big idlers
 idler_rad = 17.5/2;
 idler_flange_rad = 22/2;
+
+//this is using flanged bearings, and no plastic
+idler_rad = 10/2;
+idler_flange_rad = 15/2;
 
 pulley_rad = 13/2;
 pulley_flange_rad = 18/2;
