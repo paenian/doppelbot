@@ -266,13 +266,18 @@ module top_plate(motor=true){
 
 //there aren't any...
 module bottom_plate_connectors(gender=MALE, solid=1){
-    for(j=[0,1]) for(i=[-1,1]){
+    if(num_clips == 2){
+		for(j=[0,1]) for(i=[-1,1]){
             mirror([0,j,0]) translate([mdf_tab*i,frame_y/2,0]) if(gender == MALE){
                 mirror([0,1,0]) pinconnector_male(solid=solid);
             }else{
                 mirror([0,1,0]) pinconnector_female();
             }
         }
+	 }
+	 if(num_clips == 1){
+	     //todo
+	 }
 }
 
 //the bottom plate.  Includes mounts for the Z motor in the middle, and the smooth rods on the sides.

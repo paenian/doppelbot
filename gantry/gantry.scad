@@ -1,6 +1,6 @@
-include <configuration.scad>
-include <functions.scad>
-use <beam.scad>
+include <../configuration.scad>
+include <../functions.scad>
+use <../beam.scad>
 
 wall=3;
 
