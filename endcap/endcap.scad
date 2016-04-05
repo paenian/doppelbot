@@ -51,8 +51,10 @@ if(part == 2)
 if(part == 3)
     vertical_wall_projected();
 if(part == 4)
-    top_wall_projected();
+    top_wall_projected(motor=true);
 if(part == 5)
+    top_wall_projected(motor=false);
+if(part == 6)
     bottom_wall_projected();
 
 //view the assembly
@@ -151,16 +153,16 @@ module vertical_walls_connected(){
     }
 }
 
-module top_wall_projected(){
-    projection() rotate([90,0,0]) top_wall_connected();
+module top_wall_projected(motor=true){
+    projection() rotate([90,0,0]) top_wall_connected(motor=motor);
 }
 
 //the top wall
-module top_wall_connected(){
+module top_wall_connected(motor=true){
     difference(){
         //top - motors on one end, idlers on the other
         translate([0,frame_z/2+mdf_wall/2,wall_inset]) rotate([0,0,90]) rotate([0,90,0]) 
-        top_plate();
+        top_plate(motor=motor);
     
         //this subtacts the connectors from whatever part comes next.
         end_plate_connectors(gender=FEMALE);
@@ -266,8 +268,17 @@ module top_plate(motor=true){
 
 //there aren't any...
 module bottom_plate_connectors(gender=MALE, solid=1){
-    for(j=[0,1]) for(i=[-1,1]){
+    if(num_clips == 2){
+        for(j=[0,1]) for(i=[-1,1]){
             mirror([0,j,0]) translate([mdf_tab*i,frame_y/2,0]) if(gender == MALE){
+                mirror([0,1,0]) pinconnector_male(solid=solid);
+            }else{
+                mirror([0,1,0]) pinconnector_female();
+            }
+        }
+    }
+    if(num_clips == 1){
+            translate([0,frame_y/2,0]) if(gender == MALE){
                 mirror([0,1,0]) pinconnector_male(solid=solid);
             }else{
                 mirror([0,1,0]) pinconnector_female();
@@ -300,7 +311,7 @@ module vertical_plate_connectors(gender=MALE, solid=1){
     if(num_clips == 2){
         for(i=[-1,1]){
             translate([mdf_tab*i,frame_z/2,0]) if(gender == MALE){
-                #mirror([0,1,0]) pinconnector_male(solid=solid);
+                mirror([0,1,0]) pinconnector_male(solid=solid);
             }else{
                 mirror([0,1,0]) pinconnector_female();
             }
