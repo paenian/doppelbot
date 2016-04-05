@@ -19,7 +19,7 @@ ind_height = 12;
 translate([0,0,wall]) rotate([180,0,0]) 
 hotend_carriage();
 
-translate([-50,100,0]) gantry_end();
+translate([110,0,0]) gantry_end();
 
 translate([50,100,0]) gantry_clamp();
 
@@ -126,7 +126,7 @@ module roller_mount(solid=1){
             translate([0,0,wheel_rad-1]) rotate([0,90,0]){
                 cylinder(r=m5_rad, h=50, center=true);
                 difference(){
-                    %cylinder(r=wheel_clearance/2+slop*2, h=1, center=true);
+                    %cylinder(r=wheel_rad+slop*2, h=1, center=true);
                     cylinder(r=wheel_clearance/2+slop, h=wheel_height+1, center=true);
                     translate([0,0,-m5_nut_height-wall-wheel_height/2]) cylinder(r=m5_nut_rad+wall/2, h=m5_nut_height+wall);
                 }

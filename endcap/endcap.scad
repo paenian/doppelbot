@@ -35,9 +35,6 @@ motor_w = 42.5;
 screw_w = 31;
 screw_rad = m3_rad;
 
-pulley_rad = 20/2;  //outer rad for clearance
-pulley_belt_rad = 20/2; //position of the belt
-
 //render everything
 part=10;
 
@@ -189,7 +186,7 @@ module bottom_wall_connected(){
         translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
     //also gets hit by the verts
-        for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,wall_inset]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
+        *for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,wall_inset]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
     }
 }
 
@@ -278,7 +275,8 @@ module bottom_plate_connectors(gender=MALE, solid=1){
         }
     }
     if(num_clips == 1){
-            translate([0,frame_y/2,0]) if(gender == MALE){
+        for(j=[0,1])
+            mirror([0,j,0]) translate([0,frame_y/2,0]) if(gender == MALE){
                 mirror([0,1,0]) pinconnector_male(solid=solid);
             }else{
                 mirror([0,1,0]) pinconnector_female();
