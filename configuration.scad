@@ -16,16 +16,22 @@ bed = 300;
 
 layer_height=.2;
 
-idler_rad = 17.5/2;
-idler_flange_rad = 22/2;
+//this is for using the big idlers
+//idler_rad = 17.5/2;
+//idler_flange_rad = 22/2;
+
+//this is using flanged bearings, and no plastic
+idler_rad = 10/2;
+idler_flange_rad = 15/2;
 
 pulley_rad = 13/2;
 pulley_flange_rad = 18/2;
 
-wheel_rad = 10.2;
-wheel_clearance = 26;
-wheel_height = 10.4;
-wheel_flange_rad = 24.5/2;
+//using the mini V-wheels
+wheel_rad = 11.5/2;
+wheel_clearance = 18;
+wheel_height = 9;
+wheel_flange_rad = 16/2;
 
 eccentric_rad = 7.3/2;
 eccentric_flange_rad = 11/2;
@@ -39,8 +45,8 @@ belt_width = 2;
 
 //frame lengths - may be dependent on wall above.
 frame_x = 500;  //we lose more in X because of the endcaps - it's where all the motors etc. will hide.
-frame_y = 450;  //(450-300)/2-wall-beam=50mm on either side of the printer.
-frame_z = 450;  //because square is nice.
+frame_y = 420;  //(420-300)/2-beam=40mm clearance on either side of the printer.
+frame_z = 420;  //because square is nice.
 
 echo("BOM: 4, reg rail, 2020", frame_x, "Frame");
 
@@ -66,7 +72,8 @@ m4_rad = 4/2+slop;
 m4_cap_rad = 7/2+slop;
 m4_cap_height = 2.5;
 
-m5_nut_rad = 8.79/2-.25;
+m5_nut_rad = 8.79/2;
+m5_nut_rad_laser = 8.79/2-.4;
 m5_nut_height = 4.7;
 m5_rad = 5/2;
 m5_cap_rad = 10/2+slop;
