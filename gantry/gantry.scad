@@ -15,6 +15,8 @@ ind_offset = beam/2+ind_rad+wall+1;
 ind_lift = 20;
 ind_height = 12;
 
+idler_extension = 10;
+
 //flip for printing
 translate([0,0,wall]) rotate([180,0,0]) 
 hotend_carriage();
@@ -29,6 +31,9 @@ module gantry_clamp(){
     roller_sep = 30; //distance between rod centers
     ridge_length = 25;
     wall=3;
+    
+    %translate([-beam/2,0,-beam]) cube([beam, 100, beam*2],center=true);
+    
     difference(){
         union(){
             //y wheel mounts
@@ -51,14 +56,18 @@ module gantry_clamp(){
             
         //gantry beam mount
         for(i=[0,1]) translate([-beam-wall-beam*3/2-i*beam, 0, 0]) translate([0,0,wall+.1+2]) mirror([0,0,1]) screw_hole_m5(cap=false);
+            
+        //flatten the bottom
+        translate([0,0,-100]) cube([200,200,200], center=true);
     }
 }
 
 //the top of the gantry
 module gantry_end(){
-    roller_sep = 30; //distance between rod centers
+    roller_sep = 30; //distance between wheel centers
     ridge_length = 30;
     wall=5;
+    %translate([-beam/2,0,-beam]) cube([beam, 100, beam*2],center=true);
     difference(){
         union(){
             //y wheel mounts
@@ -77,7 +86,7 @@ module gantry_end(){
             hull(){
                 //gantry beam mount
                 for(i=[0,1]) translate([-beam-wall-beam-i*beam, 0, 0]) cylinder(r=m5_rad+wall, h=wall);
-                translate([-ridge_length/2-beam/2,0,wall/2]) cube([ridge_length,beam,wall], center=true);
+                    translate([-ridge_length/2-beam/2,0,wall/2]) cube([ridge_length,beam,wall], center=true);
             }
         }
         //holes for the mounts
@@ -89,7 +98,14 @@ module gantry_end(){
             
         //gantry beam mount
         for(i=[0,1]) translate([-beam-wall-beam-i*beam, 0, 0]) translate([0,0,wall+.1]) mirror([0,0,1]) screw_hole_m5(cap=false);
+            
+        //flatten the bottom
+        translate([0,0,-100]) cube([200,200,200], center=true);
     }
+}
+
+module wheel(){
+    cylinder(r=wheel_clearance/2+slop, h=wheel_height+1, center=true);
 }
 
 module roller_mount(solid=1){
@@ -118,17 +134,17 @@ module roller_mount(solid=1){
             translate([0,0,-m5_nut_height-wall-wheel_height/2]) cylinder(r=m5_nut_rad+wall/2, h=m5_nut_height+wall);
         }
     }
-        
     
     //wheel cutouts
     if(solid==0){
         //cutout for wheel            
             translate([0,0,wheel_rad-1]) rotate([0,90,0]){
-                cylinder(r=m5_rad, h=50, center=true);
+                #rotate([0,0,-90]) cap_cylinder(r=m5_rad, h=50, center=true);
                 difference(){
-                    %cylinder(r=wheel_rad+slop*2, h=1, center=true);
-                    cylinder(r=wheel_clearance/2+slop, h=wheel_height+1, center=true);
-                    translate([0,0,-m5_nut_height-wall-wheel_height/2]) cylinder(r=m5_nut_rad+wall/2, h=m5_nut_height+wall);
+                    %wheel();
+                    cylinder(r=wheel_clearance/2+slop, h=wheel_height+2, center=true);
+                    translate([0,0,-m5_nut_height-wall-wheel_height/2]) cylinder(r=m5_nut_rad+wall/2, h=m5_nut_height+wall-2);
+                    translate([0,0,-m5_nut_height-wall-wheel_height/2+m5_nut_height+wall-2.1]) cylinder(r1=m5_nut_rad+wall/2, r2=m5_nut_rad, h=2.1);
                 }
                 translate([0,0,-wheel_height/2-m5_nut_height-1-wall]) cylinder(r1=m5_nut_rad+slop, r2=m5_nut_rad, h=m5_nut_height+1, $fn=6);
                 translate([0,0,-wheel_height/2-m5_nut_height-1-wall-29.9]) cylinder(r=m5_nut_rad+wall/2, h=30, $fn=6);
