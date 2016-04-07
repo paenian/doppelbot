@@ -76,7 +76,7 @@ module pinconnector_male(screw = true, solid=0){
 		if(screw){
 			if(solid<=0){
 				cube([m5_rad*2+laser_slop, mdf_wall*6, mdf_wall+2], center=true);
-				translate([0,mdf_wall*1.5, 0]) cube([m5_nut_rad*2+laser_slop, m5_nut_height+1, mdf_wall+2], center=true);
+				translate([0,mdf_wall*1.5, 0]) cube([m5_nut_rad_laser*2, m5_nut_height+1, mdf_wall+2], center=true);
 			}
 		}
 	
