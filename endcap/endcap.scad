@@ -67,6 +67,11 @@ module assembled_endcap(){
     vertical_walls_connected();
     top_wall_connected();
     bottom_wall_connected();
+
+	//draw in a few belt lines
+	%for(j=[-pulley_rad,pulley_rad]) for(i=[0:1]) mirror([i,0,0]) translate([motor_y+j,frame_z/2,50]){
+		cube([2,6,100], center=true);
+	}
 }
 
 /************* Layout Section ***************
@@ -244,7 +249,7 @@ module top_plate(motor=true){
         top_plate_connectors(gender=MALE, solid=-1);
         
         //mount the idlers/motors
-        for(i=[0:1]) mirror([0,i,0]) translate([-plate_sep/2-mdf_wall-pulley_rad,frame_y/2-beam-pulley_rad,0])
+        for(i=[0:1]) mirror([0,i,0]) translate([-plate_sep/2-mdf_wall-pulley_rad,motor_y,0])
         if(motor==true){    //motor mounts
             rotate([0,0,-45]) motor_mount();
         }else{              //idler mounts

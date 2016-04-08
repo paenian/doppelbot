@@ -36,19 +36,23 @@ wheel_flange_rad = 16/2;
 eccentric_rad = 7.3/2;
 eccentric_flange_rad = 11/2;
 
-motor_w = 42;
-motor_r = 52/2;
-
-belt_thick = 6;
-belt_width = 2;
-
-
 //frame lengths - may be dependent on wall above.
 frame_x = 500;  //we lose more in X because of the endcaps - it's where all the motors etc. will hide.
 frame_y = 420;  //(420-300)/2-beam=40mm clearance on either side of the printer.
 frame_z = 420;  //because square is nice.
 
+foot_height = 60;       //tall foot, cuz the Z motor will be underneath.
+
 echo("BOM: 4, reg rail, 2020", frame_x, "Frame");
+
+//motor size and placement variables
+motor_w = 42;
+motor_r = 52/2;
+motor_y = frame_y/2-beam-pulley_rad; //distance motors are from the center.
+
+belt_thick = 6;
+belt_width = 2;
+
 
 //gantry - might want to make it bigger
 echo("BOM: 1, v-rail, 2020", frame_y, "Gantry");
