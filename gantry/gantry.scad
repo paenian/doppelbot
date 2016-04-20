@@ -230,7 +230,7 @@ module hotend_carriage(){
             
             //induction sensor mount
             translate([0, -ind_offset,-ind_height+wall-ind_lift+wall-1]) mirror([0,1,0]) rotate([0,0,90]) {
-                extruder_mount(solid=1, m_height=ind_height+.666,  hotend_rad=ind_rad, wall=3);
+                extruder_mount(solid=1, m_height=ind_height+.25,  hotend_rad=ind_rad, wall=3);
             //offset the mount
                 translate([0,0,ind_height-.1]) cylinder(r=(ind_rad+wall)/cos(30), h=ind_lift+.1, $fn=6);
             }
