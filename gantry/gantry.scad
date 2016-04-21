@@ -52,9 +52,9 @@ if(part == 10){
 
 //just a little spar below the gantry to make sure it remains level
 module gantry_clamp(){
-    roller_sep = 30; //distance between rod centers
-    ridge_length = 30;
-    wall=3;
+    roller_sep = 40; //distance between rod centers
+    ridge_length = 20;
+    wall=5;
     
     %translate([-beam/2,0,-beam]) cube([beam, 100, beam*2],center=true);
     
@@ -65,21 +65,21 @@ module gantry_clamp(){
             //y wheel support spines
             for(i=[-1,1]) hull(){
                 translate([-beam/2, roller_sep/2*i, 0]) roller_mount(1);
-                translate([-ridge_length/2-beam/2,beam/4*i,wall/2]) cube([ridge_length,beam/2,wall], center=true);
+                translate([-ridge_length/2-beam/2-(m5_rad+wall),beam/4*i,wall/2]) cube([ridge_length,beam/2,wall], center=true);
             }
             
             //main base
             hull(){
                 //gantry beam mount
                 for(i=[0,1]) translate([-beam-wall-beam*3/2-i*beam, 0, 0]) cylinder(r=m5_rad+wall, h=wall);
-                translate([-ridge_length/2-beam/2,0,wall/2]) cube([ridge_length,beam,wall], center=true);
+                #translate([-ridge_length/2-beam/2-(m5_rad+wall),0,wall/2]) cube([ridge_length,beam,wall], center=true);
             }
         }
         //holes for the mounts
         for(i=[-1,1]) translate([-beam/2, roller_sep/2*i, 0]) roller_mount(0);
             
         //gantry beam mount
-        for(i=[0,1]) translate([-beam-wall-beam*3/2-i*beam, 0, 0]) translate([0,0,wall+.1+2]) mirror([0,0,1]) screw_hole_m5(cap=false);
+        for(i=[0,1]) translate([-beam-wall-beam*3/2-i*beam, 0, 0]) translate([0,0,wall*1.5+.25]) mirror([0,0,1]) screw_hole_m5(height=wall*2, cap=false);
         //flatten the bottom
         translate([0,0,-100]) cube([200,200,200], center=true);
     }
@@ -110,7 +110,7 @@ module gantry_end(){
             }
             hull(){
                 //gantry beam mount
-                for(i=[0,1]) translate([-beam-wall-beam/2-beam*i, 0, 0]) cylinder(r=m5_rad+wall, h=wall);
+               for(i=[0,1]) translate([-beam-wall-beam/2-beam*i, 0, 0]) cylinder(r=m5_rad+wall, h=wall);
                     //translate([-ridge_length/2-beam/2,0,wall/2]) cube([ridge_length,beam,wall], center=true);
             }
         }
@@ -119,10 +119,10 @@ module gantry_end(){
             
         //idler rollers
         for(i=[-1,1]) translate([idler_pos, i*idler_extension, 0])
-           translate([0,0,wall+wall/2]) mirror([0,0,1]) screw_hole_m5(cap=false, height=10);
+           translate([0,0,wall+wall/2+.25]) mirror([0,0,1]) screw_hole_m5(cap=false, height=10);
             
         //gantry beam mount
-        for(i=[0,1]) translate([-beam-wall-beam/2-beam*i, 0, wall/2]) translate([0,0,wall+.1]) mirror([0,0,1]) screw_hole_m5(cap=false, height=10);
+        for(i=[0,1]) translate([-beam-wall-beam/2-beam*i, 0, wall/2+.25]) translate([0,0,wall+.1]) mirror([0,0,1]) screw_hole_m5(cap=false, height=10);
             
         //flatten the bottom
         translate([0,0,-100]) cube([200,200,200], center=true);
@@ -134,29 +134,28 @@ module wheel(){
     cylinder(r=wheel_clearance/2+slop, h=wheel_height/2, center=true);
 }
 
+
+
+//TODO
+//New roller mounts that are flush with the end of the beam
+//  move the wheel support back and use a spacer to mount the wheels.
+
 module roller_mount(solid=1){
     wall = 5;
     min_rad = wall/2;
     w = wheel_height+wall;
     r = 10;//(wheel_clearance+wall)/2;
     
-    
-    
     //main body
     if(solid==1){
-        translate([-w/2,0,-.1+wall/2]) minkowski(){
-            cube([w-min_rad*2, r-min_rad*2, wall-.2], center=true);
-            cylinder(r=min_rad, h=.1);
-        }
-        translate([0,0,wheel_rad-1]) rotate([0,90,0]){
+        translate([0,0,wheel_rad]) rotate([0,90,0]){
             translate([0,0,-m5_nut_height-wall-wheel_height/2]) cylinder(r=m5_nut_rad+wall/2+.5, h=m5_nut_height+wall);
         }
-        
     }
     
     //hull section
     if(solid==2){
-        translate([0,0,wheel_rad-1]) rotate([0,90,0]){
+        *translate([0,0,wheel_rad]) rotate([0,90,0]){
             translate([0,0,-m5_nut_height-wall-wheel_height/2]) cylinder(r=m5_nut_rad+wall/2, h=m5_nut_height+wall);
         }
     }
@@ -164,13 +163,13 @@ module roller_mount(solid=1){
     //wheel cutouts
     if(solid==0){
         //cutout for wheel            
-            translate([0,0,wheel_rad-1]) rotate([0,90,0]){
+            translate([0,0,wheel_rad]) rotate([0,90,0]){
                 rotate([0,0,-90]) cap_cylinder(r=m5_rad, h=40, center=true);
                 difference(){
                     %wheel();
                     cylinder(r=wheel_clearance/2+slop, h=wheel_height+2, center=true);
                     translate([0,0,-m5_nut_height-wall-wheel_height/2]) cylinder(r=m5_nut_rad+wall/2, h=m5_nut_height+wall-2);
-                    translate([0,0,-m5_nut_height-wall-wheel_height/2+m5_nut_height+wall-2.1]) cylinder(r1=m5_nut_rad+wall/2, r2=m5_nut_rad, h=2.1);
+                    #translate([0,0,-m5_nut_height-wall-wheel_height/2+m5_nut_height+wall-2.1]) cylinder(r1=m5_nut_rad+wall/2, r2=8/2, h=2.1);
                 }
                 translate([0,0,-wheel_height/2-m5_nut_height+1-wall]) cylinder(r1=m5_nut_rad+slop, r2=m5_nut_rad, h=m5_nut_height-1, $fn=6);
 					hull(){
@@ -292,7 +291,7 @@ module guide_wheel_helper(solid=0){
     if(solid <= 0){
         for(i=[-1,1]) translate([i*gantry_length/2,0,-.1]){
             translate([0,beam/2+wheel_rad,0]) cylinder(r=m5_rad, h=wall+1);
-            translate([0,-beam/2-eccentric_offset,0]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1);
+            #translate([0,-beam/2-eccentric_offset,0]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1);
         }
     }
 }
