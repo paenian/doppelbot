@@ -69,8 +69,8 @@ module assembled_endcap(){
     bottom_wall_connected();
 
 	//draw in a few belt lines
-	%for(j=[-pulley_rad,pulley_rad]) for(i=[0:1]) mirror([i,0,0]) translate([motor_y+j,frame_z/2,50]){
-		cube([2,6,100], center=true);
+	%for(j=[-pulley_rad,pulley_rad]) for(i=[0:1]) mirror([i,0,0]) translate([motor_y+j,frame_z/2-3-6,100]){
+		cube([2,6,200], center=true);
 	}
 }
 
@@ -264,6 +264,9 @@ module top_plate(motor=true){
         
         //hole for the Z rod
         translate([-plate_sep/2-z_offset,0,0]) cylinder(r=4+slop, h=mdf_wall*3, center=true);
+        
+        //this is for an m8 flanged bearing
+        translate([-plate_sep/2-z_offset,0,0]) cylinder(r=22/2, h=mdf_wall*3, center=true);
     }
 }
 
@@ -301,6 +304,13 @@ module bottom_plate(){
         //mount the motor
         translate([-plate_sep/2-z_offset,0,0])
             rotate([0,0,-45]) motor_mount();
+        
+        translate([-plate_sep/2-z_offset,150,0])
+            rotate([0,0,-45]) motor_mount();
+        
+        translate([-plate_sep/2-z_offset,-150,0])
+            rotate([0,0,-45]) motor_mount();
+        
         
         //smooth rod mounts
         smooth_rod_holes();

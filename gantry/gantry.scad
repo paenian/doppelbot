@@ -33,15 +33,19 @@ if(part == 1)
     gantry_end();
 if(part == 2)
     gantry_clamp();
+if(part == 3)
+    gantry_carriage();
 
 if(part == 10){
 //flip for printing
     translate([frame_y/2-90,0,0]) rotate([0,0,0]) 
     hotend_carriage();
 
-    translate([frame_y/2,0,0]) gantry_end();
+    translate([frame_y/2,-60,0]) gantry_end();
 
-    translate([frame_y/2,0,-beam*2]) mirror([0,0,1]) gantry_clamp();
+    translate([frame_y/2,-60,-beam*2]) mirror([0,0,1]) gantry_clamp();
+    
+    translate([frame_y/2-beam,0,-beam-mdf_wall]) gantry_carriage();
     
     //the endcap, for reference
     translate([0,100,-frame_z/2-mdf_wall]) rotate([90,0,0]) assembled_endcap(); 
@@ -180,7 +184,85 @@ module roller_mount(solid=1){
     }
 }
 
+module gantry_carriage(){
+    min_rad = 2;
+    carriage_len = 35;
+    rotate([0,0,90]) rotate([-90,0,0]) {
+    %translate([0,0,-beam/2-1]) cube([120,beam*2,beam],center=true);
+    %translate([0,0,mdf_wall/2+30]) cube([beam,beam*2,60],center=true);
+    difference(){
+        union(){
+            //idler mounts
+            translate([0,0,mdf_wall/2]) idler_mounts(solid=1);
+            
+            //guide wheels
+            difference(){
+                guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, cutout=false);
+                
+                
+                //round the front corners
+                *for(i=[0,1]) mirror([i,0,0]) translate([cyclops_width/2+min_rad,beam/2+m5_rad+wall+1,0]) difference(){
+                    translate([-min_rad-1,0,-wall]) cube([min_rad+1, min_rad+1, wall*5]);
+                    cylinder(r=min_rad, h=wall*11, center=true);
+                }
+            }
+            
+        } //Holes below here
+        
+        //guide wheels
+        translate([0,0,mdf_wall-1]) mirror([0,0,1]) guide_wheel_helper(solid=-1, span=2, gantry_length=carriage_len);
+        
+        //idler screws
+        translate([0,0,mdf_wall/2]) idler_mounts(solid=0);
+        
+        //holes for the beam
+        for(i=[-beam/2, beam/2]) translate([0,i,0]) beamHoles(slop=0);
+        
+        //belt path
+        translate([0,-beam/2,0]) cube([50,belt_thick*1.5,mdf_wall*2], center=true);
+        
+        //flatten the bottom
+        translate([0,0,-50]) cube([100,100,100],center=true);
+        
+    }
+}
+}
 
+module idler_mounts(solid=1){
+    wall=5;
+    translate([0,-beam/2,0]) for(i=[0,1]) mirror([i,0,0]) {
+        if(solid==1){
+            hull(){
+                translate([beam/2+idler_rad,0,0]) rotate([90,0,0]) cylinder(r=idler_rad, h=idler_thick+wall*2, center=true);
+            
+                translate([idler_extension,0,idler_extension-mdf_wall-1-beam/2+belt_width]) rotate([90,0,0]) cylinder(r=idler_rad, h=idler_thick+wall, center=true);
+            
+            }
+        }
+        if(solid <= 0){
+            //todo: make some bump standoffs
+            translate([idler_extension,0,idler_extension-mdf_wall-1-beam/2+belt_width]) rotate([90,0,0]) cylinder(r=idler_flange_rad+1, h=idler_thick, center=true);
+        
+            translate([idler_extension,0,idler_extension-mdf_wall-1-beam/2+belt_width]) rotate([90,0,0]) cylinder(r=m5_rad, h=idler_thick*3, center=true);
+        }
+    }
+}
+
+module belt_screwholes(){
+    wall = 5;
+    for(i=[-1,1]) for(j=[-1,1]) translate([i*(gantry_length/2-wheel_rad),j*(idler_extension-idler_rad),0]){
+        if(solid==0){
+            cylinder(r=m5_rad, h=wall*3, center=true);
+            translate([0,0,-wall+1]) cylinder(r2=m5_nut_rad, r1=m5_nut_rad+slop, h=wall, $fn=6);
+        }
+        if(solid==1){
+            hull(){
+                cylinder(r=m5_rad+wall,h=wall);
+                translate([0,-10*j,0]) cylinder(r=m5_rad+wall,h=wall);
+            }
+        }
+    }
+}
 
 module hotend_carriage(){
     wall=3;
@@ -254,7 +336,7 @@ module hotend_carriage(){
     }
 }
 
-module guide_wheel_helper(solid=0){
+module guide_wheel_helper(solid=0, span=1, cutout=true){
     min_rad=3;
     wall=5;
     
@@ -264,53 +346,41 @@ module guide_wheel_helper(solid=0){
         difference(){
             hull(){
                 for(i=[-1,1]) translate([i*gantry_length/2,0,0]){
-                    translate([0,beam/2+wheel_rad,0]) cylinder(r=wall/2, h=wall);
-                    translate([0,-beam/2-eccentric_offset,0]) cylinder(r=wall/2, h=wall);
+                    translate([0,span*beam/2+wheel_rad,0]) cylinder(r=wall/2, h=wall);
+                    translate([0,-span*beam/2-eccentric_offset,0]) cylinder(r=wall/2, h=wall);
                 }
             }
+            
             %for(i=[-1,1]) translate([i*gantry_length/2,0,0]){
-                translate([0,beam/2+wheel_rad,-beam/2]) wheel();
-                translate([0,-beam/2-eccentric_offset,-beam/2]) wheel();
+                translate([0,span*beam/2+wheel_rad,-beam/2]) wheel();
+                translate([0,-span*beam/2-eccentric_offset,-beam/2]) wheel();
             }
                
-            for(i=[0,1]) mirror([i,0,0]) translate([gantry_length/2,0,-.1]){
+            if(cutout==true)
+                for(i=[0,1]) mirror([i,0,0]) translate([gantry_length/2,0,-.1]){
 					cylinder(r=beam/2, h=wall+.2);
             }
             
-            for(i=[0,1]) mirror([0,i,0]) translate([0,beam/2+wheel_rad,-.1]){
+            for(i=[0,1]) mirror([0,i,0]) translate([0,span*beam/2+wheel_rad,-.1]){
                 hull() for(j=[0,1]) mirror([j,0,0]) translate([gantry_length/2-m5_rad-wall-min_rad/2,wall,0]) 
                     cylinder(r=min_rad/2, h=wall+.2);
             }
         }
         
         for(i=[-1,1]) translate([i*gantry_length/2,0,0]){
-            translate([0,beam/2+wheel_rad,0]) cylinder(r=m5_rad+wall, h=wall);
-            translate([0,-beam/2-eccentric_offset,0]) cylinder(r=m5_rad+wall, h=wall);
+            translate([0,span*beam/2+wheel_rad,0]) cylinder(r=m5_rad+wall, h=wall);
+            translate([0,-span*beam/2-eccentric_offset,0]) cylinder(r=m5_rad+wall, h=wall);
         }
     }
     if(solid <= 0){
         for(i=[-1,1]) translate([i*gantry_length/2,0,-.1]){
-            translate([0,beam/2+wheel_rad,0]) cylinder(r=m5_rad, h=wall+1);
-            #translate([0,-beam/2-eccentric_offset,0]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1);
+            translate([0,span*beam/2+wheel_rad,0]) cylinder(r=m5_rad, h=wall+1);
+            translate([0,-span*beam/2-eccentric_offset,0]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1);
         }
     }
 }
 
-module belt_screwholes(){
-    wall = 5;
-    for(i=[-1,1]) for(j=[-1,1]) translate([i*(gantry_length/2-wheel_rad),j*(idler_extension-idler_rad),0]){
-        if(solid==0){
-            cylinder(r=m5_rad, h=wall*3, center=true);
-            translate([0,0,-wall+1]) cylinder(r2=m5_nut_rad, r1=m5_nut_rad+slop, h=wall, $fn=6);
-        }
-        if(solid==1){
-            hull(){
-                cylinder(r=m5_rad+wall,h=wall);
-                translate([0,-10*j,0]) cylinder(r=m5_rad+wall,h=wall);
-            }
-        }
-    }
-}
+
 
 //mounting holes for the cyclops
 module cyclops_holes(solid=0, jut=0){
