@@ -49,7 +49,7 @@ echo("BOM: 4, reg rail, 2020", frame_x, "Frame");
 //motor size and placement variables
 motor_w = 42;
 motor_r = 52/2;
-motor_y = frame_y/2-beam-pulley_flange_rad; //distance motors are from the center.
+motor_y = frame_y/2-beam-pulley_rad; //distance motors are from the center.
 
 belt_thick = 6;
 belt_width = 1.5;

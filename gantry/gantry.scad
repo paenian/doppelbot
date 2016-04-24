@@ -45,7 +45,7 @@ if(part == 10){
 
     translate([frame_y/2,-60,-beam*2]) mirror([0,0,1]) gantry_clamp();
     
-    translate([frame_y/2-beam,0,-beam-mdf_wall]) gantry_carriage();
+    translate([frame_y/2-beam,0,-beam]) gantry_carriage();
     
     //the endcap, for reference
     translate([0,100,-frame_z/2-mdf_wall]) rotate([90,0,0]) assembled_endcap(); 
@@ -210,16 +210,16 @@ module gantry_carriage(){
         } //Holes below here
         
         //guide wheels
-        translate([0,0,mdf_wall-1]) mirror([0,0,1]) guide_wheel_helper(solid=-1, span=2, gantry_length=carriage_len);
+        translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1]) guide_wheel_helper(solid=-1, span=2, gantry_length=carriage_len);
         
         //idler screws
         translate([0,0,mdf_wall/2]) idler_mounts(solid=0);
         
         //holes for the beam
-        for(i=[-beam/2, beam/2]) translate([0,i,0]) beamHoles(slop=0);
+        for(i=[-beam/2, beam/2]) translate([0,i,-1]) cap_cylinder(r=m5_rad, h=20);
         
         //belt path
-        translate([0,-beam/2,0]) cube([50,belt_thick*1.5,mdf_wall*2], center=true);
+        translate([0,-beam/2,0]) cube([60,belt_thick*1.5,mdf_wall/2], center=true);
         
         //flatten the bottom
         translate([0,0,-50]) cube([100,100,100],center=true);
@@ -233,7 +233,7 @@ module idler_mounts(solid=1){
     translate([0,-beam/2,0]) for(i=[0,1]) mirror([i,0,0]) {
         if(solid==1){
             hull(){
-                translate([beam/2+idler_rad,0,0]) rotate([90,0,0]) cylinder(r=idler_rad, h=idler_thick+wall*2, center=true);
+                translate([beam/2+idler_rad+wall/2,0,0]) rotate([90,0,0]) cylinder(r=idler_rad+wall/2, h=idler_thick+wall*2, center=true);
             
                 translate([idler_extension,0,idler_extension-mdf_wall-1-beam/2+belt_width]) rotate([90,0,0]) cylinder(r=idler_rad, h=idler_thick+wall, center=true);
             

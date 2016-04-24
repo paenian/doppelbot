@@ -65,13 +65,8 @@ module assembled_endcap(){
     support_plate_connected();
     cross_plates();
     vertical_walls_connected();
-    top_wall_connected();
+    top_wall_connected(motor=true);
     bottom_wall_connected();
-
-	//draw in a few belt lines
-	%for(j=[-pulley_rad,pulley_rad]) for(i=[0:1]) mirror([i,0,0]) translate([motor_y+j,frame_z/2-3-6,100]){
-		cube([2,6,200], center=true);
-	}
 }
 
 /************* Layout Section ***************
@@ -93,6 +88,10 @@ module end_plate_connected(){
             
         //holes for all the stiffening cross plates
         cross_plates_connectors(gender=FEMALE);
+        
+        //top wall - belt holes
+        translate([0,frame_z/2+mdf_wall/2,wall_inset]) rotate([0,0,90]) rotate([0,90,0])
+        top_plate_connectors(gender=FEMALE);
     }
 }
 
@@ -110,6 +109,10 @@ module support_plate_connected(){
             
         //holes for all the stiffening cross plates
         cross_plates_connectors(gender=FEMALE);
+        
+        //top wall - belt holes
+        translate([0,frame_z/2+mdf_wall/2,wall_inset]) rotate([0,0,90]) rotate([0,90,0])
+        top_plate_connectors(gender=FEMALE);
     }        
 }
 
@@ -199,6 +202,7 @@ module bottom_wall_connected(){
 //holes for the motor
 module motor_mount(){
     cylinder(r=bump_rad, h=wall*3, center=true);
+    %translate([0,0,-20]) cylinder(r=pulley_flange_rad, h=20);
     for(i=[0:90:359]) rotate([0,0,i]) translate([screw_w/2, screw_w/2, 0]){
         hull(){
             translate([-1,-1,0]) cylinder(r=screw_rad, h=wall*3, center=true);
@@ -237,19 +241,43 @@ module beam_holes(double = false){
 
 //there aren't any...
 module top_plate_connectors(gender=MALE, solid=1){
+    //draw in a few belt lines
+	%rotate([90,0,0]) rotate([0,90,0]) for(j=[-pulley_rad,pulley_rad]) for(i=[0:1]) mirror([i,0,0]) translate([motor_y+j,-beam/2-mdf_wall/2,-50]){
+		cube([2,6,200], center=true);
+    }
+    
+    if(gender==FEMALE){
+        //lets make those belt lines into holes
+        rotate([90,0,0]) rotate([0,90,0]) for(j=[-pulley_rad,pulley_rad]) for(i=[0:1]) mirror([i,0,0]) translate([motor_y+j,-beam/2-mdf_wall/2,0]){
+            cube([belt_width+wall/2,belt_thick+wall/2,50], center=true);
+        }
+    }
 }
 
 //the uppermost plate.  Includes mounts for the motors on one side, and idlers on the other
 module top_plate(motor=true){
+    motor_offset = plate_sep/2+mdf_wall*2+pulley_flange_rad+1;
     difference(){
         union(){
             cube([side_plate_width, frame_y+mdf_wall*3, mdf_wall], center=true);
+            
+            //motor/idler sticky-outy
+            for(i=[0:1]) mirror([0,i,0]) hull() translate([motor_offset,motor_y,0])
+            if(motor==true){    //motor mounts
+                rotate([0,0,-45]) motor_mount(screw_rad = screw_rad+mdf_wall/2, wall=wall/3);
+                translate([-mdf_wall,0,0]) rotate([0,0,-45]) motor_mount(screw_rad = screw_rad+mdf_wall, wall=wall/3);
+            }else{              //idler mounts
+                idler_mount(m5_rad = m5_rad+mdf_wall/2, wall=wall/3);
+                translate([-mdf_wall,0,0]) idler_mount(m5_rad = m5_rad+mdf_wall, wall=wall/3);
+            }
+            
+            
             top_plate_connectors(gender=MALE, solid=1);
         }
         top_plate_connectors(gender=MALE, solid=-1);
         
         //mount the idlers/motors
-        for(i=[0:1]) mirror([0,i,0]) translate([-plate_sep/2-mdf_wall-pulley_rad,motor_y,0])
+        for(i=[0:1]) mirror([0,i,0]) translate([motor_offset,motor_y,0])
         if(motor==true){    //motor mounts
             rotate([0,0,-45]) motor_mount();
         }else{              //idler mounts
