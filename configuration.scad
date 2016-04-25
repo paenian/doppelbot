@@ -40,7 +40,12 @@ eccentric_flange_rad = 11/2;
 //frame lengths - may be dependent on wall above.
 frame_x = 500;  //we lose more in X because of the endcaps - it's where all the motors etc. will hide.
 frame_y = 420;  //(420-300)/2-beam=40mm clearance on either side of the printer.
+corner_y = frame_y-100;
 frame_z = 420;  //because square is nice.
+corner_z = frame_z-100;
+
+corner_endplate = true; //this controls wether you want a full endcap, or just the corners.  Corners allows twisting in a direction that should be impossible when the rails are connected on both ends, but I wanted to retain the old option just in case.
+corner_length = 250; //length of the corner side support.
 
 foot_height = 60;       //tall foot, cuz the Z motor will be underneath.
 

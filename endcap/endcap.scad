@@ -29,6 +29,7 @@ wall_inset = side_plate_width/2-mdf_wall*1.5;
 z_offset = 10; //applies to both the lead screw and the smooth rods - they're inline.
 
 
+
 //motor dimensions
 bump_rad = 25/2;    //clearance for the central bump thingy
 motor_w = 42.5;
@@ -36,7 +37,7 @@ screw_w = 31;
 screw_rad = m3_rad;
 
 //render everything
-part=10;
+part=7;
 
 //parts for laser cutting
 if(part == 0)
@@ -53,6 +54,8 @@ if(part == 5)
     top_wall_projected(motor=false);
 if(part == 6)
     bottom_wall_projected();
+if(part == 7)
+    corner_plate_projected();
 
 //view the assembly
 if(part == 10){
@@ -63,7 +66,11 @@ if(part == 10){
 module assembled_endcap(){
     end_plate_connected();
     support_plate_connected();
-    cross_plates();
+    if(corner_endplate==true){
+        corner_plates();
+    }else{
+        cross_plates();
+    }
     vertical_walls_connected();
     top_wall_connected(motor=true);
     bottom_wall_connected();
@@ -84,10 +91,15 @@ module end_plate_connected(){
     //we ignore assembled, cuz it's always flat :-)
     difference(){
         //the very end.  Stuff mounts to this guy.
-        end_plate();     
+        end_plate(corners=true);     
             
         //holes for all the stiffening cross plates
-        cross_plates_connectors(gender=FEMALE);
+        if(corner_endplate==true){
+            echo("corner plates");
+            corner_plates_connectors(gender=FEMALE);
+        }else{
+            cross_plates_connectors(gender=FEMALE);
+        }
         
         //top wall - belt holes
         translate([0,frame_z/2+mdf_wall/2,wall_inset]) rotate([0,0,90]) rotate([0,90,0])
@@ -108,7 +120,12 @@ module support_plate_connected(){
         translate([0,0,plate_sep+mdf_wall]) support_plate();
             
         //holes for all the stiffening cross plates
-        cross_plates_connectors(gender=FEMALE);
+        if(corner_endplate==true){
+            corner_plates_connectors(gender=FEMALE);
+        }else{
+            cross_plates_connectors(gender=FEMALE);
+        }
+            
         
         //top wall - belt holes
         translate([0,frame_z/2+mdf_wall/2,wall_inset]) rotate([0,0,90]) rotate([0,90,0])
@@ -119,6 +136,12 @@ module support_plate_connected(){
 module cross_plate_projected(){
     echo("Cut Two per End");
     projection() cross_plate();
+}
+
+
+module corner_plate_projected(){
+    echo("Cut Four per End");
+    projection() corner_plate();
 }
 
 module vertical_wall_projected(){
@@ -392,7 +415,8 @@ module end_plate_connectors(gender = MALE, solid=1){
     }
 }
 
-module end_plate(){
+module end_plate(corners=false){
+    inner_sub = 75;
     difference(){
         union(){
             //the plate
@@ -401,6 +425,11 @@ module end_plate(){
             //connectors around the edge
             end_plate_connectors(solid=1);
         }
+        
+        if(corners == true){
+            rotate([0,0,45]) cube([corner_y,corner_z,mdf_wall+1], center=true);
+        }
+        
         //connectors around the edge
         end_plate_connectors(solid=-1);
         
@@ -441,6 +470,43 @@ module support_plate(slots=false){
     difference(){
         end_plate();
         beam_cutout(screws=false, beams=true);
+        
+        //mounting holes for the electronics, power supply, etc.
+    }
+}
+
+module corner_plates_connectors(){
+    difference(){
+        union(){
+            for(i=[45:90:359]){
+                rotate([0,0,i]) translate([0,corner_y/2+mdf_wall,plate_sep-mdf_wall]) rotate([90,0,0]){
+                    cross_plate_connectors(frame_z=corner_length, num_spans=5, gender=FEMALE);
+                }
+            }
+        }
+    }
+}
+
+//in place
+module corner_plates(){
+    difference(){
+        union(){
+            for(i=[45:90:359]){
+                rotate([0,0,i]) translate([0,corner_y/2+mdf_wall,plate_sep-mdf_wall]) rotate([90,0,0]){
+                    corner_plate();
+                    cross_plate_connectors(frame_z=corner_length, num_spans=5);
+                }
+            }
+        }
+    }
+}
+
+module corner_plate(){
+    difference(){
+        union(){
+            cube([corner_length,plate_sep,mdf_wall], center=true);
+            cross_plate_connectors(frame_z=corner_length, num_spans=5);
+        }
     }
 }
 
