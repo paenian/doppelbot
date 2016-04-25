@@ -20,8 +20,6 @@ num_plates = 2;
 side_plate_width=60;    //minimum 80mm for two clips in the corners.
 num_clips = 1;          //for one clip, minimum is 60.
 
-foot_height = 60;       //tall foot, cuz the Z motor will be underneath.
-
 
 wall_inset = (plate_sep+mdf_wall)/2+15;
 wall_inset = side_plate_width/2-mdf_wall*1.5;
