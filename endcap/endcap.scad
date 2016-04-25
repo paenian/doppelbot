@@ -59,11 +59,14 @@ if(part == 7)
 
 //view the assembly
 if(part == 10){
-    assembled_endcap();
+    assembled_endcap(motor=true);
+    
+    translate([0,0,150]) 
+    mirror([0,0,1]) assembled_endcap(motor=false);
 }
 
 //assemble
-module assembled_endcap(){
+module assembled_endcap(motor=true){
     end_plate_connected();
     support_plate_connected();
     if(corner_endplate==true){
@@ -72,7 +75,7 @@ module assembled_endcap(){
         cross_plates();
     }
     vertical_walls_connected();
-    top_wall_connected(motor=true);
+    top_wall_connected(motor=motor);
     bottom_wall_connected();
 }
 
@@ -236,7 +239,17 @@ module motor_mount(){
 
 //holes for the idler
 module idler_mount(){
-    cylinder(r=m5_rad, h=wall*3, center=true);
+    //outer pulley
+    translate([pulley_rad*2,0,0]){
+        cylinder(r=m5_rad, h=wall*3, center=true);
+        %translate([0,0,-mdf_wall*2]) cylinder(r=pulley_flange_rad, h=10);
+    }
+    
+    //inner pulley
+    translate([0,-pulley_rad*2,0]){
+        cylinder(r=m5_rad, h=wall*3, center=true);
+        %translate([0,0,-mdf_wall*2]) cylinder(r=pulley_flange_rad, h=10);
+    }
 }
 
 module smooth_rod_holes(){
@@ -291,7 +304,7 @@ module top_plate(motor=true){
                 translate([-mdf_wall,0,0]) rotate([0,0,-45]) motor_mount(screw_rad = screw_rad+mdf_wall, wall=wall/3);
             }else{              //idler mounts
                 idler_mount(m5_rad = m5_rad+mdf_wall/2, wall=wall/3);
-                translate([-mdf_wall,0,0]) idler_mount(m5_rad = m5_rad+mdf_wall, wall=wall/3);
+                translate([-mdf_wall*3,0,0]) idler_mount(m5_rad = m5_rad+mdf_wall*2, wall=wall/3);
             }
             
             
@@ -299,7 +312,7 @@ module top_plate(motor=true){
         }
         top_plate_connectors(gender=MALE, solid=-1);
         
-        //mount the idlers/motors
+        //mount the motors and idlers
         for(i=[0:1]) mirror([0,i,0]) translate([motor_offset,motor_y,0])
         if(motor==true){    //motor mounts
             rotate([0,0,-45]) motor_mount();
