@@ -37,7 +37,7 @@ screw_w = 31;
 screw_rad = m3_rad;
 
 //render everything
-part=7;
+part=10;
 
 //parts for laser cutting
 if(part == 0)
@@ -317,7 +317,7 @@ module top_plate(motor=true){
         translate([-plate_sep/2-z_offset,0,0]) cylinder(r=4+slop, h=mdf_wall*3, center=true);
         
         //this is for an m8 flanged bearing
-        translate([-plate_sep/2-z_offset,0,0]) cylinder(r=22/2, h=mdf_wall*3, center=true);
+        z_motor_mounts();
     }
 }
 
@@ -343,6 +343,30 @@ module bottom_plate_connectors(gender=MALE, solid=1){
         }
 }
 
+module z_motor_mounts(){
+    //mount the motors
+    translate([-plate_sep/2-z_offset,0,0])
+        rotate([0,0,-45]) motor_mount();
+    
+    translate([-plate_sep/2-z_offset,150,0])
+        rotate([0,0,-45]) motor_mount();
+    
+    translate([-plate_sep/2-z_offset,-150,0])
+        rotate([0,0,-45]) motor_mount();
+}
+
+module z_idler_mounts(){
+    //mount the motors
+    translate([-plate_sep/2-z_offset,0,0])
+        cylinder(r=22/2, h=mdf_wall*3, center=true);
+    
+    translate([-plate_sep/2-z_offset,150,0])
+        cylinder(r=22/2, h=mdf_wall*3, center=true);
+    
+    translate([-plate_sep/2-z_offset,-150,0])
+        cylinder(r=22/2, h=mdf_wall*3, center=true);
+}
+
 //the bottom plate.  Includes mounts for the Z motor in the middle, and the smooth rods on the sides.
 module bottom_plate(){
     difference(){
@@ -352,16 +376,9 @@ module bottom_plate(){
         }
         bottom_plate_connectors(gender=MALE, solid=-1);
         
-        //mount the motor
-        translate([-plate_sep/2-z_offset,0,0])
-            rotate([0,0,-45]) motor_mount();
-        
-        translate([-plate_sep/2-z_offset,150,0])
-            rotate([0,0,-45]) motor_mount();
-        
-        translate([-plate_sep/2-z_offset,-150,0])
-            rotate([0,0,-45]) motor_mount();
-        
+
+        //mount the motors
+        z_idler_mounts();
         
         //smooth rod mounts
         smooth_rod_holes();
