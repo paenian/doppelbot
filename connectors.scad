@@ -71,6 +71,17 @@ module pinconnector_female(screw = true){
 	}
 }
 
+module tab(width=mdf_tab, gender=MALE){
+    if(gender==MALE){
+        difference(){
+            cube([width, mdf_wall*2, mdf_wall], center=true);
+            for(j=[0,1]) mirror([j,0,0]) translate([width/2,-mdf_wall,0]) cylinder(r=mdf_wall/4, h=mdf_wall*2, center=true, $fn=4);
+        }
+    }else{
+        translate([0,-mdf_wall/2-laser_slop/2,0]) cube([width+laser_slop, mdf_wall+2, mdf_wall+laser_slop], center=true);
+    }
+}
+
 module pinconnector_male(screw = true, solid=0){
 	union(){
 		if(screw){

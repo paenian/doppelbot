@@ -24,7 +24,7 @@ num_clips = 1;          //for one clip, minimum is 60.
 wall_inset = (plate_sep+mdf_wall)/2+15;
 wall_inset = side_plate_width/2-mdf_wall*1.5;
 
-z_offset = 10; //applies to both the lead screw and the smooth rods - they're inline.
+z_offset = 10+2; //applies to both the lead screw and the smooth rods - they're inline.
 
 
 
@@ -92,7 +92,7 @@ module end_plate_connected(){
     //we ignore assembled, cuz it's always flat :-)
     difference(){
         //the very end.  Stuff mounts to this guy.
-        end_plate(corners=true);     
+        end_plate(corners=true, endcap=true);     
             
         //holes for all the stiffening cross plates
         if(corner_endplate==true){
@@ -174,7 +174,7 @@ module vertical_walls_connected(){
         }
         
         //this subtracts the end connectors
-        end_plate_connectors(gender=FEMALE);
+        end_plate_connectors(gender=FEMALE, endcap=true);
         translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
         //the walls also get pinned at the bottom
@@ -194,7 +194,7 @@ module top_wall_connected(motor=true){
         top_plate(motor=motor);
     
         //this subtacts the connectors from whatever part comes next.
-        end_plate_connectors(gender=FEMALE);
+        end_plate_connectors(gender=FEMALE, endcap=true);
         translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
         //also gets hit by the verts
@@ -214,7 +214,7 @@ module bottom_wall_connected(){
         bottom_plate();
     
         //this subtacts the connectors from whatever part comes next.
-        end_plate_connectors(gender=FEMALE);
+        end_plate_connectors(gender=FEMALE, endcap=true);
         translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
     //also gets hit by the verts
@@ -227,6 +227,18 @@ module bottom_wall_connected(){
 module motor_mount(){
     cylinder(r=bump_rad, h=wall*3, center=true);
     %translate([0,0,-20]) cylinder(r=pulley_flange_rad, h=20);
+    for(i=[0:90:359]) rotate([0,0,i]) translate([screw_w/2, screw_w/2, 0]){
+        hull(){
+            translate([-1,-1,0]) cylinder(r=screw_rad, h=wall*3, center=true);
+            translate([1,1,0]) cylinder(r=screw_rad, h=wall*3, center=true);
+        }
+    }
+}
+
+//holes for an offset motor - the Z is on a stilt to accommodate a centering bearing.
+module motor_mount_offset(){
+    cylinder(r=z_bearing, h=mdf_wall*3, center=true);
+    %translate([0,0,-20-mdf_wall]) cylinder(r=pulley_flange_rad, h=20);
     for(i=[0:90:359]) rotate([0,0,i]) translate([screw_w/2, screw_w/2, 0]){
         hull(){
             translate([-1,-1,0]) cylinder(r=screw_rad, h=wall*3, center=true);
@@ -273,7 +285,7 @@ module beam_holes(double = false){
         }
 }
 
-//there aren't any...
+//there are some now
 module top_plate_connectors(gender=MALE, solid=1){
     //draw in a few belt lines
 	%rotate([90,0,0]) rotate([0,90,0]) for(j=[-pulley_rad,pulley_rad]) for(i=[0:1]) mirror([i,0,0]) translate([motor_y+j,-beam/2-mdf_wall/2,-50]){
@@ -357,25 +369,25 @@ module bottom_plate_connectors(gender=MALE, solid=1){
 module z_motor_mounts(){
     //mount the motors
     translate([-plate_sep/2-z_offset,0,0])
-        rotate([0,0,-45]) motor_mount();
+        rotate([0,0,-45]) motor_mount_offset();
     
     translate([-plate_sep/2-z_offset,150,0])
-        rotate([0,0,-45]) motor_mount();
+        rotate([0,0,-45]) motor_mount_offset();
     
     translate([-plate_sep/2-z_offset,-150,0])
-        rotate([0,0,-45]) motor_mount();
+        rotate([0,0,-45]) motor_mount_offset();
 }
 
 module z_idler_mounts(){
     //mount the motors
     translate([-plate_sep/2-z_offset,0,0])
-        cylinder(r=22/2, h=mdf_wall*3, center=true);
+        cylinder(r=z_bearing, h=mdf_wall*3, center=true);
     
     translate([-plate_sep/2-z_offset,150,0])
-        cylinder(r=22/2, h=mdf_wall*3, center=true);
+        cylinder(r=z_bearing, h=mdf_wall*3, center=true);
     
     translate([-plate_sep/2-z_offset,-150,0])
-        cylinder(r=22/2, h=mdf_wall*3, center=true);
+        cylinder(r=z_bearing, h=mdf_wall*3, center=true);
 }
 
 //the bottom plate.  Includes mounts for the Z motor in the middle, and the smooth rods on the sides.
@@ -431,7 +443,7 @@ module vertical_plate(){
     }
 }
 
-module end_plate_connectors(gender = MALE, solid=1){
+module end_plate_connectors(gender = MALE, solid=1, endcap=false){
     for(i=[0:90:359]) rotate([0,0,i]) {
         for(i=[-1,1]){
             translate([(frame_y/2-beam*5)*i,-frame_y/2,0]) if(gender == MALE){
@@ -440,10 +452,27 @@ module end_plate_connectors(gender = MALE, solid=1){
                 pinconnector_female();
             }
         }
+        
+        //middle connector, on the support plate only
+        if(endcap==false){
+            translate([0,-frame_y/2,0]) if(gender == MALE){
+                pinconnector_male(solid=solid);
+            }else{
+                pinconnector_female();
+            }
+        }
     }
+    
+    //tabs in the corners, to better align the beams
+    if(endcap==true){
+        translate([frame_y/2,frame_z/2-beam,0]) {
+            rotate([0,0,90]) tab(width=beam/2, gender=gender);
+        }
+    }
+    
 }
 
-module end_plate(corners=false){
+module end_plate(corners=false, endcap=false){
     inner_sub = 75;
     difference(){
         union(){
@@ -451,7 +480,7 @@ module end_plate(corners=false){
             cube([frame_y, frame_z, mdf_wall], center=true);
    
             //connectors around the edge
-            end_plate_connectors(solid=1);
+            end_plate_connectors(solid=1, endcap=endcap);
         }
         
         if(corners == true){

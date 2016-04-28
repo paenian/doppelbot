@@ -25,6 +25,9 @@ idler_rad = 13/2;
 idler_flange_rad = 18/2;
 idler_thick = 12;
 
+//flanged bearing for the Z idler
+z_bearing=22/2;
+
 pulley_rad = 13/2;
 pulley_flange_rad = 18/2;
 
