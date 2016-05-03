@@ -24,7 +24,7 @@ num_clips = 1;          //for one clip, minimum is 60.
 wall_inset = (plate_sep+mdf_wall)/2+15;
 wall_inset = side_plate_width/2-mdf_wall*1.5;
 
-z_offset = 10+2; //applies to both the lead screw and the smooth rods - they're inline.
+z_offset = 10+2+2; //applies to both the lead screw and the smooth rods - they're inline.
 
 
 
