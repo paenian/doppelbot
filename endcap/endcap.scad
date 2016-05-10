@@ -337,7 +337,7 @@ module top_plate(motor=true){
         beam_holes();
         
         //hole for the Z rod
-        translate([-plate_sep/2-z_offset,0,0]) cylinder(r=4+slop, h=mdf_wall*3, center=true);
+        //translate([-plate_sep/2-z_offset,0,0]) cylinder(r=4+slop, h=mdf_wall*3, center=true);
         
         //this is for an m8 flanged bearing
         z_motor_mounts();
@@ -368,13 +368,13 @@ module bottom_plate_connectors(gender=MALE, solid=1){
 
 module z_motor_mounts(){
     //mount the motors
-    translate([-plate_sep/2-z_offset,0,0])
+    #translate([-plate_sep/2-z_offset,0,0])
         rotate([0,0,-45]) motor_mount_offset();
     
-    translate([-plate_sep/2-z_offset,150,0])
+    translate([-plate_sep/2-z_offset,bed_screw_offset_y,0])
         rotate([0,0,-45]) motor_mount_offset();
     
-    translate([-plate_sep/2-z_offset,-150,0])
+    translate([-plate_sep/2-z_offset,-bed_screw_offset_y,0])
         rotate([0,0,-45]) motor_mount_offset();
 }
 
@@ -383,10 +383,10 @@ module z_idler_mounts(){
     translate([-plate_sep/2-z_offset,0,0])
         cylinder(r=z_bearing, h=mdf_wall*3, center=true);
     
-    translate([-plate_sep/2-z_offset,150,0])
+    translate([-plate_sep/2-z_offset,bed_screw_offset_y,0])
         cylinder(r=z_bearing, h=mdf_wall*3, center=true);
     
-    translate([-plate_sep/2-z_offset,-150,0])
+    translate([-plate_sep/2-z_offset,-bed_screw_offset_y,0])
         cylinder(r=z_bearing, h=mdf_wall*3, center=true);
 }
 
