@@ -20,7 +20,7 @@ side_length = rail_sep - beam;
 bed_screw_offset = (m5_washer_rad-mdf_wall)/2;  //this is used to make sure that the side-tensioning screws of the bed plates don't protrude - so that the top plate and side plates are flush, but the screw cap and nut don't stick up past the top.
 
 //render everything
-part=10;
+part=3;
 
 //parts for laser cutting
 if(part == 0)
@@ -106,7 +106,7 @@ module bed_top_connectors(gender = MALE, solid=1, screw_offset=0, end=true){
     
     if(end==false){
         //cut a third screw for the other side, too
-        translate([-top_width/2,0,0]) rotate([0,0,90]) 
+        mirror([1,0,0]) translate([top_width/2,0,0]) rotate([0,0,90]) 
         if(gender == MALE){
             pinconnector_male(solid=solid);
         }else{
@@ -184,7 +184,7 @@ module bed_brace(){
             bed_top_connectors(solid=1, end=false);
         }
         
-        bed_top_connectors(solid=-1);
+        bed_top_connectors(solid=-1, end=false);
         
         //beam holes
         for(i=[-1,1]) for(j=[-1,1]) translate([j*(top_width/2-beam/2),i*rail_sep/2,0]) cylinder(r=m5_rad, h=mdf_wall*2, center=true);
