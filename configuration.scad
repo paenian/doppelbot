@@ -28,6 +28,7 @@ idler_thick = 12;
 //flanged bearing for the Z idler
 z_bearing=22/2;
 leadscrew_rad = 8/2+slop;
+leadscrew_shaft_rad = 7;
 leadscrew_screw_rad = 19.05/2;
 
 pulley_rad = 13/2;
@@ -73,7 +74,7 @@ bed_x = 300+beam*2;
 bed_y = 300;  //the screwholes on the bed should line up with the long_bed rails.
 
 bed_screw_offset_y = bed_y/2;
-bed_screw_offset_x = 10;
+bed_screw_offset_x = 15;
 
 echo("BOM: 2, reg rail, 2020", bed_x, "Bed mount");
 echo("BOM: 3, reg rail, 2020", bed_y, "Bed mount");  //might want more than three - to hold insulation well.
@@ -97,6 +98,7 @@ m5_nut_height = 4.7;
 m5_rad = 5/2;
 m5_cap_rad = 10/2+slop;
 m5_cap_height = 3;
+m5_washer_rad = 10/2+.1;
 
 
 //some enums

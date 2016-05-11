@@ -61,10 +61,10 @@ module test_male(){
 
 
 
-module pinconnector_female(screw = true){
+module pinconnector_female(screw = true, screw_offset=0){
 	translate([0,-mdf_wall/2-laser_slop/2,0]) union(){
 		if(screw){
-			rotate([90,0,0]) cylinder(r=m5_rad, h=mdf_wall+1, center=true);
+			translate([0,0,screw_offset]) rotate([90,0,0]) cylinder(r=m5_rad, h=mdf_wall+1, center=true);
 		}
 
 		for(i=[0,1]) mirror([i,0,0]) translate([mdf_tab, 0, 0]) cube([mdf_tab+laser_slop, mdf_wall+1, mdf_wall+laser_slop], center=true);

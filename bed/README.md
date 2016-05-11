@@ -15,7 +15,11 @@ It might be a good idea to add a thin piece of aluminum as a heat spreader... I'
 ## Mechanical
 The bed mechanics consist of three leadscrews secured on the end panels; two on the left (where the electronics et al live) and one on the left.  Eventually I would like to use one stepper driver per screw, to support true bed leveling; right now, though, they're just going to be linked to a single Z driver.
 
-
-
-## 3D Printed
-We'll be 3d printing interfaces to the leadscrew nuts - that's pretty much it.
+##MDF Parts
+ - Encap: two needed
+  - bed_end_top
+  - bed_inside
+  - bed_outside
+ - Brace: two needed
+  - bed_brace_top
+  - 2 * bed_inside
