@@ -214,7 +214,7 @@ module bed_inside(){
         }
         
         //locks for the side rails
-        for(i=[0,1]) mirror([0,i,0]) translate([0,side_length/2, 0]){
+        for(i=[0,1]) mirror([0,i,0]) translate([mdf_wall/2,side_length/2, 0]){
             cube([m5_rad*2+laser_slop, beam*2, mdf_wall*2], center=true);
             hull(){
                 translate([0,-mdf_wall,0]) cube([m5_cap_rad*2+slop, .1, mdf_wall*2], center=true);
@@ -250,6 +250,6 @@ module bed_outside(){
         }
         
         //beam holes
-        #for(i=[-1,1]) translate([mdf_wall/2,i*rail_sep/2,0]) cylinder(r=m5_rad, h=mdf_wall*2, center=true);
+        for(i=[-1,1]) translate([mdf_wall*3/4,i*rail_sep/2,0]) cylinder(r=m5_rad, h=mdf_wall*2, center=true);
     }
 }
