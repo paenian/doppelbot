@@ -20,7 +20,7 @@ side_length = rail_sep - beam;
 bed_screw_offset = (m5_washer_rad-mdf_wall)/2;  //this is used to make sure that the side-tensioning screws of the bed plates don't protrude - so that the top plate and side plates are flush, but the screw cap and nut don't stick up past the top.
 
 //render everything
-part=3;
+part=0;
 
 //parts for laser cutting
 if(part == 0)
@@ -140,7 +140,7 @@ module leadscrew_flange(solid=1){
     leadscrew_base_rad = 26/2;
     leadscrew_base_height = 5;
     
-    for(i=[-1:1]) translate([-top_width/2-bed_screw_offset_x,i*bed_screw_offset_y,0]){
+    for(i=[-1:1]) #translate([-top_width/2-bed_screw_offset_x,i*bed_screw_offset_y,0]){
         if(solid>=0){
             hull(){
                 cylinder(r=flange_rad, h=mdf_wall, center=true);

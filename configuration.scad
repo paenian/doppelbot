@@ -74,7 +74,7 @@ bed_x = 300+beam*2;
 bed_y = 300;  //the screwholes on the bed should line up with the long_bed rails.
 
 bed_screw_offset_y = bed_y/2;
-bed_screw_offset_x = 15;
+bed_screw_offset_x = 15+5;
 
 echo("BOM: 2, reg rail, 2020", bed_x, "Bed mount");
 echo("BOM: 3, reg rail, 2020", bed_y, "Bed mount");  //might want more than three - to hold insulation well.
