@@ -24,7 +24,7 @@ num_clips = 1;          //for one clip, minimum is 60.
 wall_inset = (plate_sep+mdf_wall)/2+15;
 wall_inset = side_plate_width/2-mdf_wall*1.5;
 
-z_offset = 10+2+2; //applies to both the lead screw and the smooth rods - they're inline.
+z_offset = 14+2.5; //applies to both the lead screw and the smooth rods - they're inline.
 
 
 
@@ -223,18 +223,6 @@ module bottom_wall_connected(){
 }
 
 
-//holes for the motor
-module motor_mount(){
-    cylinder(r=bump_rad, h=wall*3, center=true);
-    %translate([0,0,-20]) cylinder(r=pulley_flange_rad, h=20);
-    for(i=[0:90:359]) rotate([0,0,i]) translate([screw_w/2, screw_w/2, 0]){
-        hull(){
-            translate([-1,-1,0]) cylinder(r=screw_rad, h=wall*3, center=true);
-            translate([1,1,0]) cylinder(r=screw_rad, h=wall*3, center=true);
-        }
-    }
-}
-
 //holes for an offset motor - the Z is on a stilt to accommodate a centering bearing.
 module motor_mount_offset(){
     cylinder(r=z_bearing, h=mdf_wall*3, center=true);
@@ -247,18 +235,37 @@ module motor_mount_offset(){
     }
 }
 
+
+//holes for the motor
+module motor_mount(){
+    cylinder(r=bump_rad, h=wall*3, center=true);
+    %translate([0,0,-20]) cylinder(r=pulley_flange_rad, h=20);
+    for(i=[0:90:359]) rotate([0,0,i]) translate([screw_w/2, screw_w/2, 0]){
+        hull(){
+            translate([-1,-1,0]) cylinder(r=screw_rad, h=wall*3, center=true);
+            translate([1,1,0]) cylinder(r=screw_rad, h=wall*3, center=true);
+        }
+    }
+}
+
+
 //holes for the idler
 module idler_mount(){
-    //outer pulley
-    translate([pulley_rad*2,0,0]){
-        cylinder(r=m5_rad, h=wall*3, center=true);
-        %translate([0,0,-mdf_wall*2]) cylinder(r=pulley_flange_rad, h=10);
-    }
+    //correct for the difference in radii of the idler and pulley radii
+    translate([0,pulley_rad-idler_rad,0]) {
+        //outer pulley
+        translate([idler_rad*3,0,0]){ //should be times 2, but 3 spreads the belts out more - at the cost of longer 
+            cylinder(r=m5_rad, h=wall*3, center=true);
+            %translate([0,0,-mdf_wall*3]) cylinder(r=idler_rad, h=idler_thick);
+            %translate([0,0,-mdf_wall*3]) cylinder(r=idler_flange_rad, h=1);
+        }
     
-    //inner pulley
-    translate([0,-pulley_rad*2,0]){
-        cylinder(r=m5_rad, h=wall*3, center=true);
-        %translate([0,0,-mdf_wall*2]) cylinder(r=pulley_flange_rad, h=10);
+        //inner pulley
+        translate([idler_rad*.5,-pulley_rad*2,0]){
+            cylinder(r=m5_rad, h=wall*3, center=true);
+            %translate([0,0,-mdf_wall*3]) cylinder(r=idler_rad, h=idler_thick);
+            %translate([0,0,-mdf_wall*3]) cylinder(r=idler_flange_rad, h=1);
+        }
     }
 }
 

@@ -16,14 +16,15 @@ bed = 300;
 
 layer_height=.2;
 
-//this is for using the big idlers
-//idler_rad = 17.5/2;
-//idler_flange_rad = 22/2;
+//this is using the gt2 idlers from robotdigg
+//idler_rad = 13/2;
+//idler_flange_rad = 18/2;
+//idler_thick = 12;
 
-//this is using flanged bearings, and no plastic
-idler_rad = 13/2;
-idler_flange_rad = 18/2;
-idler_thick = 12;
+//these use the smaller M5 flanged bearings as idlers
+idler_rad = 10/2;
+idler_flange_rad = 12/2;
+idler_thick = 10;
 
 //flanged bearing for the Z idler
 z_bearing=22/2;

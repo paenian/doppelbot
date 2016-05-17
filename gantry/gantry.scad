@@ -18,7 +18,9 @@ ind_offset = beam/2+ind_rad+wall+1;
 ind_lift = 10-8;
 ind_height = 12;
 
-idler_extension = beam/2+idler_flange_rad+10+6;
+idler_extension = 0; //beam/2+idler_flange_rad+10+6;
+idler_extension_x = beam/2+wheel_rad+wheel_clearance/2+idler_flange_rad;
+idler_extension_y = -mdf_wall/2+idler_rad+pulley_rad*2;
 
 
 //render everything
@@ -41,9 +43,9 @@ if(part == 10){
     translate([frame_y/2-90,0,0]) rotate([0,0,0]) 
     hotend_carriage();
 
-    translate([frame_y/2,-60,0]) gantry_end();
+    *translate([frame_y/2,-60,0]) gantry_end();
 
-    translate([frame_y/2,-60,-beam*2]) mirror([0,0,1]) gantry_clamp();
+    *translate([frame_y/2,-60,-beam*2]) mirror([0,0,1]) gantry_clamp();
     
     translate([frame_y/2-beam,0,-beam]) gantry_carriage();
     
@@ -55,6 +57,7 @@ if(part == 10){
 
 
 //just a little spar below the gantry to make sure it remains level
+//Obsolete!
 module gantry_clamp(){
     roller_sep = 40; //distance between rod centers
     ridge_length = 20;
@@ -90,6 +93,7 @@ module gantry_clamp(){
 }
 
 //the top of the gantry
+//Obsolete!
 module gantry_end(){
     roller_sep = 40; //distance between wheel centers
     ridge_length = 30;
@@ -140,10 +144,8 @@ module wheel(){
 
 
 
-//TODO
 //New roller mounts that are flush with the end of the beam
 //  move the wheel support back and use a spacer to mount the wheels.
-
 module roller_mount(solid=1){
     wall = 5;
     min_rad = wall/2;
@@ -230,27 +232,35 @@ module gantry_carriage(){
 
 module idler_mounts(solid=1){
     wall=5;
+    bump_height = 1;
     translate([0,-beam/2,0]) for(i=[0,1]) mirror([i,0,0]) {
         if(solid==1){
             hull(){
                 translate([beam/2+idler_rad+wall/2,0,0]) rotate([90,0,0]) cylinder(r=idler_rad+wall/2, h=idler_thick+wall*2, center=true);
             
-                translate([idler_extension,0,idler_extension-mdf_wall-1-beam/2+belt_width]) rotate([90,0,0]) cylinder(r=idler_rad, h=idler_thick+wall, center=true);
+                translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=idler_rad, h=idler_thick+wall+bump_height*2, center=true);
+                //%translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=idler_rad, h=50, center=true);
             
             }
         }
         if(solid <= 0){
-            //todo: make some bump standoffs
-            translate([idler_extension,0,idler_extension-mdf_wall-1-beam/2+belt_width]) rotate([90,0,0]) cylinder(r=idler_flange_rad+1, h=idler_thick, center=true);
+            translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0])
+            difference(){
+                cylinder(r=idler_flange_rad+1, h=idler_thick+bump_height*2, center=true);
+                
+                //bumps
+                for(i=[0,1]) mirror([0,0,i]) translate([0,0,idler_thick/2]) cylinder(r1=m5_rad+1, r2=idler_rad, h=bump_height+.1);
+                
+            }
         
-            translate([idler_extension,0,idler_extension-mdf_wall-1-beam/2+belt_width]) rotate([90,0,0]) cylinder(r=m5_rad, h=idler_thick*3, center=true);
+            translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=m5_rad, h=idler_thick*3, center=true);
         }
     }
 }
 
 module belt_screwholes(){
     wall = 5;
-    for(i=[-1,1]) for(j=[-1,1]) translate([i*(gantry_length/2-wheel_rad),j*(idler_extension-idler_rad),0]){
+    for(i=[-1,1]) for(j=[-1,1]) translate([i*(gantry_length/2-wheel_rad),j*(idler_extension_x-idler_rad),0]){
         if(solid==0){
             cylinder(r=m5_rad, h=wall*3, center=true);
             translate([0,0,-wall+1]) cylinder(r2=m5_nut_rad, r1=m5_nut_rad+slop, h=wall, $fn=6);
