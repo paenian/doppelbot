@@ -19,7 +19,7 @@ ind_lift = 10-8;
 ind_height = 12;
 
 idler_extension = 0; //beam/2+idler_flange_rad+10+6;
-idler_extension_x = beam/2+wheel_rad+wheel_clearance/2+idler_flange_rad;
+idler_extension_x = beam/2+wheel_rad+wheel_clearance/2+idler_flange_rad+1;
 idler_extension_y = -mdf_wall/2+idler_rad+pulley_rad*2;
 
 
@@ -274,7 +274,7 @@ module idler_mounts(solid=1){
     translate([0,-beam/2,0]) for(i=[0,1]) mirror([i,0,0]) {
         if(solid==1){
             hull(){
-                translate([beam/2+idler_rad+wall/2,0,0]) rotate([90,0,0]) cylinder(r=idler_rad+wall/2, h=idler_thick+wall*2, center=true);
+                translate([beam/2+idler_rad+wall,0,0]) rotate([90,0,0]) cylinder(r=idler_rad+wall, h=idler_thick+wall*2, center=true);
             
                 translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=idler_rad, h=idler_thick+wall+bump_height*2, center=true);
                 //%translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=idler_rad, h=50, center=true);
@@ -285,6 +285,10 @@ module idler_mounts(solid=1){
             translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0])
             difference(){
                 cylinder(r=idler_flange_rad+1, h=idler_thick+bump_height*2, center=true);
+                
+                //belt paths
+                for(j=[0,-90]) rotate([0,0,j]) translate([0,-idler_rad,0]) 
+                    %cube([100, belt_width*1.5, belt_thick], center=true);
                 
                 //bumps
                 for(i=[0,1]) mirror([0,0,i]) translate([0,0,idler_thick/2]) cylinder(r1=m5_rad+1, r2=idler_rad, h=bump_height+.1);
@@ -318,34 +322,44 @@ module belt_screwholes(){
 //bonus: able to install two cyclopses, one forward one reverse?
 // - would be really hard to level the right-side nozzles.
 module hotend_carriage2(){
-    wall=3;
+    gantry_length = 80;
+    wall=5;
     min_rad = 2;
     
     %translate([0,0,-beam-1]) cube([120,beam,beam*2],center=true);
     difference(){
         union(){
+            
+            //rough in the bits
+            //cyclopses
+            #translate([-15,15+beam/2+6,-30]) cube([28, 30, 60],center=true);
+            #translate([15,(15+beam/2+6),-30]) cube([28, 30, 60],center=true);
+            
+            //belt clamp on one side, induction sensor on the other
+            #translate([-10, -beam/2-26, -20]) cylinder(r=9, h=60, center=true);
+            
             //belt mounts
-            belt_screwholes(solid=1);
+            *belt_screwholes(solid=1);
             
             //guide wheels
             difference(){
-                guide_wheel_helper(solid=1);
+                guide_wheel_helper(solid=1,gantry_length=gantry_length, cutout=false);
                 
                 //cutout for the cyclops
-                translate([0,beam/2+wall+1+min_rad+10,-cyclops_drop-wall]) minkowski(){
+                *translate([0,beam/2+wall+1+min_rad+10,-cyclops_drop-wall]) minkowski(){
                     cube([cyclops_width-min_rad*2+.5,20,100], center=true);
                     cylinder(r=min_rad, h=1);
                 }
                 
                 //round the front corners
-                for(i=[0,1]) mirror([i,0,0]) translate([cyclops_width/2+min_rad,beam/2+m5_rad+wall+1,0]) difference(){
+                *for(i=[0,1]) mirror([i,0,0]) translate([cyclops_width/2+min_rad,beam/2+m5_rad+wall+1,0]) difference(){
                     translate([-min_rad-1,0,-wall]) cube([min_rad+1, min_rad+1, wall*5]);
                     cylinder(r=min_rad, h=wall*11, center=true);
                 }
             }
             
             //cyclops mount
-            translate([0,beam/2+wall+1,-cyclops_drop-wall+2]) {
+            *translate([0,beam/2+wall+1,-cyclops_drop-wall+2]) {
                 hull() {
                     for(i=[0,1]) mirror([i,0,0]) translate([cyclops_width/2-wall,0,cyclops_drop+wall]){
                         rotate([90,0,0]) cylinder(r=wall, h=wall);
@@ -363,7 +377,7 @@ module hotend_carriage2(){
             }
             
             //induction sensor mount
-            translate([0, -ind_offset,-ind_height+wall-ind_lift+wall-1]) mirror([0,1,0]) rotate([0,0,90]) {
+            *translate([0, -ind_offset,-ind_height+wall-ind_lift+wall-1]) mirror([0,1,0]) rotate([0,0,90]) {
                 extruder_mount(solid=1, m_height=ind_height+.25,  hotend_rad=ind_rad, wall=3);
             //offset the mount
                 translate([0,0,ind_height-.1]) cylinder(r=(ind_rad+wall)/cos(30), h=ind_lift+.1, $fn=6);
@@ -372,16 +386,16 @@ module hotend_carriage2(){
         } //Holes below here
         
         //guide wheels
-        guide_wheel_helper(solid=-1);
+        guide_wheel_helper(solid=-1,gantry_length=gantry_length, cutout=false);
         
         //belt screws
-        belt_screwholes(solid=0);
+        *belt_screwholes(solid=0);
         
         //cyclops mount
-        translate([0,beam/2+wall+1,-cyclops_drop-wall+2]) cyclops_holes(solid=-1, jut=0, wall=wall);
+        *translate([0,beam/2+wall+1,-cyclops_drop-wall+2]) cyclops_holes(solid=-1, jut=0, wall=wall);
         
         //induction sensor mount
-        translate([0, -ind_offset,-ind_height+wall-ind_lift+wall-1]) mirror([0,1,0]) rotate([0,0,90]) {
+        *translate([0, -ind_offset,-ind_height+wall-ind_lift+wall-1]) mirror([0,1,0]) rotate([0,0,90]) {
                 extruder_mount(solid=0, m_height=ind_height,  hotend_rad=ind_rad, wall=3);
             //offset the mount
                 translate([0,0,ind_height-.1]) cylinder(r1=ind_rad, r2=ind_rad+2, h=ind_lift+.15);

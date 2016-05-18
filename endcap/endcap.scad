@@ -24,7 +24,8 @@ num_clips = 1;          //for one clip, minimum is 60.
 wall_inset = (plate_sep+mdf_wall)/2+15;
 wall_inset = side_plate_width/2-mdf_wall*1.5;
 
-z_offset = 14+2.5; //applies to both the lead screw and the smooth rods - they're inline.
+z_offset = 14+2.5+2.5; //applies to both the lead screw and the smooth rods - they're inline.
+z_bump = 6; //bump for the motor mount, to give it more strength
 
 
 
@@ -269,13 +270,19 @@ module idler_mount(){
     }
 }
 
-module smooth_rod_holes(){
+module smooth_rod_holes(solid=1){
     for(i=[0:1]) mirror([0,i,0]) translate([-plate_sep/2-z_offset,frame_y/4,0]) {
-        cylinder(r=smooth_rod_rad, h=wall*3, center=true);
-        %translate([0,0,-40]) cylinder(r=20/2, h=29, center=true);
+        if(solid==1){
+            hull() for(j=[-1,1]) translate([0,j*(z_bearing+wall/2),0])
+                rotate([0,0,22.5]) cylinder(r=z_bump/cos(180/8), h=mdf_wall, $fn=8, center=true);
+        }
+        if(solid==-1){
+            cylinder(r=smooth_rod_rad, h=wall*3, center=true);
+            %translate([0,0,-40]) cylinder(r=20/2, h=29, center=true);
         
-        //zip tie holes, to hold the rods in
-        for(i=[-1,1]) translate([0,i*(smooth_rod_rad+wall+1),0]) cube([5,3,mdf_wall*3], center=true);
+            //zip tie holes, to hold the rods in
+            for(i=[-1,1]) translate([0,i*(smooth_rod_rad+wall+1),0]) cube([5,3,mdf_wall*3], center=true);
+        }
     }
 }
 
@@ -314,7 +321,7 @@ module top_plate(motor=true){
         union(){
             cube([side_plate_width, frame_y+mdf_wall*3, mdf_wall], center=true);
             
-            //motor/idler sticky-outy
+            //xy motor/idler sticky-outy
             for(i=[0:1]) mirror([0,i,0]) hull() translate([motor_offset,motor_y,0])
             if(motor==true){    //motor mounts
                 rotate([0,0,-45]) motor_mount(screw_rad = screw_rad+mdf_wall/2, wall=wall/3);
@@ -324,6 +331,10 @@ module top_plate(motor=true){
                 translate([-mdf_wall*3,0,0]) idler_mount(m5_rad = m5_rad+mdf_wall*2, wall=wall/3);
             }
             
+            //the z motor mounts
+            z_motor_mounts(solid=1);
+            
+            smooth_rod_holes(solid=1);
             
             top_plate_connectors(gender=MALE, solid=1);
         }
@@ -338,7 +349,7 @@ module top_plate(motor=true){
         }
         
         //smooth rod mounts
-        smooth_rod_holes();
+        smooth_rod_holes(solid=-1);
         
         //beam holes
         beam_holes();
@@ -347,7 +358,7 @@ module top_plate(motor=true){
         //translate([-plate_sep/2-z_offset,0,0]) cylinder(r=4+slop, h=mdf_wall*3, center=true);
         
         //this is for an m8 flanged bearing
-        z_motor_mounts();
+        z_motor_mounts(solid=-1);
     }
 }
 
@@ -373,28 +384,34 @@ module bottom_plate_connectors(gender=MALE, solid=1){
         }
 }
 
-module z_motor_mounts(){
-    //mount the motors
-    #translate([-plate_sep/2-z_offset,0,0])
-        rotate([0,0,-45]) motor_mount_offset();
-    
-    translate([-plate_sep/2-z_offset,bed_screw_offset_y,0])
-        rotate([0,0,-45]) motor_mount_offset();
-    
-    translate([-plate_sep/2-z_offset,-bed_screw_offset_y,0])
-        rotate([0,0,-45]) motor_mount_offset();
+module z_motor_mounts(solid=1){
+    for(i=[-1:1]) {
+        if(solid==1){
+            hull() for(j=[-1,1]) translate([-plate_sep/2-z_offset,bed_screw_offset_y*i+j*motor_w*sqrt(2)/2,0])
+                rotate([0,0,22.5]) cylinder(r=z_bump/cos(180/8), h=mdf_wall, $fn=8, center=true);
+                //cube([z_bump*2, motor_w*sqrt(2), mdf_wall], center=true);
+        }
+        if(solid==-1){
+            //holes for the motors
+            translate([-plate_sep/2-z_offset,bed_screw_offset_y*i,0])
+                rotate([0,0,-45-45]) motor_mount_offset();
+        }
+    }
 }
 
-module z_idler_mounts(){
-    //mount the motors
-    translate([-plate_sep/2-z_offset,0,0])
-        cylinder(r=z_bearing, h=mdf_wall*3, center=true);
-    
-    translate([-plate_sep/2-z_offset,bed_screw_offset_y,0])
-        cylinder(r=z_bearing, h=mdf_wall*3, center=true);
-    
-    translate([-plate_sep/2-z_offset,-bed_screw_offset_y,0])
-        cylinder(r=z_bearing, h=mdf_wall*3, center=true);
+module z_idler_mounts(solid=1){
+    for(i=[-1:1]) {
+        if(solid==1){
+            hull() for(j=[-1,1]) translate([-plate_sep/2-z_offset,bed_screw_offset_y*i+j*(z_bearing+wall/2),0])
+                rotate([0,0,22.5]) cylinder(r=z_bump/cos(180/8), h=mdf_wall, $fn=8, center=true);
+                //cube([z_bump*2, motor_w*sqrt(2), mdf_wall], center=true);
+        }
+        if(solid==-1){
+            //holes for the motors
+            translate([-plate_sep/2-z_offset,bed_screw_offset_y*i,0])
+                cylinder(r=z_bearing, h=mdf_wall*3, center=true);
+        }
+    }
 }
 
 //the bottom plate.  Includes mounts for the Z motor in the middle, and the smooth rods on the sides.
@@ -403,15 +420,20 @@ module bottom_plate(){
         union(){
             cube([side_plate_width, frame_y, mdf_wall], center=true);
             bottom_plate_connectors(gender=MALE, solid=1);
+            
+            z_idler_mounts(solid=1);
+            
+            //smooth rod mounts
+            smooth_rod_holes(solid=1);
         }
         bottom_plate_connectors(gender=MALE, solid=-1);
         
 
         //mount the motors
-        z_idler_mounts();
+        z_idler_mounts(solid=-1);
         
         //smooth rod mounts
-        smooth_rod_holes();
+        smooth_rod_holes(solid=-1);
         
         //beam holes
         beam_holes();
