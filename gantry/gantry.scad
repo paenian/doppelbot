@@ -368,8 +368,8 @@ module belt_stretcher(){
         }
         
         //hole for the tensioning screw
-        translate([0,-m5_nut_height/2-.5,0]) rotate([90,0,0]) cylinder(r=m5_rad, h=25);
-        translate([0,10,0]) rotate([90,0,0]) cylinder(r=m5_rad, h=10);
+        translate([0,-m5_nut_height/2-.5,0]) rotate([90,0,0]) cylinder(r=m5_rad+slop, h=25);
+        translate([0,10,0]) rotate([90,0,0]) cylinder(r=m5_rad+slop, h=10);
         
         //tensioning nut hole
         translate([0,0,0]) hull(){
@@ -391,25 +391,25 @@ module belt_tensioner(solid=1){
     //two redirects
     if(solid==1){
         hull(){
-            for(i=[-1,1]) translate([i*(idler_rad+m5_rad/2),0,0]){
+            for(i=[-1,1]) translate([i*(idler_rad+m5_rad),0,0]){
                 translate([0,-idler_extension_x,-(beam/2-idler_thick/2)]) cylinder(r=m5_rad+wall/2, h=wall+beam/2-idler_thick/2);
                 translate([0,-idler_extension_x/2,0]) cylinder(r=m5_rad+wall/2, h=wall);
             }
         }
         
         //bumps
-        for(i=[-1,1]) translate([i*(idler_rad+m5_rad/2),0,0])
+        for(i=[-1,1]) translate([i*(idler_rad+m5_rad),0,0])
             translate([0,-idler_extension_x,-wall-bump_height]) cylinder(r1=m5_rad+1, r2=m5_rad+wall/2, h=bump_height+.1);
         
         //belt stretcher roughed in
         %belt_stretcher();
     }else{
         //holes for idlers
-        for(i=[-1,1]) translate([i*(idler_rad+m5_rad/2),0,0])
+        for(i=[-1,1]) translate([i*(idler_rad+m5_rad),0,0])
             translate([0,-idler_extension_x,0]) cylinder(r=m5_rad, h=wall*3, center=true);
         
         //screwhole to align the stretcher
-        translate([0,-20,0]) rotate([90,0,0]) cylinder(r=m5_rad, h=25);
+        translate([0,-29,0]) rotate([90,0,0]) cylinder(r=m5_rad+slop, h=30);
     }
 }
 
@@ -436,7 +436,7 @@ module hotend_carriage2(){
             %translate([-10, -beam/2-26, -20]) cylinder(r=9, h=60, center=true);
             
             //belt tensioner
-            translate([gantry_length/4, 0, 0]) belt_tensioner(solid=1);
+            translate([gantry_length/4+2, 0, 0]) belt_tensioner(solid=1);
             
             //belt attachment
             belt_left_screwholes(solid=1, screw_sep = gantry_length);
@@ -477,7 +477,7 @@ module hotend_carriage2(){
         belt_left_screwholes(solid=0, screw_sep = gantry_length);
         
         //belt tensioner
-        translate([gantry_length/4, 0, 0]) belt_tensioner(solid=0);
+        translate([gantry_length/4+2, 0, 0]) belt_tensioner(solid=0);
         
         //cyclops mount
         *translate([0,beam/2+wall+1,-cyclops_drop-wall+2]) cyclops_holes(solid=-1, jut=0, wall=wall);
@@ -604,7 +604,9 @@ module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0){
     if(solid <= 0){
         for(i=[-1,1]) translate([i*gantry_length/2,0,-.1]){
             translate([0,span*beam/2+wheel_rad,0]) cylinder(r=m5_rad, h=wall+1);
+            
             translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,0]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1);
+            #translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,-wall-1]) cylinder(r=eccentric_rad+4, h=wall+1);
         }
     }
 }
