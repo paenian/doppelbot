@@ -94,6 +94,7 @@ m4_cap_rad = 7/2+slop;
 m4_cap_height = 2.5;
 
 m5_nut_rad = 8.79/2;
+m5_sq_nut_rad = (8*sqrt(2)+slop)/2;
 m5_nut_rad_laser = 8.79/2-.445;
 m5_nut_height = 4.7;
 m5_rad = 5/2;
