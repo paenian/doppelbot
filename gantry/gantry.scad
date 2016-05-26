@@ -419,6 +419,25 @@ module belt_tensioner(solid=1){
     }
 }
 
+module hotend_mount(){
+    gantry_length = 50;
+    wall=5;
+    mount_x = gantry_length+m5_rad*2+wall*2;
+    mount_y = 28;
+    translate([0,0,wall/2+1]) 
+    difference(){
+        translate([0,beam/2+1,0]) union(){
+            translate([0,mount_y/2,0]) cube([mount_x,mount_y,wall],center=true);
+        }
+        
+        //holes for the hotend mount - this is the 
+        
+        //holes for mounting
+        belt_left_screwholes(solid=0, screw_sep = gantry_length);
+        guide_wheel_helper(solid=-1,gantry_length=gantry_length, cutout=false);
+    }
+}
+
 //redo the carriage.
 //Rotate the nozzles to face forwards
 //move induction sensor to behind nozzles?
@@ -437,6 +456,9 @@ module hotend_carriage2(){
             //cyclopses
             %translate([0,15+beam/2+15,-30]) cube([28, 30, 60],center=true);
             //%translate([15,(15+beam/2+15),-30]) cube([28, 30, 60],center=true);
+            
+            //hotend mount
+            hotend_mount();
             
             //belt clamp on one side, induction sensor on the other
             %translate([-10, -beam/2-26, -20]) cylinder(r=9, h=60, center=true);
