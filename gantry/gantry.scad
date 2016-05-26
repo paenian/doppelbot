@@ -13,7 +13,7 @@ gantry_length = 60;
 cyclops_width=30;
 cyclops_drop = 18; //how far down the cyclops should be.
 
-ind_rad = 18/2+slop;
+ind_rad = 18/2;
 ind_offset = beam/2+ind_rad+wall+15;
 ind_forward = 12;
 ind_lift = 10;
@@ -328,7 +328,7 @@ module belt_screwholes(){
 
 module belt_left_screwholes(solid=1, screw_sep = 50){
     wall = 5;
-    for(i=[-1,1]) translate([i*screw_sep/2,idler_extension_x-idler_rad,0]){
+    for(i=[-1,1]) translate([i*screw_sep/2,idler_extension_x-idler_rad+m5_rad,0]){
         if(solid==0){
             cylinder(r=m5_rad, h=wall*3, center=true);
             translate([0,0,-wall+1]) cylinder(r2=m5_nut_rad, r1=m5_nut_rad+slop, h=wall, $fn=6);
@@ -347,7 +347,7 @@ module belt_stretcher(){
     
     height = 10;
     length = 15;
-    peg = 6;
+    peg = 12;
     peg_rad = m5_rad;
     
     translate([0,-50,0])
@@ -358,9 +358,15 @@ module belt_stretcher(){
             
             //knob
             intersection(){
-                hull(){
-                    translate([0,0,-(height)/2-peg]) cylinder(r=peg_rad, h=height+peg);
-                    translate([0,length/2,-(height)/2-peg]) cylinder(r=1, h=height+peg);
+                union(){
+                    hull(){
+                        translate([0,0,-(height)/2-peg]) cylinder(r=peg_rad, h=height+peg);
+                        translate([0,length/2,-(height)/2-peg]) cylinder(r=1, h=height+peg);
+                    }
+                    hull(){
+                        translate([0,0,-height/2-peg]) cylinder(r1=peg_rad+wall/2, r2=peg_rad, h=peg/4);
+                        translate([0,length/2,-(height)/2-peg]) cylinder(r=1-.15, h=peg/4);
+                    }
                 }
                 
                 translate([-15/2,-length/2,-height*2]) cube([15,length,height*2]);
@@ -409,7 +415,7 @@ module belt_tensioner(solid=1){
             translate([0,-idler_extension_x,0]) cylinder(r=m5_rad, h=wall*3, center=true);
         
         //screwhole to align the stretcher
-        translate([0,-29,0]) rotate([90,0,0]) cylinder(r=m5_rad+slop, h=30);
+        translate([0,-29,0]) rotate([90,0,0]) cylinder(r=m5_rad, h=30);
     }
 }
 
@@ -471,7 +477,7 @@ module hotend_carriage2(){
         } //Holes below here
         
         //guide wheels
-        guide_wheel_helper(solid=-1,gantry_length=gantry_length, cutout=false);
+        mirror([0,1,0]) guide_wheel_helper(solid=-1,gantry_length=gantry_length, cutout=false);
         
         //belt screws
         belt_left_screwholes(solid=0, screw_sep = gantry_length);
@@ -604,9 +610,11 @@ module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0){
     if(solid <= 0){
         for(i=[-1,1]) translate([i*gantry_length/2,0,-.1]){
             translate([0,span*beam/2+wheel_rad,0]) cylinder(r=m5_rad, h=wall+1);
+            translate([0,span*beam/2+wheel_rad,-wall-.95]) cylinder(r=eccentric_rad+4, h=wall+1);
             
             translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,0]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1);
-            #translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,-wall-1]) cylinder(r=eccentric_rad+4, h=wall+1);
+            translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,-wall-.95]) cylinder(r=eccentric_rad+4, h=wall+1);
+            
         }
     }
 }
