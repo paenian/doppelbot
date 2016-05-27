@@ -331,7 +331,8 @@ module belt_left_screwholes(solid=1, screw_sep = 50){
     for(i=[-1,1]) translate([i*screw_sep/2,idler_extension_x-idler_rad+m5_rad,0]){
         if(solid==0){
             cylinder(r=m5_rad, h=wall*3, center=true);
-            translate([0,0,-wall+1]) cylinder(r2=m5_nut_rad, r1=m5_nut_rad+slop, h=wall, $fn=6);
+            //translate([0,0,-wall+1]) cylinder(r2=m5_nut_rad, r1=m5_nut_rad+slop, h=wall, $fn=6);
+            cylinder(r=cap_rad, h=wall+1);
         }
         if(solid==1){
             hull(){
@@ -419,22 +420,45 @@ module belt_tensioner(solid=1){
     }
 }
 
+module chimaera_top_holes(){
+    tube_rad = 4;
+    wall=5;
+    %cube([30,28,50], center=true);
+    
+    //center rear mounting hole
+    translate([0,4.5,-wall/2-1]) cylinder(r=m3_rad, h=wall+2);
+    translate([0,4.5,0]) cylinder(r=m3_cap_rad, h=wall+2);
+    
+    //front left and right holes
+    for(i=[-1,1]) translate([i*8.5,-4.5,-wall/2-1]) {
+        cylinder(r=m3_rad, h=wall+2);
+        translate([0,0,wall/2+1]) cylinder(r=m3_cap_rad, h=wall+2);
+    }
+    
+    //tube holes
+    for(i=[-1,1]) translate([i*9,1.5,-wall/2-1]) {
+        cylinder(r=tube_rad, h=wall+2);
+        translate([0,0,2]) cylinder(r1=tube_rad, r2=tube_rad*2, h=wall+2);
+    }
+}
+
 module hotend_mount(){
     gantry_length = 50;
     wall=5;
     mount_x = gantry_length+m5_rad*2+wall*2;
-    mount_y = 28;
-    translate([0,0,wall/2+1]) 
+    mount_y = 32;
+    translate([0,0,wall/2+1+5]) 
     difference(){
         translate([0,beam/2+1,0]) union(){
             translate([0,mount_y/2,0]) cube([mount_x,mount_y,wall],center=true);
         }
         
-        //holes for the hotend mount - this is the 
+        //holes for the hotend mount - this is the chimera version
+        translate([0,beam/2+1+mount_y/2,0]) rotate([0,0,-90]) chimaera_top_holes();
         
         //holes for mounting
-        belt_left_screwholes(solid=0, screw_sep = gantry_length);
-        guide_wheel_helper(solid=-1,gantry_length=gantry_length, cutout=false);
+        belt_left_screwholes(solid=0, screw_sep = gantry_length, cap_rad = 5);
+        translate([0,0,-wall/2]) guide_wheel_helper(solid=-1,gantry_length=gantry_length, cutout=false, cap_rad=5);
     }
 }
 
@@ -593,7 +617,7 @@ module hotend_carriage(){
     }
 }
 
-module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0){
+module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_rad = 0){
     min_rad=3;
     wall=5;
     
@@ -632,6 +656,7 @@ module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0){
     if(solid <= 0){
         for(i=[-1,1]) translate([i*gantry_length/2,0,-.1]){
             translate([0,span*beam/2+wheel_rad,0]) cylinder(r=m5_rad, h=wall+1);
+            translate([0,span*beam/2+wheel_rad,wall/2]) cylinder(r=cap_rad, h=wall+1);
             translate([0,span*beam/2+wheel_rad,-wall-.95]) cylinder(r=eccentric_rad+4, h=wall+1);
             
             translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,0]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1);
