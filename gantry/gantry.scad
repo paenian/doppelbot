@@ -25,7 +25,7 @@ idler_extension_y = -mdf_wall/2+idler_rad+pulley_rad*2;
 
 
 //render everything
-part=10;
+part=5;
 
 //parts for laser cutting
 if(part == 0)
@@ -427,17 +427,17 @@ module chimaera_top_holes(){
     
     //center rear mounting hole
     translate([0,4.5,-wall/2-1]) cylinder(r=m3_rad, h=wall+2);
-    translate([0,4.5,0]) cylinder(r=m3_cap_rad, h=wall+2);
+    //translate([0,4.5,0]) cylinder(r=m3_cap_rad, h=wall+2);
     
     //front left and right holes
-    for(i=[-1,1]) translate([i*8.5,-4.5,-wall/2-1]) {
+    for(i=[-1,1]) translate([i*8.5,4.5-12,-wall/2-1]) {
         cylinder(r=m3_rad, h=wall+2);
-        translate([0,0,wall/2+1]) cylinder(r=m3_cap_rad, h=wall+2);
+        //translate([0,0,wall/2+1]) cylinder(r=m3_cap_rad, h=wall+2);
     }
     
     //tube holes
     for(i=[-1,1]) translate([i*9,1.5,-wall/2-1]) {
-        cylinder(r=tube_rad, h=wall+2);
+        cylinder(r=tube_rad+slop, h=wall+2);
         translate([0,0,2]) cylinder(r1=tube_rad, r2=tube_rad*2, h=wall+2);
     }
 }
@@ -447,6 +447,9 @@ module hotend_mount(){
     wall=5;
     mount_x = gantry_length+m5_rad*2+wall*2;
     mount_y = 32;
+    
+    y_offset = 5;
+    
     translate([0,0,wall/2+1+5]) 
     difference(){
         translate([0,beam/2+1,0]) union(){
@@ -454,7 +457,7 @@ module hotend_mount(){
         }
         
         //holes for the hotend mount - this is the chimera version
-        translate([0,beam/2+1+mount_y/2,0]) rotate([0,0,-90]) chimaera_top_holes();
+        translate([y_offset,beam/2+1+mount_y/2,0]) rotate([0,0,-90]) chimaera_top_holes();
         
         //holes for mounting
         belt_left_screwholes(solid=0, screw_sep = gantry_length, cap_rad = 5);
