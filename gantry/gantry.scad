@@ -462,6 +462,9 @@ module hotend_mount(){
         //holes for mounting
         belt_left_screwholes(solid=0, screw_sep = gantry_length, cap_rad = 5);
         translate([0,0,-wall/2]) guide_wheel_helper(solid=-1,gantry_length=gantry_length, cutout=false, cap_rad=5);
+        
+        //some zip tie holes
+        for(i=[17,-10]) translate([i,beam/2+mount_y-2, 0]) scale([1,.5,1]) rotate([0,0,45]) cylinder(r=4, h =wall*5, center=true, $fn=4);
     }
 }
 
