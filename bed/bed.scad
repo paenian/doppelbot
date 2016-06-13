@@ -20,7 +20,7 @@ side_length = rail_sep - beam;
 bed_screw_offset = (m5_washer_rad-mdf_wall)/2;  //this is used to make sure that the side-tensioning screws of the bed plates don't protrude - so that the top plate and side plates are flush, but the screw cap and nut don't stick up past the top.
 
 //render everything
-part=0;
+part=4;
 
 //parts for laser cutting
 if(part == 0)
@@ -31,6 +31,8 @@ if(part == 2)
     bed_outside_projected();
 if(part == 3)
     bed_brace_projected();
+if(part == 4)
+    bed_clamp();
 
 in=25.4;
 
@@ -59,6 +61,40 @@ if(part == 10){
         translate([-top_width-.1-mdf_wall,0,0]) bed_inside_connected();
     
         translate([.1,0,0]) bed_inside_connected();
+    }
+}
+
+module bed_clamp(){
+    bed_thick = 7;
+    bed_offset = 8;
+    hook = 3;
+    
+    base_thick = 1.5;
+    difference(){
+        union(){
+            //base
+            hull(){
+                intersection(){
+                    cylinder(r=m5_rad+wall, h=base_thick, center=true);
+                    cube([25, m5_rad*2+wall, base_thick], center=true);
+                }
+                translate([-bed_offset/2,0,0]) cube([bed_offset, m5_rad*2+wall, base_thick], center=true);
+            }
+            
+            //riser
+            translate([-bed_offset/2,0,bed_thick/2-base_thick/2+.1]) cube([bed_offset, m5_rad*2+wall, bed_thick], center=true);
+            
+            //hook
+            hull(){
+                translate([-bed_offset/2-hook/2,0,bed_thick]) cube([bed_offset+hook, m5_rad*2+wall, base_thick], center=true);
+                
+                translate([-bed_offset/2+hook/2,0,bed_thick+hook]) cube([bed_offset-hook, m5_rad*2+wall, base_thick], center=true);
+            }
+            
+        }
+        cylinder(r=m5_rad, h=4, center=true);
+        translate([0,0,base_thick/2+10]) cylinder(r=m5_cap_rad-.25, h=20, center=true);
+        echo(m5_cap_rad-.25);
     }
 }
 

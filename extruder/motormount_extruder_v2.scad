@@ -114,7 +114,7 @@ ind_height = 12;
 //translate([filament_offset, 33, 0]) rotate([0,0,180]) grooveclamp2(induction=0);
 
 //bowden versions for bg8
-mirror([1,0,0])		//I use this to make a left and right version for dualstrusion :-)
+mirror([0,0,0])		//I use this to make a left and right version for dualstrusion :-)
 extruder(bowden_tap, none, m5, motor_mount_h=4.5);
 
 

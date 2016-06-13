@@ -28,10 +28,10 @@ mount_sep = 20;  //needs to match ext_offset from x-carriage.scad
 
 $fn=60;
 
-extruder_mount(offset=0, mount_screw_rad=m5_rad, fan_mount=0, height=18);
+extruder_mount(offset=-6, mount_screw_rad=m5_rad, fan_mount=0, height=18, angle=3, twist=10);
 
 //attaches the motor with one or two screws.
-module extruder_mount(screws = 1, flip=0, fan_mount=0, mount_screw_rad = 632_rad, angle=0, height=15, offset=-1, motor_offset=1){
+module extruder_mount(screws = 1, flip=0, fan_mount=0, mount_screw_rad = 632_rad, angle=0, height=15, offset=-1, motor_offset=1, twist=0){
 	echo(height);
 	wall=4;
 
@@ -63,14 +63,14 @@ module extruder_mount(screws = 1, flip=0, fan_mount=0, mount_screw_rad = 632_rad
 
 			//strengthen the vertical mount
 			if(screws == 2){
-				difference(){
+				*difference(){
 					hull(){
 						translate([-motor_w/2-wall/2+.05+1,0,height/2]) cube([wall+2,motor_w,height], center=true);
 
 						translate([-motor_w/2-wall,0,height/2+hole_sep]) rotate([0,90,0]) cylinder(r=632_cap_rad+wall-.75, h=wall+2);
 					}
 
-					hull(){
+					*hull(){
 						translate([-motor_w/2-wall+1+wall,0,height+wall]) rotate([90,0,0]) scale([1,1,1]) cylinder(r=wall, h=motor_w+wall*2, center=true, $fn=90);
                                                 translate([-motor_w/2-wall+10+wall,0,height+wall]) rotate([90,0,0]) scale([1,1,1]) cylinder(r=wall, h=motor_w+wall*2, center=true, $fn=90);
 						translate([-motor_w/2-wall+1+wall,0,height+wall*2+hole_sep]) rotate([90,0,0]) cylinder(r=wall, h=motor_w+wall, center=true);
@@ -94,11 +94,12 @@ module extruder_mount(screws = 1, flip=0, fan_mount=0, mount_screw_rad = 632_rad
 		render() translate([0,motor_w/2+wall+mount_screw_rad+wall,height/2]) rotate([0,90,0]) clamp(height=height, solid=0);
 		
 		//mounting holes
+        rotate([twist,0,0]) 
         for(i=[-mount_sep/2, mount_sep/2])
-            #translate([-motor_w/2-wall*2+.5+offset,i,height/2]) rotate([0,0,angle]) {
+            translate([-motor_w/2-wall*2+.5+offset,i,height/2]) rotate([0,0,angle]) {
                 rotate([0,90,0]) rotate([0,0,-90]) translate([0,0,offset*2]) cap_cylinder(r=mount_screw_rad, h=200, center=true);
 		
-                translate([wall/2,0,0]) rotate([0,90,0]) rotate([0,0,-90]) cap_cylinder(r=mount_screw_rad*2.5, h=wall*4);
+                #translate([mdf_wall-1,0,0]) rotate([0,90,0]) rotate([0,0,-90]) cap_cylinder(r=mount_screw_rad*2.5, h=wall*4);
             }
 	
 
