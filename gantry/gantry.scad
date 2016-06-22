@@ -25,7 +25,7 @@ idler_extension_y = -mdf_wall/2+idler_rad+pulley_rad*2;
 
 
 //render everything
-part=5;
+part=10;
 
 //parts for laser cutting
 if(part == 0)
@@ -446,18 +446,31 @@ module hotend_mount(){
     gantry_length = 50;
     wall=5;
     mount_x = gantry_length+m5_rad*2+wall*2;
-    mount_y = 32;
+    mount_y = 32+10;
+    
+    cutout = 12;
     
     y_offset = 5;
+    
     
     translate([0,0,wall/2+1+5]) 
     difference(){
         translate([0,beam/2+1,0]) union(){
-            translate([0,mount_y/2,0]) cube([mount_x,mount_y,wall],center=true);
+            hull(){
+                translate([0,mount_y/2-cutout/2,0]) cube([mount_x,mount_y-cutout,wall],center=true);
+                
+                for(i=[17,-10]) translate([i,mount_y-1, 0]) scale([1,.5,1]) rotate([0,0,45]) cylinder(r=4, h =wall, center=true, $fn=4);
+            }
+            
+            //pull in the other screwholes
+            for(i=[0:1]) mirror([i,0,0]) hull(){
+                translate([gantry_length/2,-28,0]) cylinder(r=m5_cap_rad+2, h=wall, center=true);
+                translate([gantry_length/2,5,0]) cylinder(r=m5_cap_rad+2, h=wall, center=true);
+            }
         }
         
         //holes for the hotend mount - this is the chimera version
-        translate([y_offset,beam/2+1+mount_y/2,0]) rotate([0,0,-90]) chimaera_top_holes();
+        translate([y_offset,beam/2+4+mount_y/2,0]) rotate([0,0,-90]) chimaera_top_holes();
         
         //holes for mounting
         belt_left_screwholes(solid=0, screw_sep = gantry_length, cap_rad = 5);
@@ -666,6 +679,7 @@ module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_r
             translate([0,span*beam/2+wheel_rad,-wall-.95]) cylinder(r=eccentric_rad+4, h=wall+1);
             
             translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,0]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1);
+            translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,wall/2]) cylinder(r=cap_rad+2, h=wall+1);
             translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,-wall-.95]) cylinder(r=eccentric_rad+4, h=wall+1);
             
         }
