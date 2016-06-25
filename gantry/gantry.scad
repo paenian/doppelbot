@@ -474,7 +474,7 @@ module hotend_mount(){
         
         //holes for mounting
         belt_left_screwholes(solid=0, screw_sep = gantry_length, cap_rad = 5);
-        translate([0,0,-wall/2]) guide_wheel_helper(solid=-1,gantry_length=gantry_length, cutout=false, cap_rad=5);
+        translate([0,0,-wall/2]) mirror([0,1,0]) guide_wheel_helper(solid=-1,gantry_length=gantry_length, cutout=false, cap_rad=5);
         
         //some zip tie holes
         for(i=[17,-10]) translate([i,beam/2+mount_y-2, 0]) scale([1,.5,1]) rotate([0,0,45]) cylinder(r=4, h =wall*5, center=true, $fn=4);
@@ -501,7 +501,7 @@ module hotend_carriage2(){
             //%translate([15,(15+beam/2+15),-30]) cube([28, 30, 60],center=true);
             
             //hotend mount
-            hotend_mount();
+            %hotend_mount();
             
             //belt clamp on one side, induction sensor on the other
             %translate([-10, -beam/2-26, -20]) cylinder(r=9, h=60, center=true);
@@ -640,7 +640,7 @@ module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_r
     min_rad=3;
     wall=5;
     
-    eccentric_offset = wheel_rad+(eccentric_rad-m5_rad)/2-.25;
+    eccentric_offset = wheel_rad+(eccentric_rad-m5_rad)/2-.25-.125;
     
     if(solid >= 0){
         difference(){

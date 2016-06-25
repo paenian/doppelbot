@@ -28,6 +28,7 @@ idler_thick = 10;
 
 //flanged bearing for the Z idler
 z_bearing=22/2;
+z_bearing_flange = 25/2;
 leadscrew_rad = 8/2+slop;
 leadscrew_shaft_rad = 7;
 leadscrew_screw_rad = 19.05/2;
@@ -46,9 +47,9 @@ eccentric_flange_rad = 11/2;
 
 //frame lengths - may be dependent on wall above.
 frame_x = 500;  //we lose more in X because of the endcaps - it's where all the motors etc. will hide.
-frame_y = 460;  //(460-300)/2-beam=60mm clearance on either side of the printer.
+frame_y = 490;  //(490-300)/2-beam=75mm clearance on either side of the print bed.
 corner_y = frame_y-75;
-frame_z = 460;  //because square is nice.
+frame_z = 490;  //because square is nice.
 corner_z = frame_z-75;
 
 corner_endplate = true; //this controls wether you want a full endcap, or just the corners.  Corners allows twisting in a direction that should be impossible when the rails are connected on both ends, but I wanted to retain the old option just in case.
@@ -98,6 +99,7 @@ m5_sq_nut_rad = (8*sqrt(2)+slop)/2;
 m5_nut_rad_laser = 8.79/2-.445;
 m5_nut_height = 4.7;
 m5_rad = 5/2+slop;
+m5_rad_laser = 5/2-.1;
 m5_cap_rad = 10/2+slop;
 m5_cap_height = 3;
 m5_washer_rad = 10/2+.1;
