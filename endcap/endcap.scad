@@ -67,7 +67,7 @@ if(part == 5)
 if(part == 6)
     bottom_wall_projected();
 if(part == 61)
-    bottom_wall_projected(motor=true);
+    bottom_wall_projected(support=true);
 if(part == 7)
     corner_plate_projected();
 if(part == 71)
