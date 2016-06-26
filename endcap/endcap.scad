@@ -52,8 +52,10 @@ if(part == 1)
     support_plate_projected(motor = false);
 if(part == 11)
     support_plate_projected(motor = true);
-if(part == 12)
-    support_plate_cover();
+if(part == 12){
+    support_plate_cover_projected();
+    //#translate([0,0,10]) bottom_wall_connected(support=true);
+}
 if(part == 2)
     cross_plate_projected();
 if(part == 3)
@@ -64,8 +66,12 @@ if(part == 5)
     top_wall_projected(motor=false);
 if(part == 6)
     bottom_wall_projected();
+if(part == 61)
+    bottom_wall_projected(motor=true);
 if(part == 7)
     corner_plate_projected();
+if(part == 71)
+    corner_plate_projected(cover=true);
 
 //view the assembly
 if(part == 10){
@@ -79,14 +85,18 @@ if(part == 10){
 module assembled_endcap(motor=false){
     end_plate_connected();
     support_plate_connected(motor=motor);
+    if(motor==true){
+        support_plate_cover_connected();
+    }
     if(corner_endplate==true){
-        corner_plates();
+        corner_plates(cover=true);
     }else{
         *cross_plates();
     }
     vertical_walls_connected();
     top_wall_connected(motor=motor);
-    bottom_wall_connected();
+    
+    bottom_wall_connected(support=motor);
 }
 
 /************* Layout Section ***************
@@ -127,6 +137,13 @@ module support_plate_projected(motor=false){
     }
 }
 
+module support_plate_cover_projected(){
+    echo("Cut One per End");
+    projection(cut=true){
+        translate([0,0,mdf_wall]) support_plate_cover_connected();
+    }
+}
+
 module support_plate_connected(motor=false){
     difference(){
         //the support plate
@@ -146,15 +163,43 @@ module support_plate_connected(motor=false){
     }        
 }
 
-module cross_plate_projected(){
+module support_plate_cover_connected(){
+    difference(){
+        //the support plate
+        translate([0,-frame_z/2-mdf_wall,-mdf_wall]) support_plate_cover();
+        translate([0,-frame_z/2-mdf_wall,-mdf_wall]) support_plate_cover_connectors(gender=MALE);
+            
+        //holes for all the stiffening cross plates
+        if(corner_endplate==true){
+            corner_plates_connectors(gender=FEMALE, support=true);
+        }else{
+            cross_plates_connectors(gender=FEMALE, support=true);
+        }
+            
+        
+        //bottom wall
+        translate([0,-frame_z/2-mdf_wall/2-.1,wall_inset-.1]) rotate  ([0,0,90]) rotate([0,90,0]) bottom_plate_connectors(gender=FEMALE, support=true);
+        
+        translate([0,-.1,-.1])
+        bottom_wall_connected(gender=FEMALE, support=true);
+        
+        //cut out the power supply
+        translate([0,0,40]) ps_holes(solid=1);
+        
+        //cut out the relays
+        translate([0,0,20]) relay_holes(solid=1);
+    }        
+}
+
+module cross_plate_projected(cover = false){
     echo("Cut Two per End");
-    projection() cross_plate();
+    projection() cross_plate(cover = cover);
 }
 
 
-module corner_plate_projected(){
+module corner_plate_projected(cover=false){
     echo("Cut Four per End");
-    projection() corner_plate();
+    projection() corner_plate(cover = cover);
 }
 
 module vertical_wall_projected(){
@@ -214,16 +259,16 @@ module top_wall_connected(motor=true){
     }
 }
 
-module bottom_wall_projected(){
-    projection() rotate([90,0,0]) bottom_wall_connected();
+module bottom_wall_projected(support=false){
+    projection() rotate([90,0,0]) bottom_wall_connected(support=support);
 }
 
 //the bottom wall
-module bottom_wall_connected(){
+module bottom_wall_connected(support=false){
     difference(){
         //bottom - z motor in the middle
         translate([0,-frame_z/2-mdf_wall/2,wall_inset]) rotate([0,0,90]) rotate([0,90,0]) 
-        bottom_plate();
+        bottom_plate(support=support);
     
         //this subtacts the connectors from whatever part comes next.
         end_plate_connectors(gender=FEMALE, endcap=true);
@@ -325,6 +370,55 @@ module top_plate_connectors(gender=MALE, solid=1){
     }
 }
 
+module support_plate_cover_connectors(gender=MALE, solid=1){
+    height = 120;
+    bot_width = frame_y/4;
+    top_width = bot_width+height*2;
+    
+    //bottom holes
+    for(i=[0]) translate([i*30,0,0]){
+        translate([0, mdf_wall/2, 0]) cylinder(r=m5_rad, h=mdf_wall*3, center=true);
+    }
+}
+
+module power_switch(){
+    chamfer = 3;
+    union(){
+        difference(){
+            cube([25.5, 43, mdf_wall*3],center=true);
+            
+            //corners
+            for(i=[-1,1]) translate([i*25.5/2, -43/2,0]) 
+                cylinder(r=chamfer, h=mdf_wall*4, center=true, $fn=4);
+        }
+        
+        //mounting holes
+        for(i=[-1,1]) translate([i*40/2, 0,0]) 
+                cylinder(r=m5_rad, h=mdf_wall*4, center=true);
+    }
+}
+
+module support_plate_cover(){
+    height = 110;
+    bot_width = frame_y/4;
+    top_width = bot_width+height*2;
+    
+    difference(){
+        union(){
+            hull(){
+                translate([0, .5, 0]) cube([bot_width, 1, mdf_wall], center=true);
+                translate([0, height-.5, 0]) cube([top_width, 1, mdf_wall], center=true);
+            }
+        }
+        
+        //power switch hole
+        translate([0,23,0]) rotate([0,0,90]) power_switch();
+        
+        //top mounting holes
+        for(i=[0,1]) mirror([i,0,0]) translate([top_width/2-mdf_wall*3,height-10,0]) cylinder(r=m5_rad, h=mdf_wall*10, center=true);
+    }
+}
+
 //the uppermost plate.  Includes mounts for the motors on one side, and idlers on the other
 module top_plate(motor=true){
     motor_offset = plate_sep/2+mdf_wall*2+pulley_flange_rad+1;
@@ -375,7 +469,7 @@ module top_plate(motor=true){
 
 
 //there aren't any...
-module bottom_plate_connectors(gender=MALE, solid=1){
+module bottom_plate_connectors(gender=MALE, solid=1, support=false){
     if(num_clips == 2){
         for(j=[0,1]) for(i=[-1,1]){
             mirror([0,j,0]) translate([mdf_tab*i,frame_y/2,0]) if(gender == MALE){
@@ -393,6 +487,19 @@ module bottom_plate_connectors(gender=MALE, solid=1){
                 mirror([0,1,0]) pinconnector_female();
             }
         }
+        
+    if(support==true){
+        //cut out a center section
+        for(i=[0]) translate([0,i*30,0]){
+            if(solid == -1){
+                difference(){
+                    translate([side_plate_width/2,0,0]) cube([mdf_wall*2, mdf_wall*10, mdf_wall*3], center=true);
+                    translate([side_plate_width/2-mdf_wall,0,0]) rotate([0,0,90]) pinconnector_male(solid=1);
+                }
+            }
+            translate([side_plate_width/2-mdf_wall,0,0]) rotate([0,0,90]) pinconnector_male(solid=solid);
+        }
+    }
 }
 
 module z_motor_mounts(solid=1){
@@ -429,18 +536,18 @@ module z_idler_mounts(solid=1){
 }
 
 //the bottom plate.  Includes mounts for the Z motor in the middle, and the smooth rods on the sides.
-module bottom_plate(){
+module bottom_plate(support=false){
     difference(){
         union(){
             cube([side_plate_width, frame_y, mdf_wall], center=true);
-            bottom_plate_connectors(gender=MALE, solid=1);
+            bottom_plate_connectors(gender=MALE, solid=1, support=support);
             
             z_idler_mounts(solid=1);
             
             //smooth rod mounts
             smooth_rod_holes(solid=1);
         }
-        bottom_plate_connectors(gender=MALE, solid=-1);
+        bottom_plate_connectors(gender=MALE, solid=-1, support=support);
         
 
         //mount the motors
@@ -566,24 +673,44 @@ module beam_cutout(screws=true, beams=false){
     }
 }
 
-module ps_holes(){
+module ps_holes(solid=-1){
     x_sep = 50;
     y_sep = 150;
     indent = 20;
     
-    %translate([0,-indent/2,-25-mdf_wall]) cube([115,215-indent,50], center=true);
-    %translate([0,0,-15-mdf_wall]) cube([115,215,30], center=true);
+    width = 115;
+    length = 215;
+    height = 50;
     
-    for(i=[-1,1]) for(j=[-1,1]) translate([i*x_sep/2, j*y_sep/2,-mdf_wall]) 
-        screw_hole_m4(height = wall*3);
+    translate([-115/2,-50,0]) rotate([0,0,180]) {
+        if(solid == -1){
+            %translate([0,-indent/2,-height/2-mdf_wall]) cube([width,length-indent,height], center=true);
+            %translate([0,0,-15-mdf_wall]) cube([width,length,height/2], center=true);
+        }else{
+            translate([0,-indent/2,-height/2-mdf_wall]) cube([width,length-indent,height], center=true);
+            translate([0,0,-15-mdf_wall]) cube([width,length,height/2], center=true);
+            
+            //wings
+            for(i=[-1,1]) translate([width/2*i,0,-height/2-mdf_wall]) cube([5,length+1,height], center=true);
+        }
+    
+        for(i=[-1,1]) for(j=[-1,1]) translate([i*x_sep/2, j*y_sep/2,-mdf_wall]) 
+            screw_hole_m4(height = wall*3);
     }
+}
 
-module relay_holes(){
+module relay_holes(solid=-1){
     y_sep = 48;
-    %translate([0,0,-35/2-mdf_wall]) cube([45,60,35], center=true);
+    for(k=[35, 90]) translate([k,-115-2.5,0]) {
+        if(solid==-1){
+            %translate([0,0,-35/2-mdf_wall]) cube([45,60,35], center=true);
+        }else{
+            translate([0,0,-35/2-mdf_wall]) cube([45,60,35], center=true);
+        }
     
-    for(i=[-1,1]) translate([0,i*y_sep/2,-mdf_wall]) 
-        screw_hole_m4(height = wall*3);
+        for(i=[-1,1]) translate([0,i*y_sep/2,-mdf_wall]) 
+            screw_hole_m4(height = wall*3);
+    }
 }
 
 module duet_holes(){
@@ -614,12 +741,11 @@ module duet_x4_holes(){
 
 //make holes for all of the electronics
 module electronics_mounts(){
-    #translate([-115/2,-60,0]) rotate([0,0,180]) ps_holes();
-    translate([35,-135-2.5,0]) relay_holes();
-    translate([90,-135-2.5,0]) relay_holes();
+    ps_holes();
+    relay_holes();
     
-    translate([50,125]) duet_holes();
-    translate([-50,125,0]) duet_x4_holes();
+    translate([45,135]) duet_holes();
+    translate([-55,135,0]) duet_x4_holes();
 }
 
 module support_plate(slots=false, motor=false){
@@ -648,12 +774,12 @@ module corner_plates_connectors(){
 }
 
 //in place
-module corner_plates(){
+module corner_plates(cover = false){
     difference(){
         union(){
             for(i=[45:90:359]){
                 rotate([0,0,i]) translate([0,corner_y/2+mdf_wall,plate_sep/2+mdf_wall/2]) rotate([90,0,0]){
-                    corner_plate();
+                    corner_plate(cover = cover);
                     cross_plate_connectors(frame_z=corner_length, num_spans=5);
                 }
             }
@@ -661,38 +787,49 @@ module corner_plates(){
     }
 }
 
-module corner_plate(){
+module corner_plate(cover = false){
     difference(){
         union(){
             cube([corner_length,plate_sep,mdf_wall], center=true);
-            cross_plate_connectors(frame_z=corner_length, num_spans=5);
+            cross_plate_connectors(frame_z=corner_length, num_spans=5, cover = cover);
+        }
+        
+        if(cover == true){
+            translate([0,-plate_sep+mdf_wall+1,0]) pinconnector_male(solid=-1);
         }
     }
 }
 
-module cross_plate_connectors(gender=MALE, num_spans = 10){
+module cross_plate_connectors(gender=MALE, num_spans = 10, cover=false){
     //start = -frame_z/2-wall;
     //end = frame_z/2-wall;
     span = (frame_z-wall*2)/num_spans;
-    union(){
-        for(i=[0:num_spans-1]){
-            translate([i*span-frame_z/2+span/2+wall,-plate_sep/2+plate_sep*(i%2),0]){
-                if(gender==MALE){
-                    difference(){
-                        cube([span,mdf_wall*2,mdf_wall], center=true);
+    difference(){
+        union(){
+            for(i=[0:num_spans-1]){
+                translate([i*span-frame_z/2+span/2+wall,-plate_sep/2+plate_sep*(i%2),0]){
+                    if(gender==MALE){
+                        difference(){
+                            cube([span,mdf_wall*2,mdf_wall], center=true);
                         
-                        //cut off the corners
-                        for(j=[0,1]) mirror([j,0,0]) translate([span/2,-mdf_wall+mdf_wall*2*(i%2),0]) cylinder(r=mdf_wall/4, h=mdf_wall*2, center=true, $fn=4);
+                            //cut off the corners
+                            for(j=[0,1]) mirror([j,0,0]) translate([span/2,-mdf_wall+mdf_wall*2*(i%2),0]) cylinder(r=mdf_wall/4, h=mdf_wall*2, center=true, $fn=4);
+                        }
+                    }else{
+                        cube([span+laser_slop,mdf_wall*2+1,mdf_wall+laser_slop], center=true);
                     }
-                }else{
-                    cube([span+laser_slop,mdf_wall*2+1,mdf_wall+laser_slop], center=true);
                 }
             }
         }
     }
 }
 
-module cross_plates_connectors(gender=MALE, num_spans = 10){
+            /*translate([(frame_y/2-beam*5)*i,-frame_y/2,0]) if(gender == MALE){
+                pinconnector_male(solid=solid);
+            }else{
+                pinconnector_female();*/
+
+module cross_plates_connectors(gender=MALE, num_spans = 10, cover = false){
     plate_travel = frame_z/(num_plates+1);
     
     translate([0,-frame_z/2,plate_sep/2+mdf_wall/2]) 
@@ -701,12 +838,16 @@ module cross_plates_connectors(gender=MALE, num_spans = 10){
     }
 }
 
-module cross_plate(slots=false){
+module cross_plate(slots=false, cover = false){
     //rotate([90,0,0])
     difference(){
         union(){
             cube([frame_y,plate_sep,mdf_wall], center=true);
-            cross_plate_connectors();
+            cross_plate_connectors(cover = cover);
+        }
+        
+        if(cover == true){
+            translate([0,-plate_sep+mdf_wall+1,0]) pinconnector_male(solid=-1);
         }
     }
 }

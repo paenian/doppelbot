@@ -10,7 +10,8 @@ use <../endcap/endcap.scad>
 use <../beam.scad>
 use <../connectors.scad>
 
-top_width = 60; //width of the upper support ribs
+top_width = 80; //width of the upper support ribs
+center_gap = 40;    //channel in the middle for the wires
 rail_sep = bed_y + beam + m5_cap_rad/2; //center-to-center rail distance.
 top_length = rail_sep + beam;
 
@@ -20,7 +21,7 @@ side_length = rail_sep - beam;
 bed_screw_offset = (m5_washer_rad-mdf_wall)/2;  //this is used to make sure that the side-tensioning screws of the bed plates don't protrude - so that the top plate and side plates are flush, but the screw cap and nut don't stick up past the top.
 
 //render everything
-part=4;
+part=10;
 
 //parts for laser cutting
 if(part == 0)
@@ -55,7 +56,7 @@ if(part == 10){
     translate([.1,0,0]) bed_inside_connected();
     
     //brace
-    translate([200,0,0]) {
+    translate([300,0,0]) {
         bed_brace_connected();
         
         translate([-top_width-.1-mdf_wall,0,0]) bed_inside_connected();
@@ -124,7 +125,7 @@ module bed_top_connected(){
 module bed_top_connectors(gender = MALE, solid=1, screw_offset=0, end=true){
     //both sides have the ends
     for(i=[0,1]) mirror([i,0,0]) translate([top_width/2, 0, 0]) {
-        for(j=[0,1]) mirror([0,j,0]) translate([0,top_length/3,0]) rotate([0,0,90])
+        for(j=[-1,-.44,.44,1]) translate([0,j*top_length/3,0]) rotate([0,0,90])
             if(gender == MALE){
                 pinconnector_male(solid=solid);
             }else{
@@ -133,14 +134,14 @@ module bed_top_connectors(gender = MALE, solid=1, screw_offset=0, end=true){
     }
     
     //inside side has a middle one
-    translate([top_width/2,0,0]) rotate([0,0,90]) 
+    *translate([top_width/2,0,0]) rotate([0,0,90]) 
     if(gender == MALE){
         pinconnector_male(solid=solid);
     }else{
         pinconnector_female(screw_offset=screw_offset);
     }
     
-    if(end==false){
+    *if(end==false){
         //cut a third screw for the other side, too
         mirror([1,0,0]) translate([top_width/2,0,0]) rotate([0,0,90]) 
         if(gender == MALE){
@@ -202,7 +203,7 @@ module bed_brace_projected(){
 
 module bed_brace_connected(){
     difference(){
-        //the top plaqte
+        //the top plate
         bed_brace();     
             
         //holes for all the stiffening support plates
@@ -224,6 +225,9 @@ module bed_brace(){
         
         //beam holes
         for(i=[-1,1]) for(j=[-1,1]) translate([j*(top_width/2-beam/2),i*rail_sep/2,0]) cylinder(r=m5_rad, h=mdf_wall*2, center=true);
+            
+        //central gap
+        cube([top_width+mdf_wall*3, center_gap, mdf_wall*2], center=true);
     }
 }
 
@@ -251,12 +255,15 @@ module bed_inside(){
         
         //locks for the side rails
         for(i=[0,1]) mirror([0,i,0]) translate([mdf_wall/2,side_length/2, 0]){
-            cube([m5_rad*2+laser_slop, beam*2, mdf_wall*2], center=true);
+            cube([m5_rad*2+laser_slop*2, beam*2, mdf_wall*2], center=true);
             hull(){
                 translate([0,-mdf_wall,0]) cube([m5_cap_rad*2+slop, .1, mdf_wall*2], center=true);
-                translate([0,-beam,0]) cube([m5_rad*2+slop, .1, mdf_wall*2], center=true);
+                translate([0,-beam-mdf_wall,0]) cube([m5_rad*2+slop, .1, mdf_wall*2], center=true);
             }
         }
+        
+        //central gap for the wires
+        #translate([-side_width/2,0,0]) cube([mdf_wall*2, center_gap, mdf_wall*2], center=true);
     }
 }
 

@@ -7,4 +7,6 @@ openscad endcap.scad -D part=3 -o vertical_wall_plate.dxf
 openscad endcap.scad -D part=4 -o top_wall_plate_motor.dxf
 openscad endcap.scad -D part=5 -o top_wall_plate_idler.dxf
 openscad endcap.scad -D part=6 -o bottom_wall_plate.dxf
+openscad endcap.scad -D part=61 -o bottom_wall_support_plate_.dxf
 openscad endcap.scad -D part=7 -o corner_plate.dxf
+openscad endcap.scad -D part=71 -o corner_plate_support.dxf
