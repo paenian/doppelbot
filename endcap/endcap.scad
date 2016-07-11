@@ -387,7 +387,7 @@ module power_switch(){
     chamfer = 3;
     union(){
         difference(){
-            cube([25.5, 43, mdf_wall*3],center=true);
+            cube([28, 50, mdf_wall*3],center=true);
             
             //corners
             for(i=[-1,1]) translate([i*25.5/2, -43/2,0]) 
