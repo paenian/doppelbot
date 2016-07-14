@@ -43,7 +43,7 @@ screw_w = 31;
 screw_rad = m3_rad;
 
 //render everything
-part=10;
+part=0;
 
 //parts for laser cutting
 if(part == 0)
@@ -115,6 +115,10 @@ module end_plate_connected(){
     difference(){
         //the very end.  Stuff mounts to this guy.
         end_plate(corners=true, endcap=true);     
+        
+        //top wall - belt holes
+        translate([0,frame_z/2+mdf_wall/2,wall_inset-10]) rotate([0,0,90]) rotate([0,90,0])
+        top_plate_connectors(gender=FEMALE);
             
         //holes for all the stiffening cross plates
         if(corner_endplate==true){
@@ -124,9 +128,7 @@ module end_plate_connected(){
             cross_plates_connectors(gender=FEMALE);
         }
         
-        //top wall - belt holes
-        translate([0,frame_z/2+mdf_wall/2,wall_inset]) rotate([0,0,90]) rotate([0,90,0])
-        top_plate_connectors(gender=FEMALE);
+        
     }
 }
 
@@ -385,7 +387,7 @@ module power_switch(){
     chamfer = 3;
     union(){
         difference(){
-            cube([25.5, 43, mdf_wall*3],center=true);
+            cube([28, 50, mdf_wall*3],center=true);
             
             //corners
             for(i=[-1,1]) translate([i*25.5/2, -43/2,0]) 
@@ -614,7 +616,7 @@ module end_plate_connectors(gender = MALE, solid=1, endcap=false){
     }
     
     //tabs in the corners, to better align the beams
-    if(endcap==true){
+    *if(endcap==true){
         translate([frame_y/2,frame_z/2-beam,0]) {
             rotate([0,0,90]) tab(width=beam/2, gender=gender);
         }
