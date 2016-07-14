@@ -390,45 +390,53 @@ module vertical_gantry_carriage_rear(){
     carriage_len = 50;
     carriage_spread = -10;
     
-    idler_spread = idler_flange_rad*2+belt_width;
+    idler_spread = idler_flange_rad*2+belt_width*2;
     idler_jut = idler_extension_y+(m5_rad-idler_rad);
+    
+    induction_rear = 4;
+    idler_front = -18;
     
     rotate([0,0,90]) rotate([-90,0,0]) {
     %translate([0,0,-beam/2-1]) cube([120,beam*2,beam],center=true);
     difference(){
         union(){
             //idler mounts
-           //translate([0,0,mdf_wall/2]) idler_mounts(solid=1, idler_extension_x = idler_spread, idler_extension_y = idler_jut);
+            for(i=[-1,1]) translate([idler_front,0,0]) hull(){
+                #translate([idler_spread*i/2,-4,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2, h=2, center=true);
+                %translate([idler_spread*i/2,-6,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=idler_flange_rad, h=8);
+                
+                translate([idler_spread*i/2,-4,1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2, h=2, center=true);                
             
-            for(i=[-1,1]) hull(){
-                translate([idler_spread*i,-4,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2, h=2, center=true);
-            
-                translate([idler_spread*i*1.4,16,-m5_rad]) rotate([90,0,0]) cylinder(r=m5_rad+wall, h=2, center=true);
+                translate([idler_spread*i*.2,16,-m5_rad]) rotate([90,0,0]) cylinder(r=m5_rad+wall, h=2, center=true);
             }
             
             //guide wheels
                 hull() guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false);
 
-            translate([0,34,15]) rotate([90,0,0]) rotate([0,0,60]) extruder_mount(solid=1, m_height=ind_height+.25+4,  hotend_rad=ind_rad, wall=3);
+            //induction sensor mount
+            difference(){
+                translate([induction_rear,34,15]) rotate([90,0,0]) rotate([0,0,90]) extruder_mount(solid=1, m_height=ind_height+.25+4,  hotend_rad=ind_rad, wall=3);
+                
+                
+                hull(){
+                    translate([induction_rear,34-ind_height-4,15+wall+.1]) cube([30,.1,30], center=true);
+                    translate([induction_rear,34-10-ind_height-4,20+wall+.1]) cube([20,.1,30], center=true);
+                }
+            }
+            
         } //Holes below here
         
-        //induction sensor mount
-        //translate([0,hotend_drop,wall]) rotate([90,0,0]) chimaera_holder(solid=-1);
-        translate([0,34,15]) rotate([90,0,0]) rotate([0,0,60]) extruder_mount(solid=0, m_height=ind_height+.25+6,  hotend_rad=ind_rad, wall=3);
-        
-        hull(){
-            translate([0,34-ind_height-4,15+wall+.1]) cube([30,.1,30], center=true);
-            translate([0,34-10-ind_height-4,20+wall+.1]) cube([20,.1,30], center=true);
-        }
+        //induction sensor holes
+        translate([induction_rear,34,15]) rotate([90,0,0]) rotate([0,0,60]) extruder_mount(solid=0, m_height=ind_height+.25+6,  hotend_rad=ind_rad, wall=3);
         
         //guide wheels
         translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1]) guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len);
         
         //idler screws
-        translate([0,0,mdf_wall/2]) idler_mounts(solid=0, idler_extension_x = idler_spread, idler_extension_y = idler_jut, m5_rad=m5_rad-slop);
+        translate([idler_front,0,0]) translate([0,0,mdf_wall/2]) idler_mounts(solid=0, idler_extension_x = idler_spread/2, idler_extension_y = idler_jut, m5_rad=m5_rad-slop);
         
         //holes for the beam
-        for(i=[-1,1]) translate([idler_spread*i,0,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=m5_rad-slop, h=20, center=true);
+        for(i=[-1,1]) translate([idler_front,0,0]) translate([idler_spread*i/2,0,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=m5_rad-slop, h=20, center=true);
         
         //flatten the bottom
         translate([0,0,-50]) cube([100,100,100],center=true);
