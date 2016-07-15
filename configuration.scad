@@ -87,6 +87,9 @@ m3_nut_height = 2.4;
 m3_rad = 3/2+slop;
 m3_cap_rad = 3.25;
 m3_cap_height = 2;
+m3_sq_nut_rad = 7.9/2;
+
+echo(m3_sq_nut_rad*2/sqrt(2));
 
 m4_nut_rad = 7.66/2+slop;
 m4_nut_height = 3.2;
@@ -95,14 +98,18 @@ m4_cap_rad = 7/2+slop;
 m4_cap_height = 2.5;
 
 m5_nut_rad = 8.79/2;
-m5_sq_nut_rad = (8*sqrt(2)+slop)/2;
+m5_sq_nut_rad = (8*sqrt(2)+slop/2)/2;
+
+echo(m5_sq_nut_rad);
+echo(m5_sq_nut_rad*2/sqrt(2));
+
 m5_nut_rad_laser = 8.79/2-.445;
 m5_nut_height = 4.7;
 m5_rad = 5/2+slop;
 m5_rad_laser = 5/2-.1;
 m5_cap_rad = 10/2+slop;
 m5_cap_height = 3;
-m5_washer_rad = 10/2+.1;
+m5_washer_rad = 11/2+slop;
 
 
 //some enums

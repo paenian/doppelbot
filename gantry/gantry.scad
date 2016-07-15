@@ -24,6 +24,8 @@ idler_extension_x = beam/2+wheel_rad+wheel_clearance/2+idler_flange_rad+1;
 idler_extension_y = -mdf_wall/2+idler_rad+pulley_rad*2;
 
 
+stretcher_mount_sep = 30;
+
 //render everything
 part=10;
 
@@ -48,6 +50,18 @@ if(part == 5){
 
 if(part == 6){
     vertical_gantry_carriage();
+}
+
+if(part == 7){
+    vertical_gantry_carriage_rear();
+}
+
+if(part == 8){
+    belt_stretcher_2(solid=1, mount_sep=stretcher_mount_sep);
+}
+
+if(part == 9){
+    belt_stretcher_3();
 }
 
 if(part == 10) translate([0,0,0]) {
@@ -193,7 +207,7 @@ module roller_mount(solid=1){
                     %wheel();
                     cylinder(r=wheel_clearance/2+slop, h=wheel_height+2, center=true);
                     translate([0,0,-m5_nut_height-wall-wheel_height/2]) cylinder(r=m5_nut_rad+wall/2, h=m5_nut_height+wall-2);
-                    #translate([0,0,-m5_nut_height-wall-wheel_height/2+m5_nut_height+wall-2.1]) cylinder(r1=m5_nut_rad+wall/2, r2=8/2, h=2.1);
+                    translate([0,0,-m5_nut_height-wall-wheel_height/2+m5_nut_height+wall-2.1]) cylinder(r1=m5_nut_rad+wall/2, r2=8/2, h=2.1);
                 }
                 translate([0,0,-wheel_height/2-m5_nut_height+1-wall]) cylinder(r1=m5_nut_rad+slop, r2=m5_nut_rad, h=m5_nut_height-1, $fn=6);
 					hull(){
@@ -402,32 +416,30 @@ module vertical_gantry_carriage_rear(){
         union(){
             //idler mounts
             for(i=[-1,1]) translate([idler_front,0,0]) hull(){
-                #translate([idler_spread*i/2,-4,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2, h=2, center=true);
+                translate([idler_spread*i/2,-4,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2+1, h=5, center=true);
                 %translate([idler_spread*i/2,-6,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=idler_flange_rad, h=8);
                 
                 translate([idler_spread*i/2,-4,1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2, h=2, center=true);                
             
-                translate([idler_spread*i*.2,16,-m5_rad]) rotate([90,0,0]) cylinder(r=m5_rad+wall, h=2, center=true);
+                translate([idler_spread*i*0,20,-m5_rad]) rotate([90,0,0]) cylinder(r=m5_rad+wall, h=2, center=true);
             }
+            
+            //belt stretcher bumps
+            %translate([idler_front,-10,idler_extension_y+10]) rotate([90,0,0]) belt_stretcher_2(mount_sep = stretcher_mount_sep);
+            translate([idler_front,-10,wall-.1]) belt_stretcher_2_bumps(mount_sep = stretcher_mount_sep, solid=1);
             
             //guide wheels
                 hull() guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false);
 
             //induction sensor mount
-            difference(){
-                translate([induction_rear,34,15]) rotate([90,0,0]) rotate([0,0,90]) extruder_mount(solid=1, m_height=ind_height+.25+4,  hotend_rad=ind_rad, wall=3);
-                
-                
-                hull(){
-                    translate([induction_rear,34-ind_height-4,15+wall+.1]) cube([30,.1,30], center=true);
-                    translate([induction_rear,34-10-ind_height-4,20+wall+.1]) cube([20,.1,30], center=true);
-                }
-            }
+            translate([induction_rear,15,15]) rotate([90,0,0]) rotate([0,0,90]) mirror([0,1,0]) mirror([0,0,1]) extruder_mount(solid=1, m_height=ind_height+6,  hotend_rad=ind_rad, wall=3);
             
         } //Holes below here
         
+        translate([idler_front,-10,wall-.1]) belt_stretcher_2_bumps(mount_sep = stretcher_mount_sep, solid = -1);
+        
         //induction sensor holes
-        translate([induction_rear,34,15]) rotate([90,0,0]) rotate([0,0,60]) extruder_mount(solid=0, m_height=ind_height+.25+6,  hotend_rad=ind_rad, wall=3);
+        translate([induction_rear,16,15]) rotate([90,0,0]) rotate([0,0,90]) mirror([0,1,0]) mirror([0,0,1]) extruder_mount(solid=0, m_height=ind_height+6,  hotend_rad=ind_rad, wall=3);
         
         //guide wheels
         translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1]) guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len);
@@ -446,6 +458,67 @@ module vertical_gantry_carriage_rear(){
         
     }
 }
+}
+
+module belt_stretcher_2_bumps(mount_sep = 20, solid = 1, height=10){
+    for(i=[-1,1]) translate([0,mount_sep/2*i,0]){
+        if(solid == 1){
+            hull(){
+                cylinder(r1=m3_rad+wall, r2=m3_rad+wall/2, h=height);
+                translate([0,10,0]) cylinder(r=m3_rad+wall/2, h=.1);
+            }
+        }
+    
+        if(solid == -1){
+            cap_cylinder(r=m3_rad+slop/2, h=height+10);
+        }
+    }
+}
+
+module belt_stretcher_3(mount_sep = 20){
+    unit = m5_cap_rad*3;
+    m5_lift = unit/2-m5_sq_nut_rad*sqrt(2)/2;
+    difference(){
+        union(){
+            cube([unit, unit, unit], center=true);
+        }
+        
+        //m5 screw hole
+        translate([0,unit,m5_lift]) rotate([-90,0,0]) mirror([0,0,1]) screw_hole_m5(height = unit*2, cap=true);
+        
+        translate([0,-m5_cap_height,m5_lift]) rotate([-90,0,0]) rotate([0,0,45]) cylinder(r1=m5_sq_nut_rad, r2=m5_sq_nut_rad+1, h=unit, $fn=4);
+        
+        hull() translate([0,-m5_cap_height,m5_lift]) {
+             rotate([-90,0,0]) rotate([0,0,45]) cylinder(r1=8.7/2, r2 = 9.7/2, h=unit);
+             *translate([0,0,unit]) rotate([-90,0,0]) cylinder(r=m3_cap_rad, h=unit);
+        }
+        
+        //m3 screw hole
+        translate([0,unit/2-m3_cap_rad,0]){
+            mirror([0,0,1]) screw_hole_m3(height = unit/2-2-.25, onion=true);
+            translate([0,0,-unit/2]) rotate([0,0,45]) cylinder(r=m3_sq_nut_rad, h=4, center=true, $fn=4);
+        }
+    }
+}
+
+module belt_stretcher_2(mount_sep = 20){
+    difference(){
+        union(){
+            cylinder(r=m5_rad, h=mount_sep+m3_rad*2+wall*2, center=true);
+        }
+        
+        for(i=[-1,1]) translate([0,0,mount_sep/2*i]){
+            //mounting screws
+            rotate([90,0,0]) cylinder(r=m3_rad+slop/2, h=m5_rad*3, center=true);
+            
+            //tension nuts
+            translate([0,-1,0]) rotate([90,0,0]) rotate([0,0,45]) cylinder(r=m3_sq_nut_rad, h=wall, $fn=4);
+            
+        }
+        
+        //flatten the front
+        translate([0,50+m5_rad-.75,0]) cube([100,100,100], center=true);
+    }
 }
 
 
@@ -850,11 +923,11 @@ module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_r
         for(i=[-1,1]) translate([i*gantry_length/2,0,-.1]){
             translate([0,span*beam/2+wheel_rad,0]) cylinder(r=m5_rad, h=wall+1);
             translate([0,span*beam/2+wheel_rad,wall/2]) cylinder(r=cap_rad, h=wall+1);
-            translate([0,span*beam/2+wheel_rad,-wall-.95]) cylinder(r=eccentric_rad+4, h=wall+1);
+            translate([0,span*beam/2+wheel_rad,-wall-.95]) cylinder(r=m5_washer_rad+.5, h=wall+1);
             
             translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,0]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1);
             translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,wall/2]) cylinder(r=cap_rad+2, h=wall+1);
-            translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,-wall-.95]) cylinder(r=eccentric_rad+4, h=wall+1);
+            translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,-wall-.95]) cylinder(r=m5_washer_rad+.5, h=wall+1);
             
         }
     }
@@ -931,7 +1004,10 @@ module extruder_mount(solid = 1, m_height = 10, m_thickness=50, fillet = 8, tap_
 			//hotend hole
 			translate([0,0,-.05]) cylinder(r=hotend_rad/cos(180/18)+.1, h=m_height*3, $fn=36);
             //flare the underside
-            translate([0,0,-16]) cylinder(r1=hotend_rad/cos(180/18)+2 , r2=hotend_rad/cos(180/18)+.1, h=16, $fn=36);
+            translate([0,0,-25]) cylinder(r1=hotend_rad/cos(180/18)+2 , r2=hotend_rad/cos(180/18)+.1, h=25, $fn=36);
+            
+            //flare the topside, too, because why not
+            translate([0,0,m_height-1.5]) cylinder(r2=hotend_rad/cos(180/18)+2 , r1=hotend_rad/cos(180/18)+.1, h=25, $fn=36);
 
 			//bolt slots
 			if(m_height > nut_rad*2){
