@@ -24,7 +24,7 @@ idler_extension_x = beam/2+wheel_rad+wheel_clearance/2+idler_flange_rad+1;
 idler_extension_y = -mdf_wall/2+idler_rad+pulley_rad*2;
 
 
-stretcher_mount_sep = 30;
+stretcher_mount_sep = 40;
 
 //render everything
 part=10;
@@ -111,7 +111,7 @@ module gantry_clamp(){
             hull(){
                 //gantry beam mount
                 for(i=[0,1]) translate([-beam-wall-beam*3/2-i*beam, 0, 0]) cylinder(r=m5_rad+wall, h=wall);
-                #translate([-ridge_length/2-beam/2-(m5_rad+wall),0,wall/2]) cube([ridge_length,beam,wall], center=true);
+                    translate([-ridge_length/2-beam/2-(m5_rad+wall),0,wall/2]) cube([ridge_length,beam,wall], center=true);
             }
         }
         //holes for the mounts
@@ -409,6 +409,7 @@ module vertical_gantry_carriage_rear(){
     
     induction_rear = 4;
     idler_front = -18;
+    induction_jut = 6;
     
     rotate([0,0,90]) rotate([-90,0,0]) {
     %translate([0,0,-beam/2-1]) cube([120,beam*2,beam],center=true);
@@ -432,14 +433,17 @@ module vertical_gantry_carriage_rear(){
                 hull() guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false);
 
             //induction sensor mount
-            translate([induction_rear,15,15]) rotate([90,0,0]) rotate([0,0,90]) mirror([0,1,0]) mirror([0,0,1]) extruder_mount(solid=1, m_height=ind_height+6,  hotend_rad=ind_rad, wall=3);
+            translate([induction_rear,15,15+induction_jut]) hull(){
+                rotate([90,0,0]) rotate([0,0,90]) mirror([0,1,0]) mirror([0,0,1]) extruder_mount(solid=1, m_height=ind_height+6,  hotend_rad=ind_rad, wall=3);
+                translate([0,18,-15-induction_jut]) rotate([90,0,0]) cylinder(r=ind_rad-2, h=ind_height+6+wall+4);
+            }
             
         } //Holes below here
         
         translate([idler_front,-10,wall-.1]) belt_stretcher_2_bumps(mount_sep = stretcher_mount_sep, solid = -1);
         
         //induction sensor holes
-        translate([induction_rear,16,15]) rotate([90,0,0]) rotate([0,0,90]) mirror([0,1,0]) mirror([0,0,1]) extruder_mount(solid=0, m_height=ind_height+6,  hotend_rad=ind_rad, wall=3);
+        translate([induction_rear,16,15+induction_jut]) rotate([90,0,0]) rotate([0,0,90]) mirror([0,1,0]) mirror([0,0,1]) extruder_mount(solid=0, m_height=ind_height+6,  hotend_rad=ind_rad, wall=3);
         
         //guide wheels
         translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1]) guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len);
@@ -470,7 +474,7 @@ module belt_stretcher_2_bumps(mount_sep = 20, solid = 1, height=10){
         }
     
         if(solid == -1){
-            cap_cylinder(r=m3_rad+slop/2, h=height+10);
+            translate([0,0,wall*1.5]) cap_cylinder(r=m3_rad+slop/2, h=height+10);
         }
     }
 }
@@ -887,7 +891,7 @@ module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_r
     min_rad=3;
     wall=5;
     
-    eccentric_offset = wheel_rad+(eccentric_rad-m5_rad)/2-.25-.125;
+    eccentric_offset = wheel_rad+(eccentric_rad-m5_rad)/2-.25-.125-1+.125;
     
     if(solid >= 0){
         difference(){
@@ -925,7 +929,10 @@ module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_r
             translate([0,span*beam/2+wheel_rad,wall/2]) cylinder(r=cap_rad, h=wall+1);
             translate([0,span*beam/2+wheel_rad,-wall-.95]) cylinder(r=m5_washer_rad+.5, h=wall+1);
             
-            translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,0]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1);
+            //a little plastic spring
+            #translate([i*gantry_spread/2,-span*beam/2-eccentric_offset+eccentric_rad*2,0]) scale([4,.5,1]) rotate([0,0,30*(i-1)]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1, $fn=3);
+            
+            #translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,0]) cylinder(r1=eccentric_rad+.5, r2=eccentric_rad, h=wall+1);
             translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,wall/2]) cylinder(r=cap_rad+2, h=wall+1);
             translate([i*gantry_spread/2,-span*beam/2-eccentric_offset,-wall-.95]) cylinder(r=m5_washer_rad+.5, h=wall+1);
             
@@ -1002,7 +1009,7 @@ module extruder_mount(solid = 1, m_height = 10, m_thickness=50, fillet = 8, tap_
 	}else{
 		union(){
 			//hotend hole
-			translate([0,0,-.05]) cylinder(r=hotend_rad/cos(180/18)+.1, h=m_height*3, $fn=36);
+			#translate([0,0,-.05]) cylinder(r=hotend_rad/cos(180/18)+.1, h=m_height*3, $fn=36, center=true);
             //flare the underside
             translate([0,0,-25]) cylinder(r1=hotend_rad/cos(180/18)+2 , r2=hotend_rad/cos(180/18)+.1, h=25, $fn=36);
             
