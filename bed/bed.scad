@@ -21,7 +21,7 @@ side_length = rail_sep - beam;
 bed_screw_offset = (m5_washer_rad-mdf_wall)/2;  //this is used to make sure that the side-tensioning screws of the bed plates don't protrude - so that the top plate and side plates are flush, but the screw cap and nut don't stick up past the top.
 
 //render everything
-part=10;
+part=0;
 
 //parts for laser cutting
 if(part == 0)
@@ -43,7 +43,7 @@ if(part == 10){
     %translate([12*in,0,mdf_wall*2]) cube([24*in, 12*in, .25*in], center=true);
     
     //render an endcap for scale/matching
-    %translate([-89,0,frame_z/2-mdf_wall/2-6]) rotate([0,0,90]) rotate([90,0,0]) assembled_endcap(motor=true);
+    %translate([-89-35,0,frame_z/2-mdf_wall/2-6]) rotate([0,0,90]) rotate([90,0,0]) assembled_endcap(motor=true);
     
     //render some rails in
     %for(i=[-1,1]) translate([0,i*rail_sep/2,-beam/2-mdf_wall/2]) rotate([0,90,0]) beam(800, true, .25);
@@ -125,7 +125,7 @@ module bed_top_connected(){
 module bed_top_connectors(gender = MALE, solid=1, screw_offset=0, end=true){
     //both sides have the ends
     for(i=[0,1]) mirror([i,0,0]) translate([top_width/2, 0, 0]) {
-        for(j=[-1,-.44,.44,1]) translate([0,j*top_length/3,0]) rotate([0,0,90])
+        for(j=[-1.085,-.44,.44,1.085]) translate([0,j*top_length/3,0]) rotate([0,0,90])
             if(gender == MALE){
                 pinconnector_male(solid=solid);
             }else{
@@ -152,6 +152,47 @@ module bed_top_connectors(gender = MALE, solid=1, screw_offset=0, end=true){
     }
 }
 
+module smooth_rod_connectors(solid=1){
+    flange_chamfer = 3;
+    flange_width = 33;
+    flange_screw_sep = 20;
+    //the smooth rods are 10mm, and have flanged connectors on them
+    translate([-top_width/2-bed_screw_offset_x,0,0]) 
+    for(i=[0:1]) mirror([0,i,0]) translate([0,frame_y/5,0]) {
+        //body
+        if(solid > 0){
+            union(){
+                //the flange
+                hull() for(j=[-1,1]) for(k=[-1,1]) {
+                    translate([(flange_width/2-flange_chamfer)*j, (flange_width/2-flange_chamfer)*k, 0])
+                    cylinder(r=flange_chamfer, h=mdf_wall, center=true);
+                }
+                
+                //join to the body
+                hull() for(j=[-1,1]){                    
+                    translate([(flange_width/2-flange_chamfer)*1, (flange_width/2-flange_chamfer)*j, 0])
+                    cylinder(r=flange_chamfer, h=mdf_wall, center=true);
+                
+                    translate([top_width/2,(flange_width/2-flange_chamfer)*j, 0])
+                    cylinder(r=flange_chamfer, h=mdf_wall, center=true);
+                }
+            }
+        }
+        
+        
+        if(solid < 0){
+            //screwholes
+            for(j=[-1,1]) for(k=[-1,1]) {
+                translate([flange_screw_sep/2*j, flange_screw_sep/2*k, 0])
+                cylinder(r=m3_rad, h=mdf_wall*3, center=true);
+            }
+            
+            //rod hole - for the whole connector, not just the rod
+            cylinder(r=19/2+slop, h=mdf_wall*3, center=true);
+        }
+    }
+}
+
 module bed_top(){
     difference(){
         union(){
@@ -159,10 +200,15 @@ module bed_top(){
             
             leadscrew_flange(solid=1);
             
+            //attach to the smooth rods for straight bed movement
+            smooth_rod_connectors(solid=1);
+            
             bed_top_connectors(solid=1);
         }
         
         leadscrew_flange(solid=-1);
+        
+        smooth_rod_connectors(solid=-1);
         
         bed_top_connectors(solid=-1);
         
@@ -177,11 +223,11 @@ module leadscrew_flange(solid=1){
     leadscrew_base_rad = 26/2;
     leadscrew_base_height = 5;
     
-    for(i=[-1:1]) #translate([-top_width/2-bed_screw_offset_x,i*bed_screw_offset_y,0]){
+    for(i=[-1:1]) translate([-top_width/2-bed_screw_offset_x,i*bed_screw_offset_y,0]){
         if(solid>=0){
             hull(){
                 cylinder(r=flange_rad, h=mdf_wall, center=true);
-                translate([bed_screw_offset_x,0,0]) cube([mdf_wall*2.1,flange_rad*2.25,mdf_wall], center=true);
+                translate([bed_screw_offset_x,0,0]) cube([mdf_wall*4,flange_rad*2.25,mdf_wall], center=true);
                 //scale([1,1.2,1]) cylinder(r=flange_rad, h=mdf_wall, center=true, $fn=50);
             }
         }
@@ -189,8 +235,9 @@ module leadscrew_flange(solid=1){
             cylinder(r=leadscrew_shaft_rad, h=mdf_wall*2, center=true);
             for(i=[0:120:359]) rotate([0,0,i]) translate([leadscrew_screw_rad,0,0]) cylinder(r=m3_rad, h=mdf_wall*2, center=true);
         }
-        if(solid==0){
-            translate([0,0,-mdf_wall/2-leadscrew_base_height/2]) cube([100, leadscrew_base_rad*2, leadscrew_base_height+.1], center=true);
+        
+        *if(solid==0){
+            #translate([0,0,-mdf_wall/2-leadscrew_base_height/2]) cube([100, leadscrew_base_rad*2, leadscrew_base_height+.1], center=true);
         }
     }
 }
@@ -280,6 +327,9 @@ module bed_outside_connected(){
         
         //remove holes from the top plate
         bed_top_connectors(gender=FEMALE);
+        
+        //remove the smooth rod flanges
+        smooth_rod_connectors(solid=1);
         
         //remove the flanges
         leadscrew_flange(solid=0);

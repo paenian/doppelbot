@@ -43,7 +43,7 @@ screw_w = 31;
 screw_rad = m3_rad;
 
 //render everything
-part=0;
+part=10;
 
 //parts for laser cutting
 if(part == 0)
