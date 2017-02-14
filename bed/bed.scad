@@ -125,7 +125,8 @@ module bed_top_connected(){
 module bed_top_connectors(gender = MALE, solid=1, screw_offset=0, end=true){
     //both sides have the ends
     for(i=[0,1]) mirror([i,0,0]) translate([top_width/2, 0, 0]) {
-        for(j=[-1.085,-.44,.44,1.085]) translate([0,j*top_length/3,0]) rotate([0,0,90])
+        //for(j=[-1.085,-.44,.44,1.085]) translate([0,j*top_length/3,0]) rotate([0,0,90])
+            for(j=[-1.085,-.44,.44,1.085]) translate([0,j*top_length/3,0]) rotate([0,0,90])
             if(gender == MALE){
                 pinconnector_male(solid=solid);
             }else{
