@@ -8,6 +8,7 @@ slop = .2;
 laser_slop = -.1;
 
 smooth_rod_rad = 10/2+laser_slop+.1;
+smooth_rod_sep =490/5;
 
 //these can't change - measured values.
 beam = 20;

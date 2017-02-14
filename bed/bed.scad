@@ -157,8 +157,9 @@ module smooth_rod_connectors(solid=1){
     flange_width = 33;
     flange_screw_sep = 20;
     //the smooth rods are 10mm, and have flanged connectors on them
+    echo(smooth_rod_sep);
     translate([-top_width/2-bed_screw_offset_x,0,0]) 
-    for(i=[0:1]) mirror([0,i,0]) translate([0,frame_y/5,0]) {
+    for(i=[0:1]) mirror([0,i,0]) translate([0,smooth_rod_sep,0]) {
         //body
         if(solid > 0){
             union(){

@@ -329,7 +329,7 @@ module idler_mount(){
 }
 
 module smooth_rod_holes(solid=1){
-    for(i=[0:1]) mirror([0,i,0]) translate([-plate_sep/2-z_offset,frame_y/5,0]) {
+    for(i=[0:1]) mirror([0,i,0]) translate([-plate_sep/2-z_offset,smooth_rod_sep,0]) {
         if(solid==1){
             hull() for(j=[-1,1]) translate([0,j*(z_bearing+wall/2),0])
                 rotate([0,0,22.5]) cylinder(r=z_bump/cos(180/8), h=mdf_wall, $fn=8, center=true);
