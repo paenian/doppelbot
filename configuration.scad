@@ -41,9 +41,11 @@ pulley_rad = 13/2;
 pulley_flange_rad = 18/2;
 
 //using the mini V-wheels
-wheel_rad = 11.5/2;
+wheel_rad = 15.5/2;
+wheel_inner_rad = 12.5/2;
 wheel_clearance = 18;
 wheel_height = 9;
+wheel_inner_height = 5;
 wheel_flange_rad = 16/2;
 
 eccentric_rad = 7.3/2;
