@@ -27,7 +27,7 @@ idler_extension_y = -mdf_wall/2+idler_rad+pulley_rad*2;
 stretcher_mount_sep = 40;
 
 //render everything
-part=3;
+part=77;
 
 //parts for laser cutting
 if(part == 0)
@@ -54,6 +54,11 @@ if(part == 6){
 
 if(part == 7){
     vertical_gantry_carriage_rear();
+}
+
+if(part == 77){
+    rotate([0,90,0]) vertical_gantry_carriage_rear_flat();
+    %translate([0,-100,0]) vertical_gantry_carriage_rear();
 }
 
 if(part == 8){
@@ -399,6 +404,80 @@ module vertical_gantry_carriage(){
 }
 }
 
+module vertical_gantry_carriage_rear_flat(){
+    wall=5;
+    min_rad = 2;
+    carriage_len = 50;
+    carriage_spread = -10;
+    
+    hotend_drop = 15;
+    
+    idler_spread = 20;
+    idler_jut = idler_extension_y+(m5_rad-idler_rad);
+    
+    
+    induction_rear = 5;
+    idler_front = -20;
+    induction_jut = 6;
+    
+    rotate([0,0,90]) rotate([-90,0,0]) {
+    %translate([0,0,-beam/2-1]) cube([120,beam*2,beam],center=true);
+    difference(){
+        union(){            
+            //guide wheels
+            difference(){
+                guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false);
+            }
+            
+            //idler mounts
+            for(i=[-1,1]) translate([idler_front,0,0]) hull(){
+                translate([idler_spread*i/2,-4,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2+1, h=5, center=true);
+                %translate([idler_spread*i/2,-6,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=idler_flange_rad, h=8);
+                
+                translate([idler_spread*i/2,-4,1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2, h=2, center=true);
+                translate([idler_spread*i*0,17,-m5_rad]) rotate([90,0,0]) cylinder(r=m5_rad+wall, h=2, center=true);
+            }
+            
+            //belt stretcher bumps
+            %translate([idler_front,-10,idler_extension_y+10]) rotate([90,0,0]) belt_stretcher_2(mount_sep = stretcher_mount_sep);
+            translate([idler_front,-10,wall-.1]) belt_stretcher_2_bumps(mount_sep = stretcher_mount_sep, solid=1);
+            
+            //induction sensor mount
+            translate([induction_rear,15,15+induction_jut]) hull(){
+                rotate([90,0,0]) rotate([0,0,90]) mirror([0,1,0]) mirror([0,0,1]) extruder_mount(solid=1, m_height=ind_height+6,  hotend_rad=ind_rad, wall=4);
+                translate([0,18,-15-induction_jut]) rotate([90,0,0]) cylinder(r=ind_rad-2, h=ind_height+6+wall+4);
+            }
+            
+        } //Holes below here
+        //guide wheels
+        //translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1])
+        guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len);
+        
+        //sketch in the belts
+        %translate([0,0,mdf_wall/2]) idler_mounts(solid=0, idler_extension_x = idler_spread, idler_extension_y = idler_jut);
+        
+        //idler screws
+        translate([idler_front,0,0]) translate([0,0,mdf_wall/2]) idler_mounts(solid=0, idler_extension_x = idler_spread/2, idler_extension_y = idler_jut, m5_rad=m5_rad-slop);
+        
+        //belt stretcher holes
+        translate([idler_front,-10,wall-.1]) belt_stretcher_2_bumps(mount_sep = stretcher_mount_sep, solid = -1);
+        
+        //induction sensor holes
+        translate([induction_rear,16,15+induction_jut]) rotate([90,0,0]) rotate([0,0,90]) mirror([0,1,0]) mirror([0,0,1]) extruder_mount(solid=0, m_height=ind_height+6,  hotend_rad=ind_rad, wall=3);
+        
+        for(i=[-1,1]) translate([idler_front,0,0])
+            translate([idler_spread*i/2,6.5,idler_extension_y+1]) rotate([90,0,0]) cylinder(r1=m5_sq_nut_rad+slop, r2=m5_sq_nut_rad, h=5, center=true, $fn=4);
+        
+        //flatten the bottom
+        translate([0,0,-50]) cube([100,100,100],center=true);
+        
+        //flatten the bottom
+        translate([0,31+50,0]) cube([100,100,100],center=true);
+        
+    }
+}
+}
+
 
 module vertical_gantry_carriage_rear(){
     wall=5;
@@ -418,7 +497,7 @@ module vertical_gantry_carriage_rear(){
     difference(){
         union(){
             //idler mounts
-            for(i=[-1,1]) translate([idler_front,0,0]) hull(){
+            #for(i=[-1,1]) translate([idler_front,0,0]) hull(){
                 translate([idler_spread*i/2,-4,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2+1, h=5, center=true);
                 %translate([idler_spread*i/2,-6,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=idler_flange_rad, h=8);
                 
@@ -471,13 +550,13 @@ module belt_stretcher_2_bumps(mount_sep = 20, solid = 1, height=10){
     for(i=[-1,1]) translate([0,mount_sep/2*i,0]){
         if(solid == 1){
             hull(){
-                cylinder(r1=m3_rad+wall, r2=m3_rad+wall/2, h=height);
+                translate([0,0,-wall*2]) cylinder(r1=m3_rad+wall, r2=m3_rad+wall/2, h=height+wall*2);
                 translate([0,10,0]) cylinder(r=m3_rad+wall/2, h=.1);
             }
         }
     
         if(solid == -1){
-            translate([0,0,wall*1.5]) cap_cylinder(r=m3_rad+slop/2, h=height+10);
+            translate([0,0,wall]) cap_cylinder(r=m3_rad+slop/2, h=height+10);
         }
     }
 }
