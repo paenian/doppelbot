@@ -124,7 +124,7 @@ module inner_hinge(){
 }
 
 module center_light(){
-    scale([.5,1,1]) cylinder(r=lamp_width/2-wall/2, h=wall+2, center=true);
+    scale([.5,1,1]) cylinder(r=lamp_width/2-wall/2, h=wall+2, center=true, $fn=18);
 }
 
 module center_slice(){
@@ -132,7 +132,7 @@ module center_slice(){
 }
 
 module edge_slice(){
-    scale([.1,1,1]) cylinder(r=lamp_width/2-wall/2, h=wall+2, center=true);
+    scale([.1,1,1]) cylinder(r=lamp_width/2-wall/2, h=wall+2, center=true, $fn=18);
 }
 
 //extra plates for the base
