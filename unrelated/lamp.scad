@@ -37,7 +37,7 @@ outer_hinge_angle = asin((base_width/2)/outer_rad)-outer_hinge_extra_angle;
 inner_hinge_extra_length = -5;
 
 //the calculation is diameter * degrees_of_hinge/360 - inner_hinge_extra_length
-outer_hinge_length = outer_rad*pi*2*((360-outer_hinge_angle*2)/360) - inner_hinge_extra_length;
+outer_hinge_length = outer_rad*pi*2*((360-outer_hinge_angle*2)/360) + inner_hinge_extra_length;
 
 
 outer_tabs = 12;
@@ -52,6 +52,8 @@ tab_width = wall;
 //translate([0,120,0]) wire_base();
 
 dxf_layout();
+
+!projection(cut = true) outer_hinge();
 
 module dxf_layout(){
     projection(cut = true) layout();
@@ -80,7 +82,7 @@ module assembly(){
 }
 
 module outer_hinge(){
-    num_edge_cuts = outer_tabs * 4;
+    num_edge_cuts = outer_tabs * 6;
     num_center_cuts = num_edge_cuts;
     
     difference(){
@@ -102,7 +104,7 @@ module outer_hinge(){
 }
 
 module inner_hinge(){
-    num_edge_cuts = inner_tabs * 3;
+    num_edge_cuts = inner_tabs * 5;
     num_center_cuts = num_edge_cuts;
     
     difference(){
@@ -124,7 +126,7 @@ module inner_hinge(){
 }
 
 module center_light(){
-    scale([.5,1,1]) cylinder(r=lamp_width/2-wall/2, h=wall+2, center=true, $fn=18);
+    scale([.25,1,1]) cylinder(r=lamp_width/2-wall/2, h=wall+2, center=true, $fn=4);
 }
 
 module center_slice(){
@@ -132,7 +134,7 @@ module center_slice(){
 }
 
 module edge_slice(){
-    scale([.1,1,1]) cylinder(r=lamp_width/2-wall/2, h=wall+2, center=true, $fn=18);
+    scale([.05,1,1]) cylinder(r=lamp_width/2-wall/2, h=wall+2, center=true, $fn=4);
 }
 
 //extra plates for the base
