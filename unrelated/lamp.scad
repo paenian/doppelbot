@@ -1,8 +1,9 @@
 in = 25.4;
 pi = 3.14159;
 
-wall = 6.5;
-led_width = 15;
+circle_wall = 6.5;
+hinge_wall = 3.3;
+led_width = 22;
 
 $fn = 180;
 
@@ -13,19 +14,19 @@ base_width = 75;
 base_height = 60;
 base_screw_rad = 3/2;
 base_screw_sep = base_width*.4;
-base_screw_drop = base_height/2-wall;
+base_screw_drop = base_height/2-circle_wall;
 
 
-num_plates = ceil((led_width+wall*2) / wall);
+num_plates = ceil((led_width+circle_wall*2) / circle_wall);
 echo(num_plates);
-lamp_width = num_plates*wall;
-echo(led_width + wall + wall);
+lamp_width = num_plates*circle_wall;
+echo(led_width + circle_wall*2);
 echo(lamp_width);
 
 
 //the inner hinge is compressed to stick into the slots - this is the compression.
-inner_hinge_extra_length = 5;
-inner_hinge_length = (inner_rad+wall)*pi*2 + inner_hinge_extra_length;
+inner_hinge_extra_length = 10;
+inner_hinge_length = (inner_rad+hinge_wall)*pi*2 + inner_hinge_extra_length;
 
 
 //this insets the outer hinge into the base a bit.
@@ -34,16 +35,16 @@ outer_hinge_extra_angle = 4;
 outer_hinge_angle = asin((base_width/2)/outer_rad)-outer_hinge_extra_angle;
 
 //the outer hinge is stretched to stick into the slots - this is the stretch.
-inner_hinge_extra_length = -5;
+inner_hinge_extra_length = -10;
 
 //the calculation is diameter * degrees_of_hinge/360 - inner_hinge_extra_length
 outer_hinge_length = outer_rad*pi*2*((360-outer_hinge_angle*2)/360) + inner_hinge_extra_length;
 
 
-outer_tabs = 12;
-inner_tabs = 10;
+outer_tabs = 7;
+inner_tabs = 5;
 
-tab_width = wall;
+tab_width = 5;
 
 //this is to fudge the outer hinge 
 //base();
@@ -53,14 +54,14 @@ tab_width = wall;
 
 dxf_layout();
 
-!projection(cut = true) outer_hinge();
+//projection(cut = true) outer_hinge();
 
 module dxf_layout(){
     projection(cut = true) layout();
 }
 
 module layout(){
-    for(i=[-1,1]) translate([-i*outer_rad,0,0]) rotate([0,0,i*125]) {
+    for(i=[-1,1]) translate([-i*outer_rad,0,0]) rotate([0,0,i*124]) {
         circle();
     }
     
@@ -69,28 +70,29 @@ module layout(){
     translate([0,80,0]) switch_base();
     translate([0,120,0]) wire_base();
         
-    translate([0,-outer_rad-lamp_width*1.6,0]) outer_hinge();
-    translate([0,-outer_rad-lamp_width/2,0]) inner_hinge();
+    translate([0,-outer_rad-lamp_width*1.7,0]) outer_hinge();
+    translate([0,-outer_rad-lamp_width/2-2,0]) inner_hinge();
     
 }
 
 module assembly(){
-    for(i=[-1,1]) translate([0,0,i*(lamp_width-wall)/2]) circle();
+    for(i=[-1,1]) translate([0,0,i*(lamp_width-hinge_wall)/2]) circle();
         
     translate([0,-outer_rad-55,0]) outer_hinge();
     translate([0,-outer_rad-20,0]) inner_hinge();
 }
 
 module outer_hinge(){
-    num_edge_cuts = outer_tabs * 6;
+    num_edge_cuts = outer_tabs * 8;
     num_center_cuts = num_edge_cuts;
     
     difference(){
-        cube([outer_hinge_length, lamp_width, wall], center=true);
+        cube([outer_hinge_length, lamp_width, hinge_wall], center=true);
         
+        //offset the tabs so the end is free
         //tabs
         for(j=[0:1]) mirror([0,j,0]) for(i=[-outer_hinge_length/2:outer_hinge_length/outer_tabs:outer_hinge_length/2])
-            translate([i,lamp_width/2, 0]) cube([tab_width,wall*2,wall+1], center=true);
+            translate([i-outer_hinge_length/outer_tabs/2,lamp_width/2, 0]) cube([tab_width,circle_wall*2,hinge_wall+1], center=true);
         
         
         //edge cuts
@@ -104,15 +106,15 @@ module outer_hinge(){
 }
 
 module inner_hinge(){
-    num_edge_cuts = inner_tabs * 5;
+    num_edge_cuts = inner_tabs * 7;
     num_center_cuts = num_edge_cuts;
     
     difference(){
-        cube([inner_hinge_length, lamp_width, wall], center=true);
+        cube([inner_hinge_length, lamp_width, hinge_wall], center=true);
         
         //tabs
         for(j=[0:1]) mirror([0,j,0]) for(i=[-inner_hinge_length/2:inner_hinge_length/inner_tabs:inner_hinge_length/2])
-            translate([i,lamp_width/2, 0]) cube([tab_width,wall*2,wall+1], center=true);
+            translate([i,lamp_width/2, 0]) cube([tab_width,circle_wall*2,hinge_wall+1], center=true);
         
         
         //edge cuts
@@ -126,7 +128,7 @@ module inner_hinge(){
 }
 
 module center_light(){
-    scale([.25,1,1]) cylinder(r=lamp_width/2-wall/2, h=wall+2, center=true, $fn=4);
+    scale([.25,1,1]) cylinder(r=lamp_width/2-circle_wall/2, h=hinge_wall+2, center=true, $fn=4);
 }
 
 module center_slice(){
@@ -134,20 +136,20 @@ module center_slice(){
 }
 
 module edge_slice(){
-    scale([.05,1,1]) cylinder(r=lamp_width/2-wall/2, h=wall+2, center=true, $fn=4);
+    scale([.05,1,1]) cylinder(r=lamp_width/2-circle_wall/2, h=hinge_wall+2, center=true, $fn=4);
 }
 
 //extra plates for the base
 module base(){
     difference(){
-        translate([0,outer_rad,0]) cube([base_width, base_height, wall], center=true);
+        translate([0,outer_rad,0]) cube([base_width, base_height, circle_wall], center=true);
         
         //center hole
-        cylinder(r=outer_rad, h=wall+1, center=true);
+        cylinder(r=outer_rad, h=circle_wall+1, center=true);
         
         //screwholes for the base
         for(i=[-base_screw_sep/2, base_screw_sep/2]) translate([i,outer_rad+base_screw_drop,0]){
-            cylinder(r=base_screw_rad, h=wall*2, center=true);
+            cylinder(r=base_screw_rad, h=circle_wall*2, center=true);
         }
     }
 }
@@ -157,9 +159,9 @@ module stepped_base(step = 10){
     difference(){
         base();
         //step in the sides
-        *for(i=[0,1]) mirror([i,0,0]) translate([base_width-step,outer_rad,0]) cube([base_width,base_height+2,wall+1],center=true);
+        *for(i=[0,1]) mirror([i,0,0]) translate([base_width-step,outer_rad,0]) cube([base_width,base_height+2,circle_wall+1],center=true);
         //step in the top
-        cylinder(r=outer_rad+step, h=wall*2, center=true);
+        cylinder(r=outer_rad+step, h=circle_wall*2, center=true);
     }
 }
 
@@ -172,10 +174,10 @@ module switch_base(){
         base();
         
         //switch inset hole
-        translate([0,outer_rad+switch_drop-switch_height/2,0]) cube([switch_width,switch_height,wall+2], center=true);
+        translate([0,outer_rad+switch_drop-switch_height/2,0]) cube([switch_width,switch_height,circle_wall+2], center=true);
         
         //string hole
-        translate([0,outer_rad,0]) cube([1,switch_height,wall+2], center=true);
+        translate([0,outer_rad,0]) cube([1,switch_height,circle_wall+2], center=true);
     }
 }
 
@@ -186,39 +188,39 @@ module wire_base(){
         base();
         
         //wire hole
-        translate([-base_width/2, outer_rad+switch_drop, 0]) cube([base_width, wire_thick, wall+2],center=true);
+        translate([-base_width/2, outer_rad+switch_drop, 0]) cube([base_width, wire_thick, circle_wall+2],center=true);
     }
 }
 
 module circle(){
     difference(){
         union(){
-            cylinder(r=outer_rad, h=wall, center=true);
-            translate([0,outer_rad,0]) cube([base_width, base_height, wall], center=true);
+            cylinder(r=outer_rad, h=circle_wall, center=true);
+            translate([0,outer_rad,0]) cube([base_width, base_height, circle_wall], center=true);
         }
         
         //center hole
-        cylinder(r=inner_rad, h=wall+1, center=true);
+        cylinder(r=inner_rad, h=circle_wall+1, center=true);
         
         //screwholes for the base
         for(i=[-base_screw_sep/2, base_screw_sep/2]) translate([i,outer_rad+base_screw_drop,0]){
-            cylinder(r=base_screw_rad, h=wall*2, center=true);
+            cylinder(r=base_screw_rad, h=circle_wall*2, center=true);
         }
         
         //inner tabs
         difference(){
-            cylinder(r=inner_rad+wall, h=wall+1, center=true);
+            cylinder(r=inner_rad+hinge_wall, h=circle_wall+1, center=true);
             
-            for(i=[0:360/inner_tabs:359]) rotate([0,0,i]) translate([0,inner_rad,0]) cube([tab_width,wall*2,wall+2], center=true);
+            for(i=[0:360/inner_tabs:359]) rotate([0,0,i]) translate([0,inner_rad,0]) cube([tab_width,hinge_wall*2,circle_wall+2], center=true);
         }
         
         //outer_tabs - have to avoid the base
         difference(){
-            cylinder(r=outer_rad+.5, h=wall+1, center=true);
-            cylinder(r=outer_rad-wall, h=wall+2, center=true);
+            cylinder(r=outer_rad+.5, h=circle_wall+1, center=true);
+            cylinder(r=outer_rad-hinge_wall, h=circle_wall+2, center=true);
             
             //the tabs
-            for(i=[outer_hinge_angle:(360-outer_hinge_angle*2)/outer_tabs:359-outer_hinge_angle/2]) rotate([0,0,i]) translate([0,outer_rad-wall,0]) cube([tab_width,wall*3,wall+2], center=true);
+            for(i=[outer_hinge_angle:(360-outer_hinge_angle*2)/outer_tabs:359-outer_hinge_angle/2]) rotate([0,0,i]) translate([0,outer_rad-hinge_wall,0]) cube([tab_width,hinge_wall*3,circle_wall+2], center=true);
                 
             //fill in between the two bottom tabs
             hull(){
