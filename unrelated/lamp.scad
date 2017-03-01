@@ -220,7 +220,7 @@ module circle(){
             cylinder(r=outer_rad-hinge_wall, h=circle_wall+2, center=true);
             
             //the tabs
-            for(i=[outer_hinge_angle:(360-outer_hinge_angle*2)/outer_tabs:359-outer_hinge_angle/2]) rotate([0,0,i]) translate([0,outer_rad-hinge_wall,0]) cube([tab_width,hinge_wall*3,circle_wall+2], center=true);
+            for(i=[outer_hinge_angle:(360-outer_hinge_angle*2)/outer_tabs:360+outer_hinge_angle]) rotate([0,0,i+((360-outer_hinge_angle*2)/outer_tabs)/2]) translate([0,outer_rad-hinge_wall,0]) cube([tab_width,hinge_wall*3,circle_wall+2], center=true);
                 
             //fill in between the two bottom tabs
             hull(){
