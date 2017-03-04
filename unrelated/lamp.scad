@@ -52,9 +52,52 @@ tab_width = 5;
 //translate([0,80,0]) switch_base();
 //translate([0,120,0]) wire_base();
 
-dxf_layout();
+//dxf_layout();
+
+ball();
 
 //projection(cut = true) outer_hinge();
+
+module ball(){
+    ball_rad = 13;
+    magnet_width = in*.25;
+    magnet_length = in*.25;
+    magnet_thick = in*.25;
+    
+    thin_wall = 2.5;
+    string_hole = 1;
+    
+    sphere_scale = [1,1,.666];
+    
+    slop = .1;
+    
+    difference(){
+        union(){
+            intersection(){
+                scale(sphere_scale) sphere(r=ball_rad);
+                cylinder(r=ball_rad+1, h=magnet_thick, center=true);
+            }
+        }
+            
+        //magnet - offset to the top
+        translate([0,ball_rad-magnet_length/2-thin_wall,0]) cube([magnet_width, magnet_length+slop*2, magnet_thick+slop], center=true);
+        
+        //slit to snug it in place
+        translate([0,ball_rad/2+.5,0]) cube([1, ball_rad+1, magnet_thick+slop], center=true);
+        
+        //center hole - to look nice
+        cylinder(r=ball_rad-magnet_length-thin_wall*2, h=magnet_thick+1, center=true);
+        
+        //string hole - actually a torus
+        translate([0,0,20]) rotate_extrude(){
+            translate([10,0,0]) circle(r=4);
+        }
+        
+        translate([0,-ball_rad+magnet_thick/2-string_hole,0]) rotate([0,90,0]) rotate_extrude(convexity = 10)
+            translate([magnet_thick/2,0, 0])
+            circle(r = string_hole);
+    }
+}
 
 module dxf_layout(){
     projection(cut = true) layout();
@@ -62,7 +105,7 @@ module dxf_layout(){
 
 module layout(){
     for(i=[-1,1]) translate([-i*outer_rad,0,0]) rotate([0,0,i*124]) {
-        circle();
+        circle_lamp();
     }
     
     base();
@@ -76,7 +119,7 @@ module layout(){
 }
 
 module assembly(){
-    for(i=[-1,1]) translate([0,0,i*(lamp_width-hinge_wall)/2]) circle();
+    for(i=[-1,1]) translate([0,0,i*(lamp_width-hinge_wall)/2]) circle_lamp();
         
     translate([0,-outer_rad-55,0]) outer_hinge();
     translate([0,-outer_rad-20,0]) inner_hinge();
@@ -192,7 +235,7 @@ module wire_base(){
     }
 }
 
-module circle(){
+module circle_lamp(){
     difference(){
         union(){
             cylinder(r=outer_rad, h=circle_wall, center=true);
