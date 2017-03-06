@@ -59,10 +59,10 @@ ball();
 //projection(cut = true) outer_hinge();
 
 module ball(){
-    ball_rad = 13;
-    magnet_width = in*.25;
-    magnet_length = in*.25;
-    magnet_thick = in*.25;
+    ball_rad = 18;
+    magnet_width = in*3/8;
+    magnet_length = in*3/8;
+    magnet_thick = in*3/8;
     
     thin_wall = 2.5;
     string_hole = 1;
@@ -75,7 +75,7 @@ module ball(){
         union(){
             intersection(){
                 scale(sphere_scale) sphere(r=ball_rad);
-                cylinder(r=ball_rad+1, h=magnet_thick, center=true);
+                cylinder(r=ball_rad+1, h=circle_wall, center=true);
             }
         }
             
