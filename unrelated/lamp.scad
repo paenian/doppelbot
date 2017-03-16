@@ -51,9 +51,9 @@ tab_width = wall;
 //translate([0,80,0]) switch_base();
 //translate([0,120,0]) wire_base();
 
-dxf_layout();
+layout();
 
-!projection(cut = true) outer_hinge();
+//projection(cut = true)
 
 module dxf_layout(){
     projection(cut = true) layout();
@@ -82,7 +82,7 @@ module assembly(){
 }
 
 module outer_hinge(){
-    num_edge_cuts = outer_tabs * 6;
+    num_edge_cuts = outer_tabs * 7;
     num_center_cuts = num_edge_cuts;
     
     difference(){
@@ -98,8 +98,10 @@ module outer_hinge(){
             translate([i,lamp_width/2, 0]) edge_slice();
         
         //center cuts
-        for(i=[-outer_hinge_length/2:outer_hinge_length/num_center_cuts:outer_hinge_length/2+1])
+        for(i=[-outer_hinge_length/2:outer_hinge_length/num_center_cuts:outer_hinge_length/2+1]){
+            echo(i%outer_tabs);                
             translate([i-outer_hinge_length/num_center_cuts/2,0, 0]) center_slice();
+        }
     }
 }
 
