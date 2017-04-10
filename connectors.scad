@@ -64,7 +64,7 @@ module test_male(){
 module pinconnector_female(screw = true, screw_offset=0){
 	translate([0,-mdf_wall/2-laser_slop/2,0]) union(){
 		if(screw){
-			translate([0,0,screw_offset]) rotate([90,0,0]) cylinder(r=m5_rad, h=mdf_wall+1, center=true);
+			translate([0,0,screw_offset]) rotate([90,0,0]) cylinder(r=ten24_rad, h=mdf_wall+1, center=true);
 		}
 
 		for(i=[0,1]) mirror([i,0,0]) translate([mdf_tab, 0, 0]) cube([mdf_tab+laser_slop, mdf_wall+1, mdf_wall+laser_slop], center=true);
@@ -86,8 +86,8 @@ module pinconnector_male(screw = true, solid=0){
 	union(){
 		if(screw){
 			if(solid<=0){
-				cube([m5_rad_laser*2, mdf_wall*6, mdf_wall+2], center=true);
-				translate([0,mdf_wall*1.5, 0]) cube([m5_nut_rad_laser*2, m5_nut_height+1, mdf_wall+2], center=true);
+				cube([ten24_rad_laser*2, mdf_wall*6, mdf_wall+2], center=true);
+				translate([0,mdf_wall*1.5, 0]) cube([ten24_sq_nut_rad_laser*2, ten24_nut_height+1, mdf_wall+2], center=true);
 			}
 		}
 	

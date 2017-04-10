@@ -1,3 +1,4 @@
+in = 25.4;
 mdf_wall = 6.5;
 mdf_tab = 15;
 
@@ -95,7 +96,6 @@ m3_cap_rad = 3.25;
 m3_cap_height = 2;
 m3_sq_nut_rad = 7.9/2;
 
-echo(m3_sq_nut_rad*2/sqrt(2));
 
 m4_nut_rad = 7.66/2+slop;
 m4_nut_height = 3.2;
@@ -105,10 +105,6 @@ m4_cap_height = 2.5;
 
 m5_nut_rad = 8.79/2;
 m5_sq_nut_rad = (8*sqrt(2)+slop/2)/2;
-
-echo(m5_sq_nut_rad);
-echo(m5_sq_nut_rad*2/sqrt(2));
-
 m5_nut_rad_laser = 8.79/2-.445;
 m5_nut_height = 4.7;
 m5_rad = 5/2+slop;
@@ -116,6 +112,27 @@ m5_rad_laser = 5/2-.1;
 m5_cap_rad = 10/2+slop;
 m5_cap_height = 3;
 m5_washer_rad = 11/2+slop;
+
+
+//redoing the frame with 10-24 screws - will use them for self-tapping screws
+//on the endcaps, as well as all the MDF->MDF joints.  The reason for this is
+//that the nuts on 10-24 are MUCH larger than  M5 nuts - making it way less
+//likely to ruin the MDF.
+ten24_rad = (.19*in/2+slop);
+ten24_cap_rad = (.361*in/2+slop);
+ten24_cap_height = .101*in+slop;
+ten24_nut_rad = ((3/8*in)*cos(180/6))/2;
+ten24_sq_nut_rad = ((3/8*in)*sqrt(2))/2+slop/2;
+
+ten24_nut_height = 1/8*in+slop;
+
+ten24_rad_laser = ten24_rad+laser_slop/2;
+ten24_sq_nut_rad_laser = ten24_sq_nut_rad+laser_slop;
+
+
+echo(m5_sq_nut_rad);
+echo(ten24_sq_nut_rad);
+
 
 
 //some enums

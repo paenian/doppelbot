@@ -13,8 +13,8 @@ wall = 6;
 //%rotate([90,0,0])translate([-34.5,13,-2]) cylinder(r=m8_rad, h=30, center=true);
 
 //the wheel
-//translate([-31,T/2,9]) rotate([90,0,0]) //this puts the wheel in the carrier
-*wheel();
+translate([-31,T/2,9]) rotate([90,0,0]) //this puts the wheel in the carrier
+!wheel();
 
 //the carrier
 //rotated for printing
@@ -28,7 +28,9 @@ difference(){
 }
 
 module carrier(){
-	thickness = wall+wall+1+1+T;
+    bump_height = 1.5;
+    
+	thickness = wall+wall+bump_height*2+T;
 	difference(){
 		union(){
             //extra base clearance
@@ -51,7 +53,7 @@ module carrier(){
 				}
                 
 				//bumps to hold the wheel centered
-				for(i=[0,1]) mirror([0,0,i]) translate([0,0,-T/2-1.1]) cylinder(r1=m5_washer_rad+1, r2=m5_washer_rad-1, h=1);
+				for(i=[0,1]) mirror([0,0,i]) translate([0,0,-T/2-1.1]) cylinder(r1=m5_washer_rad+1, r2=m5_washer_rad-1, h=bump_height);
 			}
 		}
 		
@@ -69,20 +71,20 @@ module carrier(){
 }
 
 // outer diameter of ring
-D=60;
+D=65;
 // thickness
-T=15;
+T=18;
 // clearance
 tol=.3;
-number_of_planets=6;
-number_of_teeth_on_planets=5;
-approximate_number_of_teeth_on_sun=11;
+number_of_planets=8;
+number_of_teeth_on_planets=6;
+approximate_number_of_teeth_on_sun=13;
 // pressure angle
-P=45;//[30:60]
+P=40;//[30:60]
 // number of teeth to twist across
 nTwist=1;
 // width of center hole
-w=m5_dia+slop;
+w=m5_dia+1  ;
 
 DR=0.5*1;// maximum depth ratio of teeth
 
@@ -106,7 +108,7 @@ module wheel(){
 		difference(){
 			intersection(){
 				cylinder(r=D/2+1,h=T,center=true,$fn=100);
-				scale([1,1,.8]) sphere(r=D/2+1, $fn=90);
+				scale([1,1,1.25]) sphere(r=D/2+1, $fn=90);
 			}
 			render() herringbone(nr,pitch,P,DR,-tol,helix_angle,T+0.2);
 		}

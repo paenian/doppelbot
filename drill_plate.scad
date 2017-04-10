@@ -1,5 +1,11 @@
 include<configuration.scad>
 
+/*
+ * This is a simple hole array to help drill & tap the ends of the extrusion.
+ * If you mount the long frame extrusions all to this plate, then you can cut
+ * all of them at the same time and ensure that they're all exactly the same
+ * length, at least if you use an accurate and squared saw.
+ */
 
 projection() difference(){
 	cube([beam*1.9, beam*6, mdf_wall], center=true);

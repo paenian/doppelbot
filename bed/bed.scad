@@ -21,7 +21,7 @@ side_length = rail_sep - beam;
 bed_screw_offset = (m5_washer_rad-mdf_wall)/2;  //this is used to make sure that the side-tensioning screws of the bed plates don't protrude - so that the top plate and side plates are flush, but the screw cap and nut don't stick up past the top.
 
 //render everything
-part=4;
+part=10;
 
 //parts for laser cutting
 if(part == 0)
