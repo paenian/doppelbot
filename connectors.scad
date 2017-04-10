@@ -28,7 +28,7 @@ for(i=[-3:3]){
 	            pinconnector_male(screw=true, solid=1, laser_slop=(i*.1));
 	        }
 	        pinconnector_male(screw=true, solid=-1, laser_slop=(i*.1));
-            translate([0,30,0]) rotate([0,0,0]) write(str(i*2),t=wall*3,h=10,center=true, font = "Writescad/orbitron.dxf");
+            translate([0,30,0]) rotate([0,0,0]) write(str(i),t=wall*3,h=10,center=true, font = "Writescad/orbitron.dxf");
 	    }
     		
 		//}
@@ -86,8 +86,8 @@ module pinconnector_male(screw = true, solid=0){
 	union(){
 		if(screw){
 			if(solid<=0){
-				cube([ten24_rad_laser*2, mdf_wall*6, mdf_wall+2], center=true);
-				translate([0,mdf_wall*1.5, 0]) cube([ten24_sq_nut_rad_laser*2, ten24_nut_height+1, mdf_wall+2], center=true);
+				#translate([0,-mdf_wall,0]) cube([ten24_rad_laser*2, mdf_wall*6.25, mdf_wall+2], center=true);
+				translate([0,mdf_wall*1.5, 0]) cube([ten24_sq_nut_rad_laser*2, ten24_nut_height+2, mdf_wall+2], center=true);
 			}
 		}
 	

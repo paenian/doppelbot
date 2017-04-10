@@ -1,6 +1,6 @@
-include <configuration.scad>
-use <beam.scad>
-use <connectors.scad>
+include <../configuration.scad>
+use <../beam.scad>
+use <../connectors.scad>
 
 test_plate();
 

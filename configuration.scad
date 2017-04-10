@@ -127,7 +127,7 @@ ten24_sq_nut_rad = ((3/8*in)*sqrt(2))/2+slop/2;
 ten24_nut_height = 1/8*in+slop;
 
 ten24_rad_laser = ten24_rad+laser_slop/2;
-ten24_sq_nut_rad_laser = ten24_sq_nut_rad+laser_slop;
+ten24_sq_nut_rad_laser = ten24_sq_nut_rad+laser_slop/2;
 
 
 echo(m5_sq_nut_rad);
