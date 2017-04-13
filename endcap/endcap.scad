@@ -347,7 +347,7 @@ module smooth_rod_holes(solid=1){
 module beam_holes(double = false){
     
     for(i=[0:1]) for(j=[wall_inset-mdf_wall*1.5,mdf_wall*2-side_plate_width/2])
-        mirror([0,i,0]) translate([j,frame_y/2-beam/2,0]){
+        mirror([0,i,0]) translate([j,frame_z/2-beam/2,0]){
             cylinder(r=m5_rad, h=mdf_wall*3, center=true);
             
             //this is for the flat of the beam
@@ -586,7 +586,7 @@ module vertical_plate_connectors(gender=MALE, solid=1){
 module vertical_plate(){
     difference(){
         union(){
-            translate([0,-foot_height/2,0]) cube([side_plate_width, frame_y+foot_height, mdf_wall], center=true);
+            translate([0,-foot_height/2,0]) cube([side_plate_width, frame_z+foot_height, mdf_wall], center=true);
             vertical_plate_connectors(gender=MALE, solid=1);
         }
         vertical_plate_connectors(gender=MALE, solid=-1);
@@ -596,32 +596,28 @@ module vertical_plate(){
 }
 
 module end_plate_connectors(gender = MALE, solid=1, endcap=false){
-    for(i=[0:90:359]) rotate([0,0,i]) {
-        for(i=[-1,1]){
-            translate([(frame_y/2-beam*5)*i,-frame_y/2,0]) if(gender == MALE){
-                pinconnector_male(solid=solid);
-            }else{
-                pinconnector_female();
-            }
+    for(i=[0,1]) for(j=[0,1]) mirror([i,0,0]) mirror([0,j,0]) {
+        translate([(frame_y/2-beam*5),-frame_z/2,0]) if(gender == MALE){
+            pinconnector_male(solid=solid);
+        }else{
+            pinconnector_female();
+        }
+        
+        translate([-frame_y/2,(-frame_z/2+beam*5),0]) rotate([0,0,-90]) if(gender == MALE){
+            pinconnector_male(solid=solid);
+        }else{
+            pinconnector_female();
         }
         
         //middle connector, on the support plate only
-        if(endcap==false){
-            translate([0,-frame_y/2,0]) if(gender == MALE){
+        if(endcap==false && i==0){
+            translate([0,-frame_z/2,0]) if(gender == MALE){
                 pinconnector_male(solid=solid);
             }else{
                 pinconnector_female();
             }
         }
     }
-    
-    //tabs in the corners, to better align the beams
-    *if(endcap==true){
-        translate([frame_y/2,frame_z/2-beam,0]) {
-            rotate([0,0,90]) tab(width=beam/2, gender=gender);
-        }
-    }
-    
 }
 
 module end_plate(corners=false, endcap=false){
@@ -636,7 +632,7 @@ module end_plate(corners=false, endcap=false){
         }
         
         if(corners == true){
-            rotate([0,0,45]) cube([corner_y,corner_z,mdf_wall+1], center=true);
+            rotate([0,0,45]) cube([corner_z+mdf_wall,corner_z+mdf_wall,mdf_wall+1], center=true);
         }
         
         //connectors around the edge
@@ -751,7 +747,7 @@ module electronics_mounts(){
 }
 
 module support_plate(slots=false, motor=false){
-    difference(){
+    #difference(){
         end_plate();
         beam_cutout(screws=false, beams=true);
         
@@ -766,8 +762,8 @@ module support_plate(slots=false, motor=false){
 module corner_plates_connectors(){
     difference(){
         union(){
-            for(i=[45:90:359]){
-                rotate([0,0,i]) translate([0,corner_y/2+mdf_wall,plate_sep/2+mdf_wall/2]) rotate([90,0,0]){
+            for(i=[0,1]) for(j=[0,1]) mirror([i,0,0]) mirror([0,j,0]) {
+                rotate([0,0,45]) translate([0,corner_z/2+mdf_wall*2,plate_sep/2+mdf_wall/2]) rotate([90,0,0]){
                     cross_plate_connectors(frame_z=corner_length, num_spans=5, gender=FEMALE);
                 }
             }
@@ -779,10 +775,10 @@ module corner_plates_connectors(){
 module corner_plates(cover = false){
     difference(){
         union(){
-            for(i=[45:90:359]){
-                rotate([0,0,i]) translate([0,corner_y/2+mdf_wall,plate_sep/2+mdf_wall/2]) rotate([90,0,0]){
+            for(i=[0,1]) for(j=[0,1]) mirror([i,0,0]) mirror([0,j,0]) {
+                rotate([0,0,45]) translate([0,corner_z/2+mdf_wall*2,plate_sep/2+mdf_wall/2]) rotate([90,0,0]){
                     corner_plate(cover = cover);
-                    cross_plate_connectors(frame_z=corner_length, num_spans=5);
+                    //cross_plate_connectors(frame_z=corner_length, num_spans=5);
                 }
             }
         }
