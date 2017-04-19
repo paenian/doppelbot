@@ -632,7 +632,7 @@ module end_plate(corners=false, endcap=false){
         }
         
         if(corners == true){
-            rotate([0,0,45]) cube([corner_z+mdf_wall,corner_z+mdf_wall,mdf_wall+1], center=true);
+            #rotate([0,0,45]) cube([corner_z+mdf_wall,corner_z+mdf_wall,mdf_wall+1], center=true);
         }
         
         //connectors around the edge
