@@ -174,10 +174,12 @@ module support_plate_cover_connected(){
         //holes for all the stiffening cross plates
         if(corner_endplate==true){
             corner_plates_connectors(gender=FEMALE, support=true);
+        
         }else{
             cross_plates_connectors(gender=FEMALE, support=true);
         }
-            
+        
+        
         
         //bottom wall
         translate([0,-frame_z/2-mdf_wall/2-.1,wall_inset-.1]) rotate  ([0,0,90]) rotate([0,90,0]) bottom_plate_connectors(gender=FEMALE, support=true);
@@ -384,13 +386,13 @@ module support_plate_cover_connectors(gender=MALE, solid=1){
 }
 
 module power_switch(){
-    chamfer = 3;
+    chamfer = 4;
     union(){
         difference(){
             cube([28, 50, mdf_wall*3],center=true);
             
             //corners
-            for(i=[-1,1]) translate([i*25.5/2, -43/2,0]) 
+            for(i=[-1,1]) translate([i*26/2, -48/2,0]) 
                 cylinder(r=chamfer, h=mdf_wall*4, center=true, $fn=4);
         }
         
@@ -401,15 +403,14 @@ module power_switch(){
 }
 
 module support_plate_cover(){
-    height = 110;
-    bot_width = frame_y/4;
-    top_width = bot_width+height*2;
+    height = 100;
+    top_width = corner_z;
     
     difference(){
         union(){
-            hull(){
-                translate([0, .5, 0]) cube([bot_width, 1, mdf_wall], center=true);
-                translate([0, height-.5, 0]) cube([top_width, 1, mdf_wall], center=true);
+            intersection(){
+                translate([0, height/2, 0]) cube([top_width, height, mdf_wall], center=true);
+                translate([0, frame_z/2+mdf_wall,0]) rotate([0,0,45]) cube([corner_z+mdf_wall*6,corner_z+mdf_wall*6,mdf_wall+1], center=true);
             }
         }
         
@@ -747,7 +748,7 @@ module electronics_mounts(){
 }
 
 module support_plate(slots=false, motor=false){
-    #difference(){
+    difference(){
         end_plate();
         beam_cutout(screws=false, beams=true);
         
@@ -788,7 +789,7 @@ module corner_plates(cover = false){
 module corner_plate(cover = false){
     difference(){
         union(){
-            #cube([corner_length,plate_sep,mdf_wall], center=true);
+            cube([corner_length,plate_sep,mdf_wall], center=true);
             cross_plate_connectors(frame_z=corner_length, num_spans=5, cover = cover);
         }
         
@@ -817,6 +818,11 @@ module cross_plate_connectors(gender=MALE, num_spans = 10, cover=false){
                         cube([span+laser_slop,mdf_wall*2+1,mdf_wall+laser_slop], center=true);
                     }
                 }
+            }
+            
+                    
+            if(gender == FEMALE){
+                translate([0,-plate_sep+mdf_wall+1,0]) pinconnector_male(solid=-1);
             }
         }
     }
