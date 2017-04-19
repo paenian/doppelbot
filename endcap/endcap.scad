@@ -632,7 +632,7 @@ module end_plate(corners=false, endcap=false){
         }
         
         if(corners == true){
-            #rotate([0,0,45]) cube([corner_z+mdf_wall,corner_z+mdf_wall,mdf_wall+1], center=true);
+            rotate([0,0,45]) cube([corner_z+mdf_wall,corner_z+mdf_wall,mdf_wall+1], center=true);
         }
         
         //connectors around the edge
@@ -788,7 +788,7 @@ module corner_plates(cover = false){
 module corner_plate(cover = false){
     difference(){
         union(){
-            cube([corner_length,plate_sep,mdf_wall], center=true);
+            #cube([corner_length,plate_sep,mdf_wall], center=true);
             cross_plate_connectors(frame_z=corner_length, num_spans=5, cover = cover);
         }
         
