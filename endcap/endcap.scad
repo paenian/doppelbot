@@ -13,7 +13,7 @@ use <../beam.scad>
 use <../connectors.scad>
 
 //cross plate vars
-plate_sep = 25;
+plate_sep = 20;
 num_plates = 2;
 
 ps_width = 115;
@@ -24,15 +24,15 @@ relay_height = 35;
 //bottom plate width: 
 
 //side vars
-side_plate_width=70;    //minimum 80mm for two clips in the corners.
+side_plate_width=60;    //minimum 80mm for two clips in the corners.
 num_clips = 1;          //for one clip, minimum is 60.
 
 
 wall_inset = (plate_sep+mdf_wall)/2+15;
 wall_inset = side_plate_width/2-mdf_wall*1.5;
 
-z_offset = 14+2.5+2.5+2.5+2.5; //applies to both the lead screw and the smooth rods - they're inline.
-z_bump = 6; //bump for the motor mount, to give it more strength
+z_offset = 18; //applies to both the lead screw and the smooth rods - they're inline.
+z_bump = 18; //bump for the motor mount, to give it more strength
 
 
 
@@ -44,6 +44,7 @@ screw_rad = m3_rad;
 
 //render everything
 part=10;
+
 
 //parts for laser cutting
 if(part == 0)
@@ -333,7 +334,7 @@ module idler_mount(){
 module smooth_rod_holes(solid=1){
     for(i=[0:1]) mirror([0,i,0]) translate([-plate_sep/2-z_offset,smooth_rod_sep,0]) {
         if(solid==1){
-            hull() for(j=[-1,1]) translate([0,j*(z_bearing+wall/2),0])
+            hull() for(j=[-1,1]) translate([0,j*(z_bearing+wall/2)*0,0])
                 rotate([0,0,22.5]) cylinder(r=z_bump/cos(180/8), h=mdf_wall, $fn=8, center=true);
         }
         if(solid==-1){
@@ -341,7 +342,7 @@ module smooth_rod_holes(solid=1){
             %translate([0,0,-40]) cylinder(r=20/2, h=29, center=true);
         
             //zip tie holes, to hold the rods in
-            for(i=[-1,1]) translate([0,i*(smooth_rod_rad+wall+1),0]) cube([5,3,mdf_wall*3], center=true);
+            for(i=[-1,1]) translate([0,i*(smooth_rod_rad+wall+1),0]) cube([5,2,mdf_wall*3], center=true);
         }
     }
 }
@@ -508,14 +509,14 @@ module bottom_plate_connectors(gender=MALE, solid=1, support=false){
 module z_motor_mounts(solid=1){
     for(i=[-1:1]) {
         if(solid==1){
-            hull() for(j=[-1,1]) translate([-plate_sep/2-z_offset,bed_screw_offset_y*i+j*motor_w*sqrt(2)/2,0])
+            hull() for(j=[-1,1]) translate([-plate_sep/2-z_offset,bed_screw_offset_y*i+j*motor_w*sqrt(2)/3,0])
                 rotate([0,0,22.5]) cylinder(r=z_bump/cos(180/8), h=mdf_wall, $fn=8, center=true);
                 //cube([z_bump*2, motor_w*sqrt(2), mdf_wall], center=true);
         }
         if(solid==-1){
             //holes for the motors
             translate([-plate_sep/2-z_offset,bed_screw_offset_y*i,0])
-                rotate([0,0,-45]) motor_mount_offset();
+                rotate([0,0,0]) motor_mount_offset();
         }
     }
 }
@@ -639,8 +640,8 @@ module end_plate(corners=false, endcap=false){
         //connectors around the edge
         end_plate_connectors(solid=-1);
         
-        //mounting holes for the cross plates
-        //cross_plates_connectors(gender=FEMALE);
+        //holes to mount extra stiffening extrusions
+        extra_beam_coutout();
         
         //mounting holes for electronics etc.
         holes();
@@ -648,6 +649,23 @@ module end_plate(corners=false, endcap=false){
         //beam holes
         beam_cutout(screws=true, beams=false);
     }
+}
+
+module extra_beam_coutout(){
+    for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0])
+        for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2,0])
+            difference(){
+                union(){
+                    for(k=[0:1]){
+                        //vertical beam
+                        translate([-beam/2,-beam*2-beam/2-k*beam,0]) endScrew();
+                        //front to back beam
+                        translate([-beam-beam/2-beam*k,-beam-beam/2,0]) endScrew();
+                        
+                        
+                    }
+                }
+            }
 }
 
 module beam_cutout(screws=true, beams=false){
@@ -667,7 +685,9 @@ module beam_cutout(screws=true, beams=false){
                                 translate([-beam/2,-beam/2-k*beam,0]) beamHoles(slop=0);
                                 }
                             }
-                            translate([-beam/2,-beam,0]) rotate([0,0,180/8]) cylinder(r=beam/2-2.1, h=30, center=true, $fn=8);
+                            for(l=[-1:1]){
+                                translate([-beam/2,-beam-beam*l,0]) rotate([0,0,180/8]) cylinder(r=beam/2-2.1, h=30, center=true, $fn=8);
+                            }
                         }
     }
 }
@@ -681,7 +701,7 @@ module ps_holes(solid=-1){
     length = 215;
     height = 50;
     
-    translate([-115/2,-50,0]) rotate([0,0,180]) {
+    translate([-115/2-10,-50,0]) rotate([0,0,180]) {
         if(solid == -1){
             %translate([0,-indent/2,-height/2-mdf_wall]) cube([width,length-indent,height], center=true);
             %translate([0,0,-15-mdf_wall]) cube([width,length,height/2], center=true);
@@ -714,6 +734,16 @@ module relay_holes(solid=-1){
 
 module duet_holes(){
     hole_inset = 4;
+    width = 115;
+    length = 123;
+    
+    %translate([0,0,10-mdf_wall]) cube([width,length,20], center=true);
+    for(i=[-1,1]) for(j=[-1,1]) translate([i*(width/2-hole_inset), j*(length/2-hole_inset),-mdf_wall]) 
+        screw_hole_m3(height = wall*3);
+}
+
+module duet_wifi_holes(){
+    hole_inset = 4;
     width = 100;
     length = 123;
     
@@ -738,13 +768,17 @@ module duet_x4_holes(){
     translate([-width/2+hole_inset_right_x, -1 * (length/2-hole_inset_right_y), -mdf_wall]) screw_hole_m3(height = wall*3);
 }
 
+module duet_x5_holes(){
+    duet_wifi_holes();
+}
+
 //make holes for all of the electronics
 module electronics_mounts(){
     ps_holes();
     relay_holes();
     
-    translate([45,135]) duet_holes();
-    translate([-55,135,0]) duet_x4_holes();
+    translate([frame_y/2-mdf_wall-beam-50,0]) duet_wifi_holes();
+    translate([frame_y/2-mdf_wall-beam-160,0,0]) duet_x5_holes();
 }
 
 module support_plate(slots=false, motor=false){

@@ -71,7 +71,7 @@ motor_w = 42;
 motor_r = 52/2;
 motor_y = frame_y/2-beam-pulley_rad; //distance motors are from the center.
 
-belt_thick = 6;
+belt_thick = 9;
 belt_width = 1.5;
 
 
