@@ -461,7 +461,7 @@ module top_plate(motor=true){
         smooth_rod_holes(solid=-1);
         
         //beam holes
-        beam_holes();
+        beam_holes(frame_z = frame_y);
         
         //hole for the Z rod
         //translate([-plate_sep/2-z_offset,0,0]) cylinder(r=4+slop, h=mdf_wall*3, center=true);
@@ -561,7 +561,7 @@ module bottom_plate(support=false){
         smooth_rod_holes(solid=-1);
         
         //beam holes
-        beam_holes();
+        beam_holes(frame_z = frame_y);
     }
 }
 
