@@ -20,14 +20,14 @@ ind_lift = 10;
 ind_height = 12;
 
 idler_extension = 0; //beam/2+idler_flange_rad+10+6;
-idler_extension_x = beam/2+wheel_rad+wheel_clearance/2+idler_flange_rad+1;
+idler_extension_x = beam/2+idler_flange_rad+1;
 idler_extension_y = -mdf_wall/2+idler_rad+pulley_rad*2;
 
 
 stretcher_mount_sep = 40;
 
 //render everything
-part=77;
+part=10;
 
 //parts for laser cutting
 if(part == 0)
@@ -71,7 +71,7 @@ if(part == 9){
 
 if(part == 10) translate([0,0,0]) {
 //flip for printing
-    translate([frame_y/2-76,0,0]) rotate([0,0,0]) 
+    *translate([frame_y/2-76,0,0]) rotate([0,0,0]) 
     hotend_carriage2();
 
     *translate([frame_y/2,-60,0]) gantry_end();
@@ -80,9 +80,9 @@ if(part == 10) translate([0,0,0]) {
     
     translate([frame_y/2-beam,0,-beam]) gantry_carriage();
     
-    translate([frame_y/2-beam-160,beam/2+1,-beam]) rotate([0,0,-90]) vertical_gantry_carriage();
+    translate([frame_y/2-beam-80,beam/2+1,-beam]) rotate([0,0,-90]) vertical_gantry_carriage();
     
-    translate([frame_y/2-beam-160,-beam/2-1,-beam]) rotate([0,0,90]) vertical_gantry_carriage_rear();
+    translate([frame_y/2-beam-80,-beam/2-1,-beam]) rotate([0,0,90]) vertical_gantry_carriage_rear();
     
     translate([frame_y/2-77.5,0,0]) belt_stretcher();
     
@@ -228,8 +228,8 @@ module beam_holder(){
     translate([0,beam/2,wall]){
         if(solid==1){
             hull(){
-                translate([0,0,beam/4+wall/2]) cube([beam+wall*2, beam+wall*2, beam/2+wall], center=true);
-                translate([0,beam/4+wall/2,beam/2+wall]) cube([beam+wall*2, beam/2+wall, beam+wall*2], center=true);
+                translate([0,0,beam/4+wall/2]) cube([beam+wall*2, beam+wall*2, beam/2], center=true);
+                translate([0,beam/4+wall/2,beam/2+wall]) cube([beam+wall*2, beam/2+wall, beam], center=true);
             }
             
             //fillets
@@ -245,7 +245,7 @@ module beam_holder(){
             translate([0,slop-beam/2,beam]) cube([beam+slop, beam*2+slop*2, beam*2], center=true);
             
             //mounting holes
-            translate([0,0,beam]) rotate([0,90,0]) cylinder(r=m5_rad, h=beam*5, center=true);
+            translate([0,0,beam-wall]) rotate([0,90,0]) cylinder(r=m5_rad, h=beam*5, center=true);
             translate([0,0,beam]) rotate([90,0,0]) cylinder(r=m5_rad, h=beam*5, center=true);
         }
         
@@ -297,7 +297,7 @@ module gantry_carriage(){
         //for(i=[-beam/2, beam/2]) translate([0,i,-1]) cap_cylinder(r=m5_rad, h=20);
         
         //belt path
-        translate([0,-beam/2,0]) cube([100,belt_thick*2,wall], center=true);
+        translate([0,-beam/2,0]) cube([100,belt_thick+4,wall], center=true);
         
         //flatten the bottom
         translate([0,0,-50]) cube([100,100,100],center=true);
@@ -360,8 +360,8 @@ module vertical_gantry_carriage(){
     %translate([0,0,-beam/2-1]) cube([120,beam*2,beam],center=true);
     difference(){
         union(){
-            //idler mounts
-            translate([0,0,mdf_wall/2]) idler_mounts(solid=1, idler_extension_x = idler_spread, idler_extension_y = idler_jut);
+            //belt mounts
+            //one side is a tensioner, the other's nothing.
             
             //guide wheels
             difference(){
@@ -388,8 +388,8 @@ module vertical_gantry_carriage(){
         //translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1])
         guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len);
         
-        //idler screws
-        translate([0,0,mdf_wall/2]) idler_mounts(solid=0, idler_extension_x = idler_spread, idler_extension_y = idler_jut);
+        //belt path
+        //todo
         
         //holes for the beam
         //for(i=[-beam/2, beam/2]) translate([0,i,-1]) cap_cylinder(r=m5_rad, h=20);
@@ -610,13 +610,13 @@ module belt_stretcher_2(mount_sep = 20){
 
 module idler_mounts(solid=1){
     wall=5;
-    bump_height = 1;
+    bump_height = 2;
     translate([0,-beam/2,0]) for(i=[0,1]) mirror([i,0,0]) {
         if(solid==1){
             hull(){
                 translate([beam/2+idler_rad+wall,0,0]) rotate([90,0,0]) cylinder(r=idler_rad+wall, h=idler_thick+wall*2, center=true);
             
-                translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=idler_rad, h=idler_thick+wall+bump_height*2, center=true);
+                #translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=idler_rad, h=idler_thick+wall+bump_height*2, center=true);
                 //%translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=idler_rad, h=50, center=true);
             
             }
@@ -639,6 +639,9 @@ module idler_mounts(solid=1){
             }
         
             translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=m5_rad, h=idler_thick*3, center=true);
+            
+            //nut and screw flats
+            for(i=[0,1]) mirror([0,i,0]) translate([idler_extension_x,-idler_thick/2-wall/2-bump_height,idler_extension_y]) rotate([90,0,0]) cylinder(r=m5_cap_rad, h=idler_thick*3);
         }
     }
 }
@@ -876,7 +879,7 @@ module hotend_carriage2(){
         } //Holes below here
         
         //guide wheels
-        mirror([0,1,0]) #guide_wheel_helper(solid=-1,gantry_length=gantry_length, cutout=false);
+        mirror([0,1,0]) guide_wheel_helper(solid=-1,gantry_length=gantry_length, cutout=false);
         
         //belt screws
         belt_left_screwholes(solid=0, screw_sep = gantry_length);
@@ -972,7 +975,7 @@ module hotend_carriage(){
 
 module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_rad = 0, eccentric=false, spring_inset = 1){
     min_rad=3;
-    wall=5;
+    wall=6;
     
     eccentric_offset = (eccentric==true)?.25:0;
     spring_offset = (eccentric==false)?spring_inset:0;

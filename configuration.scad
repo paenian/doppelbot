@@ -27,9 +27,9 @@ layer_height=.2;
 //idler_thick = 12;
 
 //these use the smaller M5 flanged bearings as idlers
-idler_rad = 10/2;
-idler_flange_rad = 12/2;
-idler_thick = 10;
+idler_rad = 16/2;
+idler_flange_rad = 18/2;
+idler_thick = 11.5;
 
 //flanged bearing for the Z idler
 z_bearing=22/2;
