@@ -2,8 +2,6 @@
  * this is the structural endcap for the doppelbot.
  * The design entails two endcaps, separating and stiffening the frame.
  * 
- * Each endcap is a torsion box - two main plates with internal horizontal separators
- * plus four surrounding plates, intersecting all the others.
  * 
  */
 
@@ -22,6 +20,16 @@ relay_width = 45;
 relay_height = 35;
 
 //bottom plate width: 
+
+//y beam
+%cube([frame_y-beam*2,beam,beam], center=true);
+echo("y beams");
+echo(frame_y-beam*2);
+
+//z beam
+%cube([beam, frame_z-beam*4, beam], center=true);
+echo("z beams");
+echo(frame_z-beam*4);
 
 //side vars
 side_plate_width=60;    //minimum 80mm for two clips in the corners.
@@ -153,7 +161,7 @@ module support_plate_connected(motor=false){
         translate([0,0,plate_sep+mdf_wall]) support_plate(motor=motor);
             
         //holes for all the stiffening cross plates
-        if(corner_endplate==true){
+        *if(corner_endplate==true){
             corner_plates_connectors(gender=FEMALE);
         }else{
             cross_plates_connectors(gender=FEMALE);
@@ -654,18 +662,16 @@ module end_plate(corners=false, endcap=false){
 module extra_beam_coutout(){
     for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0])
         for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2,0])
-            difference(){
-                union(){
-                    for(k=[0:1]){
-                        //vertical beam
-                        translate([-beam/2,-beam*2-beam/2-k*beam,0]) endScrew();
-                        //front to back beam
-                        translate([-beam-beam/2-beam*k,-beam-beam/2,0]) endScrew();
-                        
-                        
-                    }
-                }
+            for(k=[0:1]){
+                //vertical beam
+                translate([-beam/2,-beam*2-beam/2-k*beam,0]) endScrew();
+                //front to back beam
+                translate([-beam-beam/2-beam*k,-beam-beam/2,0]) endScrew();
             }
+            
+    //center holes
+    for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2-beam/2,0,0]) endScrew();
+    for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2-beam*1.5,0]) endScrew();
 }
 
 module beam_cutout(screws=true, beams=false){
