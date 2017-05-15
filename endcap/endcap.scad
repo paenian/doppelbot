@@ -458,7 +458,7 @@ module top_plate(motor=true){
         if(motor==true){    //motor mounts
             rotate([0,0,-45]) motor_mount();
         }else{              //idler mounts
-            idler_mount();
+            translate([-motor_offset,0,0]) idler_mount(mdf_wall = mdf_wall+1);
         }
         
         //smooth rod mounts
