@@ -84,7 +84,7 @@ if(part == 10){
 
 //assemble
 module assembled_endcap(motor=false){
-    end_plate_connected();
+    //end_plate_connected();
     support_plate_connected(motor=motor);
     if(motor==true){
         support_plate_cover_connected();
@@ -316,15 +316,15 @@ module idler_mount(){
     //correct for the difference in radii of the idler and pulley radii
     translate([0,pulley_rad-idler_rad,0]) {
         //outer pulley
-        translate([idler_rad*3,0,0]){ //should be times 2, but 3 spreads the belts out more - at the cost of longer 
-            cylinder(r=m5_rad, h=wall*3, center=true);
+        translate([idler_flange_rad*2.75+1,0,0]){ // 
+            cylinder(r=m5_rad, h=mdf_wall, center=true);
             %translate([0,0,-mdf_wall*3]) cylinder(r=idler_rad, h=idler_thick);
             %translate([0,0,-mdf_wall*3]) cylinder(r=idler_flange_rad, h=1);
         }
     
         //inner pulley
-        translate([idler_rad*.5,-pulley_rad*2,0]){
-            cylinder(r=m5_rad, h=wall*3, center=true);
+        translate([idler_flange_rad+1,-pulley_rad*2,0]){
+            cylinder(r=m5_rad, h=mdf_wall, center=true);
             %translate([0,0,-mdf_wall*3]) cylinder(r=idler_rad, h=idler_thick);
             %translate([0,0,-mdf_wall*3]) cylinder(r=idler_flange_rad, h=1);
         }
@@ -425,7 +425,11 @@ module support_plate_cover(){
 
 //the uppermost plate.  Includes mounts for the motors on one side, and idlers on the other
 module top_plate(motor=true){
-    motor_offset = plate_sep/2+mdf_wall*2+pulley_flange_rad+1;
+    
+    %translate([10-mdf_wall/2,-frame_y/2+10,0]) cube([20,20,20], center=true);
+    
+    //motor_offset = plate_sep/2+mdf_wall*2+pulley_flange_rad+1;
+    motor_offset = beam+pulley_flange_rad-1;
     difference(){
         union(){
             cube([side_plate_width, frame_y+mdf_wall*3, mdf_wall], center=true);
@@ -434,10 +438,10 @@ module top_plate(motor=true){
             for(i=[0:1]) mirror([0,i,0]) hull() translate([motor_offset,motor_y,0])
             if(motor==true){    //motor mounts
                 rotate([0,0,-45]) motor_mount(screw_rad = screw_rad+mdf_wall/2, wall=wall/3);
-                translate([-mdf_wall,0,0]) rotate([0,0,-45]) motor_mount(screw_rad = screw_rad+mdf_wall, wall=wall/3);
+                //translate([-mdf_wall,0,0]) rotate([0,0,-45]) motor_mount(screw_rad = screw_rad+mdf_wall, wall=wall/3);
             }else{              //idler mounts
-                idler_mount(m5_rad = m5_rad+mdf_wall/2, wall=wall/3);
-                translate([-mdf_wall*3,0,0]) idler_mount(m5_rad = m5_rad+mdf_wall*2, wall=wall/3);
+                *idler_mount(m5_rad = m5_rad+mdf_wall/2, wall=wall/3);
+                translate([-motor_offset,0,0]) idler_mount(m5_rad = m5_rad+mdf_wall, wall=wall/3);
             }
             
             //the z motor mounts
@@ -654,18 +658,19 @@ module end_plate(corners=false, endcap=false){
 module extra_beam_coutout(){
     for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0])
         for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2,0])
-            difference(){
-                union(){
-                    for(k=[0:1]){
-                        //vertical beam
-                        translate([-beam/2,-beam*2-beam/2-k*beam,0]) endScrew();
-                        //front to back beam
-                        translate([-beam-beam/2-beam*k,-beam-beam/2,0]) endScrew();
-                        
-                        
-                    }
-                }
+            for(k=[0:1]){
+                //vertical beam
+                translate([-beam/2,-beam*2-beam/2-k*beam,0]) endScrew();
+                //front to back beam
+                translate([-beam-beam/2-beam*k,-beam-beam/2,0]) endScrew();
             }
+    //center screw holes
+    for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0]){
+        translate([-beam/2,0,0]) endScrew();
+    }
+    for(i=[0:1]) mirror([0,i,0]) translate([0,frame_z/2,0]){
+        translate([0,-beam/2-beam,0]) endScrew();
+    }
 }
 
 module beam_cutout(screws=true, beams=false){

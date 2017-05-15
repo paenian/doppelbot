@@ -34,8 +34,6 @@ if(part == 0)
     //flip for printing
     rotate([180,0,0]) 
     hotend_carriage2();
-if(part == 1)
-    gantry_end();
 if(part == 2)
     gantry_clamp();
 if(part == 3)
@@ -74,8 +72,6 @@ if(part == 10) translate([0,0,0]) {
     *translate([frame_y/2-76,0,0]) rotate([0,0,0]) 
     hotend_carriage2();
 
-    *translate([frame_y/2,-60,0]) gantry_end();
-
     *translate([frame_y/2,-60,-beam*2]) mirror([0,0,1]) gantry_clamp();
     
     translate([frame_y/2-beam,0,-beam]) gantry_carriage();
@@ -90,96 +86,10 @@ if(part == 10) translate([0,0,0]) {
     *translate([0,225,-frame_z/2]) rotate([90,0,0]) assembled_endcap(); 
 }
 
-
-
-
-//just a little spar below the gantry to make sure it remains level
-//Obsolete!
-module gantry_clamp(){
-    roller_sep = 40; //distance between rod centers
-    ridge_length = 20;
-    wall=5;
-    
-    %translate([-beam/2,0,-beam]) cube([beam, 100, beam*2],center=true);
-    
-    difference(){
-        union(){
-            //y wheel mounts
-            for(i=[-1,1]) translate([-beam/2, roller_sep/2*i, 0]) roller_mount(1);
-            //y wheel support spines
-            for(i=[-1,1]) hull(){
-                translate([-beam/2, roller_sep/2*i, 0]) roller_mount(1);
-                translate([-ridge_length/2-beam/2-(m5_rad+wall),beam/4*i,wall/2]) cube([ridge_length,beam/2,wall], center=true);
-            }
-            
-            //main base
-            hull(){
-                //gantry beam mount
-                for(i=[0,1]) translate([-beam-wall-beam*3/2-i*beam, 0, 0]) cylinder(r=m5_rad+wall, h=wall);
-                    translate([-ridge_length/2-beam/2-(m5_rad+wall),0,wall/2]) cube([ridge_length,beam,wall], center=true);
-            }
-        }
-        //holes for the mounts
-        for(i=[-1,1]) translate([-beam/2, roller_sep/2*i, 0]) roller_mount(0);
-            
-        //gantry beam mount
-        for(i=[0,1]) translate([-beam-wall-beam*3/2-i*beam, 0, 0]) translate([0,0,wall*1.5+.25]) mirror([0,0,1]) screw_hole_m5(height=wall*2, cap=false);
-        //flatten the bottom
-        translate([0,0,-100]) cube([200,200,200], center=true);
-    }
-}
-
-//the top of the gantry
-//Obsolete!
-module gantry_end(){
-    roller_sep = 40; //distance between wheel centers
-    ridge_length = 30;
-    wall=5;
-    %translate([-beam/2,0,-beam-1]) cube([beam, 100, beam*2],center=true);
-
-					//line up with motor   //
-	idler_pos = -(frame_y/2-motor_y) - idler_rad - pulley_rad - belt_width;
-    
-	difference(){
-        union(){
-            //y wheel support spines
-            for(i=[-1,1]) hull(){
-                translate([-beam/2, roller_sep/2*i, 0]) roller_mount(1);
-                translate([-ridge_length/2-beam/2-(m5_rad+wall),beam/4*i,wall/2]) cube([ridge_length,beam/2,wall], center=true);
-            }
-            
-            //main base
-            hull(){
-                //idler guide rollers
-                for(i=[-1,1]) translate([idler_pos, i*idler_extension, 0]) cylinder(r=m5_rad+wall, h=wall);
-            }
-            hull(){
-                //gantry beam mount
-               for(i=[0,1]) translate([-beam-wall-beam/2-beam*i, 0, 0]) cylinder(r=m5_rad+wall, h=wall);
-                    //translate([-ridge_length/2-beam/2,0,wall/2]) cube([ridge_length,beam,wall], center=true);
-            }
-        }
-        //holes for the horizontal rollers
-        for(i=[-1,1]) translate([-beam/2, roller_sep/2*i, 0]) roller_mount(0);
-            
-        //idler rollers
-        for(i=[-1,1]) translate([idler_pos, i*idler_extension, 0])
-           translate([0,0,wall+wall/2+.25]) mirror([0,0,1]) screw_hole_m5(cap=false, height=10);
-            
-        //gantry beam mount
-        for(i=[0,1]) translate([-beam-wall-beam/2-beam*i, 0, wall/2+.25]) translate([0,0,wall+.1]) mirror([0,0,1]) screw_hole_m5(cap=false, height=10);
-            
-        //flatten the bottom
-        translate([0,0,-100]) cube([200,200,200], center=true);
-    }
-}
-
 module wheel(){
     for(i=[0:1]) mirror([0,0,i]) translate([0,0,-wheel_height/2]) cylinder(r1=wheel_inner_rad, r2=wheel_rad, h=(wheel_height-wheel_inner_height)/2);
     cylinder(r=wheel_rad, h=wheel_inner_height, center=true);
 }
-
-
 
 //New roller mounts that are flush with the end of the beam
 //  move the wheel support back and use a spacer to mount the wheels.
@@ -366,18 +276,17 @@ module vertical_gantry_carriage(){
             //guide wheels
             difference(){
                 guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false);
-                
-                
-                //round the front corners
-                *for(i=[0,1]) mirror([i,0,0]) translate([cyclops_width/2+min_rad,beam/2+m5_rad+wall+1,0]) difference(){
-                    translate([-min_rad-1,0,-wall]) cube([min_rad+1, min_rad+1, wall*5]);
-                    cylinder(r=min_rad, h=wall*11, center=true);
-                }
             }
             
-            //lovingly triple-screw the hotend
+            //lovingly attach the tool mount
+            //for now, screws.  Later, use some sort of quick-change system?
             translate([0,hotend_drop,wall]) rotate([90,0,0]) chimaera_holder(solid=1, jut=1);
-
+            
+            //belt stretcher in front?
+            //have a stop for a screw, then tightening the screw brings the belt closer
+            hull(){
+                cylinder(r=belt_width/2, h=50);
+            }
             
         } //Holes below here
         
@@ -497,7 +406,7 @@ module vertical_gantry_carriage_rear(){
     difference(){
         union(){
             //idler mounts
-            #for(i=[-1,1]) translate([idler_front,0,0]) hull(){
+            for(i=[-1,1]) translate([idler_front,0,0]) hull(){
                 translate([idler_spread*i/2,-4,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2+1, h=5, center=true);
                 %translate([idler_spread*i/2,-6,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=idler_flange_rad, h=8);
                 
@@ -519,7 +428,7 @@ module vertical_gantry_carriage_rear(){
                 translate([0,18,-15-induction_jut]) rotate([90,0,0]) cylinder(r=ind_rad-2, h=ind_height+6+wall+4);
             }
             
-        } //Holes below here
+        }   //Holes below here
         
         translate([idler_front,-10,wall-.1]) belt_stretcher_2_bumps(mount_sep = stretcher_mount_sep, solid = -1);
         
