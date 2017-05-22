@@ -43,7 +43,7 @@ screw_w = 31;
 screw_rad = m3_rad;
 
 //render everything
-part=10;
+part=8;
 
 
 //parts for laser cutting
@@ -73,6 +73,8 @@ if(part == 7)
     corner_plate_projected();
 if(part == 71)
     corner_plate_projected(cover=true);
+if(part == 8)
+    corner_brace();
 
 //view the assembly
 if(part == 10){
@@ -906,4 +908,18 @@ module cross_plates(){
 
 module holes(){
     cylinder(r=5, h=mdf_wall*2, center=true, $fn=7);
+}
+
+module corner_brace(){
+    difference(){
+        hull(){
+            cylinder(r=beam/2, h=mdf_wall, center=true);
+            translate([beam*2, 0, 0]) cylinder(r=beam/2, h=mdf_wall, center=true);
+            translate([0,beam*2, 0]) cylinder(r=beam/2, h=mdf_wall, center=true);
+        }
+        
+        //holes
+        for(i=[0:2]) translate([i*beam,0,0]) cylinder(r=m5_rad, h=mdf_wall+1, center=true);
+        for(i=[0:2]) translate([0,i*beam,0]) cylinder(r=m5_rad, h=mdf_wall+1, center=true);    
+    }
 }
