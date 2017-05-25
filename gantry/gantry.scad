@@ -21,13 +21,14 @@ ind_height = 12;
 
 idler_extension = 0; //beam/2+idler_flange_rad+10+6;
 idler_extension_x = beam/2+idler_flange_rad+1;
-idler_extension_y = -mdf_wall/2+idler_rad+pulley_rad*2;
+
+idler_extension_y = -mdf_wall/2+idler_rad+pulley_rad*2-3;
 
 
 stretcher_mount_sep = 40;
 
 //render everything
-part=10;
+part=3;
 
 //parts for laser cutting
 if(part == 0)
@@ -525,7 +526,7 @@ module idler_mounts(solid=1){
             hull(){
                 translate([beam/2+idler_rad+wall,0,0]) rotate([90,0,0]) cylinder(r=idler_rad+wall, h=idler_thick+wall*2, center=true);
             
-                #translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=idler_rad, h=idler_thick+wall+bump_height*2, center=true);
+                translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=idler_rad, h=idler_thick+wall+bump_height*2, center=true);
                 //%translate([idler_extension_x,0,idler_extension_y]) rotate([90,0,0]) cylinder(r=idler_rad, h=50, center=true);
             
             }
