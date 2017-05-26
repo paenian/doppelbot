@@ -13,6 +13,10 @@ module screw_hole_m3(cap=false, onion=0, height=wall){
     screw_hole(cap=cap, onion=onion, cap_height=m3_cap_height, rad=m3_rad, cap_rad=m3_cap_rad, height=height);
 }
 
+module nut_hole_m3(cap=false, onion=0, height=wall){
+    nut_hole(cap=cap, onion=onion, nut_height=m3_nut_height+1, rad=m3_rad, nut_rad=m3_nut_rad, height=height);
+}
+
 module screw_hole_m4(cap=false, onion=0, height=wall){
     screw_hole(cap=cap, onion=onion, cap_height=m4_cap_height, rad=m4_rad, cap_rad=m4_cap_rad, height=height);
 }
@@ -21,7 +25,20 @@ module screw_hole_m5(cap=false, onion=0, height=wall){
     screw_hole(cap=cap, onion=onion, cap_height=m5_cap_height, rad=m5_rad, cap_rad=m5_cap_rad, height=height);
 }
 
-//screhole with a nice recess for the cap.
+//nuthole with a nice recess for the cap.
+module nut_hole(cap=false, onion=0, height=wall){
+    translate([0,0,-nut_height-1])
+        if(cap==true){
+            cap_cylinder(r=rad, h=height*3);
+        }else{
+            cylinder(r=rad, h=height*3);
+        }
+	translate([0,0,0])
+        cylinder(r1=nut_rad, r2=nut_rad+slop, h=height, $fn=6);
+        
+}
+
+//nuthole with a nice recess for the cap.
 module screw_hole(cap=false, onion=0, height=wall){
     translate([0,0,cap_height-.05+onion])
         if(cap==true){
