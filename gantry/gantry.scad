@@ -29,7 +29,7 @@ carriage_thick = 6;
 stretcher_mount_sep = 40;
 
 //render everything
-part=7;
+part=66;
 
 //parts for laser cutting
 if(part == 0)
@@ -52,6 +52,10 @@ if(part == 5){
 
 if(part == 6){
     rotate([0,90,0]) vertical_gantry_carriage();
+}
+
+if(part == 66){
+    rotate([0,0,90]) attachment_base();
 }
 
 if(part == 7){
@@ -312,7 +316,80 @@ module gantry_carriage(){
 }
 }
 
-module attachment_mount(solid=1, jut=1){
+module attachment_base(){
+    wall = 6;
+    slot_len = 6;
+    
+    translate([0,0,-wall]) 
+    difference(){
+        union(){
+            attachment_mount(solid=0, extra_top = 0, wall=wall, cutout = false);
+            
+            //extra top bump
+            translate([0,0,.25]) scale([.95,.95,1]) attachment_mount(solid=0, extra_top = 0, wall=wall, cutout = false);
+            
+            translate([0,slot_len,wall]) cylinder(r=m5_cap_rad+slop, h=4);
+        }
+        
+        translate([0,slot_len,0]) cylinder(r=m5_rad+slop, h=wall*5.1, center=true);
+    }
+}
+
+//this is a v-groove attachment mount.
+module attachment_mount(solid = 1, jut = 0, wall=wall, extra_top = 1, cutout = true, rad = 3){
+    bot_width = 10;
+    height = 20;
+    
+    side_angle = 20; //the angle of the V
+    cut_angle = 30; //the angle of the inside of the V-groove
+    
+    slot_len = 6;
+    
+    thick = 4;
+    
+    base = thick * tan(cut_angle);
+    echo(base);
+    bot_rad = rad + thick * tan(cut_angle) + solid*rad;
+    
+    //%cube([bot_width, 90, 15], center=true);
+    
+    //if(solid == 1){
+        translate([0,wall,0]) hull(){
+            for(i=[0,1]) mirror([i,0,0]) translate([(bot_width-rad*2)/2+thick/2*solid,height,0]){
+                //lower sides
+                translate([0,0,wall]) cylinder(r1=bot_rad, r2=rad, h=thick);
+                if(solid == 1) cylinder(r=bot_rad, h=wall+.1);
+                    
+                //upper sides
+                translate([0,0,wall]) rotate([0,0,side_angle]) translate([0,-height+(solid-extra_top)*bot_rad,0]) cylinder(r1=bot_rad, r2=rad, h=thick);
+                if(solid == 1) rotate([0,0,side_angle]) translate([0,-height,0]) cylinder(r1=bot_rad, r2=rad, h=wall+.1);
+            }
+        }
+    //}
+    echo(solid);
+        echo(base);
+    if(solid == 0 && cutout == true){
+        //open up the bottom
+        translate([0,0,wall*1.5]) cube([bot_width, 90, wall], center=true);
+        
+        //slot for the locking screw
+        hull(){
+            for(i=[0,1]) translate([0,i*slot_len,0]) cylinder(r=m5_rad-slop*(i-1), h=wall*2.1, center=true);
+        }
+        
+        //slot for the locking nut
+        hull(){
+            for(i=[0,1]) translate([0,i*slot_len,-.1]) rotate([0,0,45]) cylinder(r=m5_sq_nut_rad, h=wall/2, $fn=4);
+        }
+        
+        //hole to insert the locking nut
+        hull(){
+            for(i=[0,1]) translate([0,-slot_len/2,0]) rotate([0,0,45]) cylinder(r=m5_sq_nut_rad+slop, h=wall*2.1, $fn=4, center=true);
+        }
+    }
+}
+
+module attachment_mount_screws(solid=1, jut=1){
     wall=carriage_thick;
     hole_sep = 15;
     translate([0,beam/4,0]) {
@@ -450,7 +527,7 @@ module belt_attach_holes(carriage_len = 60){
 }
 
 module vertical_gantry_carriage(){
-    wall=5;
+    wall=6;
     min_rad = 2;
     carriage_len = 60;
     carriage_spread = -15;
@@ -482,7 +559,9 @@ module vertical_gantry_carriage(){
             }
             
             //mount for the attachments
-            attachment_mount(solid=1, jut=mount_standoff);
+            attachment_mount(solid=1, jut=mount_standoff, wall=wall);
+            
+            %translate([0,0,wall]) attachment_base();
 
             
         } //Holes below here
@@ -492,7 +571,7 @@ module vertical_gantry_carriage(){
         
         //attachment holes
         //mount for the attachments
-        attachment_mount(solid=0, jut=mount_standoff);
+        attachment_mount(solid=0, jut=mount_standoff, wall=wall+.1);
         
         //guide wheels
         //translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1])
