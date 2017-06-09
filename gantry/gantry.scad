@@ -29,7 +29,7 @@ carriage_thick = 6;
 stretcher_mount_sep = 40;
 
 //render everything
-part=66;
+part=10;
 
 //parts for laser cutting
 if(part == 0)
@@ -318,7 +318,8 @@ module gantry_carriage(){
 
 module attachment_base(){
     wall = 6;
-    slot_len = 6;
+    slot_len = 5;
+    
     
     translate([0,0,-wall]) 
     difference(){
@@ -328,10 +329,10 @@ module attachment_base(){
             //extra top bump
             translate([0,0,.25]) scale([.95,.95,1]) attachment_mount(solid=0, extra_top = 0, wall=wall, cutout = false);
             
-            translate([0,slot_len,wall]) cylinder(r=m5_cap_rad+slop, h=4);
+            translate([0,slot_len*1.5,wall]) cylinder(r=m5_cap_rad+slop, h=4);
         }
         
-        translate([0,slot_len,0]) cylinder(r=m5_rad+slop, h=wall*5.1, center=true);
+        translate([0,slot_len*1.5,0]) cylinder(r=m5_rad+slop, h=wall*5.1, center=true);
     }
 }
 
@@ -340,10 +341,12 @@ module attachment_mount(solid = 1, jut = 0, wall=wall, extra_top = 1, cutout = t
     bot_width = 10;
     height = 20;
     
+    drop = beam/2;
+    
     side_angle = 20; //the angle of the V
     cut_angle = 30; //the angle of the inside of the V-groove
     
-    slot_len = 6;
+    slot_len = 5;
     
     thick = 4;
     
@@ -354,7 +357,7 @@ module attachment_mount(solid = 1, jut = 0, wall=wall, extra_top = 1, cutout = t
     //%cube([bot_width, 90, 15], center=true);
     
     //if(solid == 1){
-        translate([0,wall,0]) hull(){
+        translate([0,drop,0]) hull(){
             for(i=[0,1]) mirror([i,0,0]) translate([(bot_width-rad*2)/2+thick/2*solid,height,0]){
                 //lower sides
                 translate([0,0,wall]) cylinder(r1=bot_rad, r2=rad, h=thick);
@@ -368,6 +371,7 @@ module attachment_mount(solid = 1, jut = 0, wall=wall, extra_top = 1, cutout = t
     //}
     echo(solid);
         echo(base);
+    translate([0,slot_len/2,0]) {
     if(solid == 0 && cutout == true){
         //open up the bottom
         translate([0,0,wall*1.5]) cube([bot_width, 90, wall], center=true);
@@ -379,14 +383,15 @@ module attachment_mount(solid = 1, jut = 0, wall=wall, extra_top = 1, cutout = t
         
         //slot for the locking nut
         hull(){
-            for(i=[0,1]) translate([0,i*slot_len,-.1]) rotate([0,0,45]) cylinder(r=m5_sq_nut_rad, h=wall/2, $fn=4);
+            for(i=[0,1]) translate([0,i*slot_len,-.1]) rotate([0,0,45]) cylinder(r=m5_sq_nut_rad+slop-slop*(i-1), h=wall/2, $fn=4);
         }
         
         //hole to insert the locking nut
         hull(){
-            for(i=[0,1]) translate([0,-slot_len/2,0]) rotate([0,0,45]) cylinder(r=m5_sq_nut_rad+slop, h=wall*2.1, $fn=4, center=true);
+            for(i=[0,1]) translate([0,-slot_len/2,0]) rotate([0,0,45]) cylinder(r=m5_sq_nut_rad+slop*2, h=wall*2.1, $fn=4, center=true);
         }
     }
+}
 }
 
 module attachment_mount_screws(solid=1, jut=1){
@@ -460,7 +465,7 @@ module chimaera_holder(solid=0, jut=0){
 }
 
 module belt_tensioner_mount(carriage_len=60){
-    thick = belt_thick+6;
+    thick = belt_thick+2;
     base_thick = carriage_thick;
     screw_jut = base_thick+m3_cap_rad+belt_width*2+1;
     
@@ -477,7 +482,7 @@ module belt_tensioner_mount(carriage_len=60){
 }
 
 module belt_tensioner_clamp(carriage_len=60){
-    thick = belt_thick;
+    thick = belt_thick+1;
     base_thick = belt_width*4;
     screw_jut = base_thick+m3_cap_rad-2;
     
@@ -515,14 +520,20 @@ module belt_tensioner_clamp(carriage_len=60){
 }
 
 module belt_attach_holes(carriage_len = 60){
+    wall = 6;
     thick = belt_thick+3;
     translate([0,-beam/2,0])
-    for(i=[0:1]) mirror([i,0,0]) translate([carriage_len/2-wall,0,0]){
-        cube([belt_width*2,thick,30], center=true);
-        translate([-wall*2,0,0]) cube([belt_width*2,thick,30], center=true);
+    for(i=[0:1]) mirror([i,0,0]) translate([carriage_len/2+.25,0,0]){
+        hull(){
+            #cube([belt_width*2,thick,belt_width], center=true);
+            translate([-wall*1.5,0,wall]) cube([belt_width*2,thick,.1], center=true);
+        }
+        
+        *cube([belt_width*2,thick,30], center=true);
+        translate([-wall*1.5,0,15+wall]) cube([belt_width*2,thick,30], center=true);
         
         //cut out the backside a smidge
-        translate([25-wall*2-belt_width,0,0]) cube([50,thick,belt_width*2], center=true);
+        *translate([25-wall*2-belt_width,0,0]) cube([50,thick,belt_width*2], center=true);
     }
 }
 
@@ -543,8 +554,7 @@ module vertical_gantry_carriage(){
     %translate([0,0,-beam/2-1]) cube([120,beam*2,beam],center=true);
     difference(){
         union(){
-            //belt tensioner mount
-            belt_tensioner_mount();
+            
             
             //guide wheels
             difference(){
@@ -594,7 +604,7 @@ module vertical_gantry_carriage(){
 }
 
 module vertical_gantry_carriage_rear(){
-    wall=5;
+    wall=6;
     min_rad = 2;
     carriage_len = 60;
     carriage_spread = -15;
@@ -620,8 +630,11 @@ module vertical_gantry_carriage_rear(){
                 translate([idler_spread*i*0,20,-m5_rad]) rotate([90,0,0]) cylinder(r=m5_rad+wall, h=2, center=true);
             }
             
+            //belt tensioner mount
+            belt_tensioner_mount();
+            
             //mount for the attachments
-            attachment_mount(solid=1, jut=mount_standoff);
+            attachment_mount(solid=1, jut=mount_standoff, wall=wall);
             
             //belt stretcher bumps
             *translate([idler_front,-10,idler_extension_y+10]) rotate([90,0,0]) belt_stretcher_2(mount_sep = stretcher_mount_sep);
@@ -641,7 +654,7 @@ module vertical_gantry_carriage_rear(){
         *translate([idler_front,-10,wall-.1]) belt_stretcher_2_bumps(mount_sep = stretcher_mount_sep, solid = -1);
         
         //mount for the attachments
-        attachment_mount(solid=0, jut=mount_standoff);
+        attachment_mount(solid=0, jut=mount_standoff, wall=wall+.1);
         
         //induction sensor holes
         *translate([induction_rear,16,15+induction_jut]) rotate([90,0,0]) rotate([0,0,90]) mirror([0,1,0]) mirror([0,0,1]) extruder_mount(solid=0, m_height=ind_height+6,  hotend_rad=ind_rad, wall=3);
