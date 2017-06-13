@@ -74,7 +74,7 @@ if(part == 7)
 if(part == 71)
     corner_plate_projected(cover=true);
 if(part == 8)
-    corner_brace();
+    corner_brace_projected();
 
 //view the assembly
 if(part == 10){
@@ -106,6 +106,12 @@ module assembled_endcap(motor=false){
  * The plate files don't have cutouts for their intersections
  * with other plates - those are added here, in the layout.
  */
+module corner_brace_projected(){
+    projection(){
+        corner_brace();
+    }
+}
+
 module end_plate_projected(){
     echo("Cut One per End");
     projection(){

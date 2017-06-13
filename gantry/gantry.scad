@@ -29,7 +29,7 @@ carriage_thick = 6;
 stretcher_mount_sep = 40;
 
 //render everything
-part=10;
+part=6;
 
 //parts for laser cutting
 if(part == 0)
@@ -56,6 +56,10 @@ if(part == 6){
 
 if(part == 66){
     rotate([0,0,90]) attachment_base();
+}
+
+if(part == 666){
+    rotate([0,0,90]) attachment_base_aero();
 }
 
 if(part == 7){
@@ -316,6 +320,55 @@ module gantry_carriage(){
 }
 }
 
+//holes for the motor
+module motor_holes(screw_rad = m3_rad+slop/2, screw_w = 31, slot=2, height = wall*3){
+    bump_rad = 12;
+    
+    cylinder(r=bump_rad, h=height, center=true);
+    %translate([0,0,-20]) cylinder(r=pulley_flange_rad, h=height*2);
+    for(i=[0:90:359]) rotate([0,0,i]) translate([screw_w/2, screw_w/2, 0]){
+        hull(){
+            translate([-slot/2,-slot/2,0]) cylinder(r=screw_rad, h=height, center=true);
+            translate([slot/2,slot/2,0]) cylinder(r=screw_rad, h=height, center=true);
+        }
+    }
+}
+
+module attachment_base_aero(){
+    wall = 3;
+    slot_len = 5;
+    base_height = 4;
+    
+    motor_w = 42;
+    
+    motor_drop = 42/2+slot_len*1.5+5+1;
+    
+    brace_width = motor_w/3;
+    brace_height = motor_w/2;
+    
+    difference(){
+        union(){
+            attachment_base();
+            
+            //motor plate
+            hull() translate([0,motor_drop,base_height+31/2+5]) rotate([0,90,0]) motor_holes(screw_rad = 5, slot = 0, height = wall);
+            hull() translate([0,motor_drop-wall/2,base_height+31/2+5]) rotate([0,90,0]) motor_holes(screw_rad = 5, slot = 0, height = wall);
+            
+            //top brace
+            hull(){
+                #translate([0,motor_drop-motor_w/2-wall/2-.75,base_height+wall/2]) cube([brace_width,wall,wall+.1],center=true);
+                translate([0,motor_drop-motor_w/2-wall/2-.75,base_height+wall/2+brace_height]) cube([wall,wall,wall+.1],center=true);
+            }
+        }
+        
+        //motor holes
+        translate([0,motor_drop,base_height+31/2+5]) rotate([0,90,0]) motor_holes(slot = .5, height = wall+1);
+        
+        //clear the screwheadhole
+        translate([0,slot_len*1.5,base_height]) cylinder(r=5, h=50);
+    }
+}
+
 module attachment_base(){
     wall = 6;
     slot_len = 5;
@@ -558,7 +611,7 @@ module vertical_gantry_carriage(){
             
             //guide wheels
             difference(){
-                guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false, spring_material=false);
+                guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false, spring_material=false, spring_compression=1);
                 
                 
                 //round the front corners
@@ -585,7 +638,7 @@ module vertical_gantry_carriage(){
         
         //guide wheels
         //translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1])
-        guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len);
+        guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len, spring_compression=1);
         
         //belt path
         //todo
@@ -641,7 +694,7 @@ module vertical_gantry_carriage_rear(){
             *translate([idler_front,-10,wall-.1]) belt_stretcher_2_bumps(mount_sep = stretcher_mount_sep, solid=1);
             
             //guide wheels
-            guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false, spring_material=false);
+            guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false, spring_material=false, spring_compression=1);
 
             //induction sensor mount
             *translate([induction_rear,15,15+induction_jut]) hull(){
@@ -661,7 +714,7 @@ module vertical_gantry_carriage_rear(){
         
         //guide wheels
         //translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1])
-        guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len);
+        guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len, spring_compression=1);
         
         //idler screws
         *translate([idler_front,0,0]) translate([0,0,mdf_wall/2]) idler_mounts(solid=0, idler_extension_x = idler_spread/2, idler_extension_y = idler_jut, m5_rad=m5_rad-slop);
