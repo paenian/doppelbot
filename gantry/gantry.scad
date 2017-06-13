@@ -29,7 +29,7 @@ carriage_thick = 6;
 stretcher_mount_sep = 40;
 
 //render everything
-part=6;
+part=666;
 
 //parts for laser cutting
 if(part == 0)
@@ -342,27 +342,32 @@ module attachment_base_aero(){
     motor_w = 42;
     
     motor_drop = 42/2+slot_len*1.5+5+1;
+    motor_extra_drop = 1;
     
     brace_width = motor_w/3;
     brace_height = motor_w/2;
+    
+    extra_jut = 13;
     
     difference(){
         union(){
             attachment_base();
             
             //motor plate
-            hull() translate([0,motor_drop,base_height+31/2+5]) rotate([0,90,0]) motor_holes(screw_rad = 5, slot = 0, height = wall);
-            hull() translate([0,motor_drop-wall/2,base_height+31/2+5]) rotate([0,90,0]) motor_holes(screw_rad = 5, slot = 0, height = wall);
+            hull() {
+                translate([0,motor_drop+motor_extra_drop,base_height+31/2+5+extra_jut]) rotate([0,90,0]) motor_holes(screw_rad = 5, slot = 0, height = wall);
+                translate([0,motor_drop-wall/2,base_height+31/2+1])rotate([0,90,0]) motor_holes(screw_rad = 5, slot = 0, height = wall);
+            }
             
             //top brace
             hull(){
-                #translate([0,motor_drop-motor_w/2-wall/2-.75,base_height+wall/2]) cube([brace_width,wall,wall+.1],center=true);
-                translate([0,motor_drop-motor_w/2-wall/2-.75,base_height+wall/2+brace_height]) cube([wall,wall,wall+.1],center=true);
+                #translate([0,motor_drop-motor_w/2-wall/2-.25,base_height+wall/2]) cube([brace_width,wall,wall+.1],center=true);
+                translate([0,motor_drop-motor_w/2-wall/2-.25,base_height+wall/2+brace_height]) cube([wall,wall,wall+.1],center=true);
             }
         }
         
         //motor holes
-        translate([0,motor_drop,base_height+31/2+5]) rotate([0,90,0]) motor_holes(slot = .5, height = wall+1);
+        translate([0,motor_drop+motor_extra_drop,base_height+31/2+5+extra_jut]) rotate([0,90,0]) motor_holes(slot = .5, height = wall+1);
         
         //clear the screwheadhole
         translate([0,slot_len*1.5,base_height]) cylinder(r=5, h=50);
