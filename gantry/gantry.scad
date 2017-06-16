@@ -29,7 +29,7 @@ carriage_thick = 6;
 stretcher_mount_sep = 40;
 
 //render everything
-part=92;
+part=88;
 
 //parts for laser cutting
 if(part == 0)
@@ -76,7 +76,7 @@ if(part == 77){
 }
 
 if(part == 88){
-    belt_tensioner_clamp();
+    translate([0,0,belt_thick/2+1]) rotate([0,90,0]) belt_tensioner_clamp();
 }
 
 if(part == 888){
@@ -598,7 +598,8 @@ module belt_tensioner_mount(carriage_len=60){
 }
 
 module belt_tensioner_clamp(carriage_len=60){
-    thick = belt_thick+1;
+    thick = belt_thick;
+    extra_thick = 2;
     base_thick = belt_width*4;
     screw_jut = base_thick+m3_cap_rad-2;
     
@@ -614,19 +615,19 @@ module belt_tensioner_clamp(carriage_len=60){
     difference(){
         union(){
             hull(){
-                translate([-wall/2,0,height/2]) cube([wall,thick,height], center=true);
-                translate([-wall,0,base_thick/2]) cube([wall*2,thick,base_thick], center=true);
+                translate([-wall/2,0,height/2]) cube([wall,thick+extra_thick,height], center=true);
+                translate([-wall,0,base_thick/2]) cube([wall*2,thick+extra_thick,base_thick], center=true);
             }
             
             //meat for the belt clamp
-            translate([-wall-clamp_len/2,0,base_thick/2]) cube([wall*2+clamp_len,thick,base_thick], center=true);
+            translate([-wall-clamp_len/2,0,base_thick/2]) cube([wall*2+clamp_len,thick+extra_thick,base_thick], center=true);
         }
         
         //nut hole
-        #translate([-wall,0,screw_jut]) rotate([0,-90,0]) nut_hole_m3(height = wall*3);
+        #translate([-wall,-extra_thick,screw_jut]) rotate([0,-90,0]) nut_hole_m3(height = wall*3);
         
         //belt clamp
-        translate([-wall*2-clamp_len/2,0,base_thick/2]) 
+        translate([-wall*2-clamp_len/2,-extra_thick,base_thick/2]) 
         difference(){
             cube([clamp_len+1,thick+1,belt_width+slop], center=true);
             for(i=[.5:pitch:clamp_len+1]) translate([i-clamp_len/2,0,-belt_width/2-.2])
