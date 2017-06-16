@@ -29,7 +29,7 @@ carriage_thick = 6;
 stretcher_mount_sep = 40;
 
 //render everything
-part=666;
+part=92;
 
 //parts for laser cutting
 if(part == 0)
@@ -54,12 +54,16 @@ if(part == 6){
     rotate([0,90,0]) vertical_gantry_carriage();
 }
 
-if(part == 66){
+if(part == 9){
     rotate([0,0,90]) attachment_base();
 }
 
-if(part == 666){
+if(part == 91){
     rotate([0,0,90]) attachment_base_aero();
+}
+
+if(part == 92){
+    rotate([0,0,90]) attachment_base_chimaera();
 }
 
 if(part == 7){
@@ -71,12 +75,16 @@ if(part == 77){
     %translate([0,-100,0]) vertical_gantry_carriage_rear();
 }
 
-if(part == 8){
-    belt_stretcher_2(solid=1, mount_sep=stretcher_mount_sep);
+if(part == 88){
+    belt_tensioner_clamp();
 }
 
-if(part == 9){
-    belt_stretcher_3();
+if(part == 888){
+    belt_tensioner_double_clamp();
+}
+
+if(part == 8){
+    belt_stretcher_2(solid=1, mount_sep=stretcher_mount_sep);
 }
 
 if(part == 10) translate([0,0,0]) {
@@ -334,15 +342,65 @@ module motor_holes(screw_rad = m3_rad+slop/2, screw_w = 31, slot=2, height = wal
     }
 }
 
+module chimaera_helper(solid = 1, jut = 1, height = 5, proud = 2){
+    hole_sep = 9;
+    hole_zsep = 10;
+    wall =5;
+    ind_jut = proud;
+    flat = 1;
+    
+    for(i=[-1,0,1]) {
+        translate([hole_sep/2*i,-height,abs(hole_zsep * i)]) rotate([-90,0,0]){
+            if(solid>=0){
+                cylinder(r=m3_rad+wall, h=height);
+                if(jut==1){
+                    translate([0,0,height-.1]) cylinder(r1=m3_rad+wall, r2=m3_rad+wall/2, h=ind_jut+.1);
+                }
+            }
+            
+            if(solid<=0) translate([0,0,-.1]) {
+                translate([0,0,ind_jut+.25]) cap_cylinder(r=m3_rad, h=wall*2);
+                translate([0,0,-height]) cap_cylinder(r=m3_cap_rad, h=m3_cap_height+wall);
+            }
+        }
+    }
+}
+
+module attachment_base_chimaera(){
+    thick = 4;
+    bot_width = 10;
+    
+    drop = 33;
+    
+    %translate([0,18,5]) cube([10,10,10], center=true);
+    
+    difference(){
+        union(){
+            attachment_base();
+            
+            intersection(){
+                union(){
+                    translate([0,7.3,thick-.1]) scale([.725,.725,1]) attachment_mount(solid=0, extra_top = 0, wall=0, cutout = false);
+                    cube([bot_width-slop*2,100,50], center=true);
+                }
+                
+                translate([0,drop,thick]) rotate([90,0,0]) chimaera_helper(solid = 1, height=thick);
+            }
+        }
+        
+        translate([0,drop,thick]) rotate([90,0,0]) chimaera_helper(solid = -1, height=thick);
+    }
+}
+
 module attachment_base_aero(){
-    wall = 3;
+    wall = 5;
     slot_len = 5;
     base_height = 4;
     
     motor_w = 42;
     
     motor_drop = 42/2+slot_len*1.5+5+1;
-    motor_extra_drop = 1;
+    motor_extra_drop = 2;
     
     brace_width = motor_w/3;
     brace_height = motor_w/2;
@@ -572,6 +630,38 @@ module belt_tensioner_clamp(carriage_len=60){
         difference(){
             cube([clamp_len+1,thick+1,belt_width+slop], center=true);
             for(i=[.5:pitch:clamp_len+1]) translate([i-clamp_len/2,0,-belt_width/2-.2])
+                cube([(pitch/2)*.8,thick+1, belt_width],center=true);
+        }
+    }
+}
+
+module belt_tensioner_double_clamp(carriage_len=60){
+    thick = belt_thick+3;
+    base_thick = belt_width*6;
+    screw_jut = base_thick+m3_cap_rad-2;
+    
+    height = screw_jut+m3_nut_rad-.5;
+    
+    clamp_len = 18;
+    
+    pitch = 2;
+    
+    belt_width = 2;
+    
+    rotate([0,0,-90]) 
+    difference(){
+        union(){
+            
+            //meat for the belt clamp
+            translate([0,0,base_thick/2]) cube([clamp_len,thick,base_thick], center=true);
+        }
+        
+        //belt clamp
+        translate([0,wall,base_thick/2]) 
+        difference(){
+            cube([clamp_len+1,thick+1,belt_width*2+slop], center=true);
+            for(j=[-1,1])
+            for(i=[pitch/2:pitch:clamp_len+1]) translate([i-clamp_len/2,0,belt_width*j])
                 cube([(pitch/2)*.8,thick+1, belt_width],center=true);
         }
     }
