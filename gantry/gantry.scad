@@ -29,7 +29,7 @@ carriage_thick = 6;
 stretcher_mount_sep = 40;
 
 //render everything
-part=88;
+part=888;
 
 //parts for laser cutting
 if(part == 0)
@@ -80,7 +80,7 @@ if(part == 88){
 }
 
 if(part == 888){
-    belt_tensioner_double_clamp();
+    translate([0,0,belt_thick/2+1.5]) rotate([0,-90,0]) belt_tensioner_double_clamp();
 }
 
 if(part == 8){
@@ -660,9 +660,9 @@ module belt_tensioner_double_clamp(carriage_len=60){
         //belt clamp
         translate([0,wall,base_thick/2]) 
         difference(){
-            cube([clamp_len+1,thick+1,belt_width*2+slop], center=true);
+            cube([clamp_len+1,thick+1,belt_width*2-slop*2], center=true);
             for(j=[-1,1])
-            for(i=[pitch/2:pitch:clamp_len+1]) translate([i-clamp_len/2,0,belt_width*j])
+            for(i=[pitch/2:pitch:clamp_len+1]) translate([i-clamp_len/2,0,(belt_width-slop)*j])
                 cube([(pitch/2)*.8,thick+1, belt_width],center=true);
         }
     }
