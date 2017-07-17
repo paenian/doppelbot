@@ -23,7 +23,7 @@ side_length = rail_sep - beam;
 bed_screw_offset = (m5_washer_rad-mdf_wall)/2;  //this is used to make sure that the side-tensioning screws of the bed plates don't protrude - so that the top plate and side plates are flush, but the screw cap and nut don't stick up past the top.
 
 //render everything
-part=5;
+part=2;
 
 //parts for laser cutting
 if(part == 0)
@@ -195,19 +195,19 @@ module smooth_rod_connectors(solid=1){
         if(solid > 0){
             union(){
                 //the flange
-                hull() for(j=[-1,1]) for(k=[-1,1]) {
+                hull() {for(j=[-1,1]) for(k=[-1,1]) {
                     translate([(flange_width/2-flange_chamfer)*j, (flange_width/2-flange_chamfer)*k, 0])
                     cylinder(r=flange_chamfer, h=mdf_wall, center=true);
                 }
                 
                 //join to the body
-                hull() for(j=[-1,1]){                    
+                for(j=[-1,1]){                    
                     translate([(flange_width/2-flange_chamfer)*1+top_width/2, (flange_width/2-flange_chamfer)*j, 0])
                     cylinder(r=flange_chamfer, h=mdf_wall, center=true);
                 
                     translate([top_width/2,(flange_width/2-flange_chamfer)*j, 0])
                     cylinder(r=flange_chamfer, h=mdf_wall, center=true);
-                }
+                }}
             }
         }
         
@@ -385,7 +385,7 @@ module bed_outside_connected(){
         bed_top_connectors(gender=FEMALE);
         
         //remove the smooth rod flanges
-        smooth_rod_connectors(solid=1);
+        #smooth_rod_connectors(solid=1);
         
         //remove the flanges
         leadscrew_flange(solid=0);
