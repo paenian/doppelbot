@@ -23,7 +23,7 @@ side_length = rail_sep - beam;
 bed_screw_offset = (m5_washer_rad-mdf_wall)/2;  //this is used to make sure that the side-tensioning screws of the bed plates don't protrude - so that the top plate and side plates are flush, but the screw cap and nut don't stick up past the top.
 
 //render everything
-part=2;
+part=6;
 
 //parts for laser cutting
 if(part == 0)
@@ -38,6 +38,8 @@ if(part == 4)
     bed_clamp();
 if(part == 5)
     bed_single_top_projected();
+if(part == 6)
+    bed_long_clamp();
 
 in=25.4;
 
@@ -100,6 +102,40 @@ module bed_clamp(){
         cylinder(r=m5_rad, h=4, center=true);
         translate([0,0,base_thick/2+10]) cylinder(r=m5_cap_rad-.25, h=20, center=true);
         echo(m5_cap_rad-.25);
+    }
+}
+
+module bed_long_clamp(length = 3*in, num_screws = 2, bed_thick = 10, top_thick = 1, top_extend = 3){
+    
+    height = bed_thick+top_thick+beam;
+    thick = wall+top_extend;
+    top_rad = wall-1;
+    echo(wall);
+    
+    screw_len = length-beam;
+    
+    difference(){
+        union(){
+            hull(){
+                //top rolling
+                translate([0,-top_extend,0]) rotate([0,90,0]) cylinder(r=top_thick, h=length, center=true);
+                translate([0,wall/2-top_extend/2,top_thick-top_rad]) rotate([0,90,0]) rotate([0,0,180/16]) cylinder(r=top_rad/cos(180/16), h=length, center=true, $fn=16);
+                
+                translate([0,wall/2-top_extend/2,-height+top_rad+top_thick]) rotate([0,90,0]) rotate([0,0,180/16]) cylinder(r=top_rad/cos(180/16), h=length, center=true, $fn=16);
+            }
+        }
+        
+        //cutout for the bed
+        translate([0,-100,-100]) cube([200,200,200], center=true);
+        
+        //some screwholes
+        echo(screw_len/num_screws);
+        for(i=[0:screw_len/(num_screws-1):screw_len+1]) translate([-screw_len/2+i,0,-bed_thick-beam/2])
+            hull() for(j=[0, 1]) mirror([0,0,j]) translate([0,0,wall/2]) 
+                rotate([90,0,0]) cylinder(r=m5_rad, h=thick*2, center=true);
+        
+        //draw in the beam
+        %translate([0,-beam/2,-beam/2-bed_thick]) cube([length*2, beam, beam], center=true);
     }
 }
 
