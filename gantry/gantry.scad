@@ -29,7 +29,7 @@ carriage_thick = 6;
 stretcher_mount_sep = 40;
 
 //render everything
-part=888;
+part=91;
 
 //parts for laser cutting
 if(part == 0)
