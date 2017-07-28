@@ -68,11 +68,12 @@ module holder_switch(){
             //endstop holder
             translate([-thick/2,0,(height+wire_height)/2]) cube([thick+wall*2, width+wall*2,height+wire_height], center=true);
         }
-                
+            
+        translate([-1,0,0]) 
         difference(){
             union(){
                 //endstop
-                #translate([-thick/2,0,height/2+wire_height+.1]) cube([thick, width,height+.2], center=true);
+                translate([-thick/2,0,height/2+wire_height+.1]) cube([thick, width,height+.2], center=true);
                 //wire pass
                 translate([-thick/2-(thick-wire)/2,0,wire_height/2-.1]) cube([wire, width,wire_height+.3], center=true);
             }
@@ -84,7 +85,7 @@ module holder_switch(){
         //screwhole
         translate([0,0,wire_height/2-1.25]) rotate([0,90,0]) {
             cylinder(r=m5_rad, h=30, center=true);
-            translate([0,0,-15+1]) cylinder(r=m5_cap_rad, h=30, center=true);
+            translate([0,0,-15+3-3.5]) cylinder(r=m5_cap_rad+1, h=30, center=true);
         }
         
         //flatten bottom
