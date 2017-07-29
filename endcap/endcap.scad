@@ -45,7 +45,6 @@ screw_rad = m3_rad;
 //render everything
 part=10;
 
-
 //parts for laser cutting
 if(part == 0)
     end_plate_projected();
@@ -620,25 +619,27 @@ module vertical_plate(){
 
 module end_plate_connectors(gender = MALE, solid=1, endcap=false){
     for(i=[0,1]) for(j=[0,1]) mirror([i,0,0]) mirror([0,j,0]) {
+        //top outer connectors
         translate([(frame_y/2-beam*5),-frame_z/2,0]) if(gender == MALE){
             pinconnector_male(solid=solid);
         }else{
             pinconnector_female();
         }
         
-        translate([-frame_y/2,(-frame_z/2+beam*5),0]) rotate([0,0,-90]) if(gender == MALE){
-            pinconnector_male(solid=solid);
-        }else{
-            pinconnector_female();
-        }
-        
-        //middle connector, on the support plate only
+        //top middle connector
         if(endcap==false && i==0){
             translate([0,-frame_z/2,0]) if(gender == MALE){
                 pinconnector_male(solid=solid);
             }else{
                 pinconnector_female();
             }
+        }
+        
+        //side connectors - deprecated
+        *translate([-frame_y/2,(-frame_z/2+beam*5),0]) rotate([0,0,-90]) if(gender == MALE){
+            pinconnector_male(solid=solid);
+        }else{
+            pinconnector_female();
         }
     }
 }
@@ -704,10 +705,10 @@ module beam_cutout(screws=true, beams=false, hybrid=true){
                     difference(){
                         union(){
                             for(k=[0:1]){
-                                translate([-beam/2,-beam/2-k*beam,0]) beamHoles(slop=0);
+                                translate([-beam/2,-beam/2-k*beam,0]) beamHoles(slop=.3);
                                 }
                             }
-                            for(l=[0,-90]){
+                            for(l=[0,-90, 180]){
                                 translate([-beam/2,-beam-beam/2,0]) rotate([0,0,l]) translate([0,-beam/2,0]) rotate([0,0,180/8]) cylinder(r=beam/2-2.1, h=30, center=true, $fn=8);
                             }
                         }
@@ -718,25 +719,6 @@ module beam_cutout(screws=true, beams=false, hybrid=true){
             for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0])
                 for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2+beam/2,0]){
                     translate([-beam/2+.5,-beam+.5,0]) cube([beam+1, beam+1, mdf_wall*4], center=true);
-                    hull(){
-                        translate([0,10,0]) intersection(){
-                            translate([-beam/2,0-beam*2+.5,0]) beamHoles(slop=0);
-                            translate([-beam/2,0-beam*2+.5,-10]) rotate([0,0,45]) cube([100,100,100]);
-                            translate([-beam*2,0-beam*2+.5+m5_rad+slop*2,-80]) cube([100,100,100]);
-                        }
-                        
-                        intersection(){
-                            translate([-beam/2,0-beam*2+.5,0]) beamHoles(slop=0);
-                            translate([-beam/2,0-beam*2+.5,-10]) rotate([0,0,45]) cube([100,100,100]);
-                            translate([-beam*2,0-beam*2+.5+m5_rad+slop*2,-80]) cube([100,100,100]);
-                        }
-                    }
-                    
-                    render() intersection(){
-                            translate([-beam/2,0-beam*2+.5,0]) beamHoles(slop=0);
-                            translate([-beam/2,0-beam*2+.5,-10]) rotate([0,0,45-90]) cube([100,100,100]);
-                            translate([-beam*2-50,0-beam*2-50,-80]) cube([100,100,100]);
-                        }
                 }
         }
     }
