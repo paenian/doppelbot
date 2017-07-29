@@ -29,7 +29,7 @@ carriage_thick = 6;
 stretcher_mount_sep = 40;
 
 //render everything
-part=91;
+part = 88;
 
 //parts for laser cutting
 if(part == 0)
@@ -643,7 +643,7 @@ module belt_tensioner_double_clamp(carriage_len=60){
     
     height = screw_jut+m3_nut_rad-.5;
     
-    clamp_len = 18;
+    clamp_len = 11;
     
     pitch = 2;
     
@@ -662,8 +662,15 @@ module belt_tensioner_double_clamp(carriage_len=60){
         difference(){
             cube([clamp_len+1,thick+1,belt_width*2-slop*2], center=true);
             for(j=[-1,1])
-            for(i=[pitch/2:pitch:clamp_len+1]) translate([i-clamp_len/2,0,(belt_width-slop)*j])
+            for(i=[pitch/2-.4:pitch:clamp_len+1]) translate([i-clamp_len/2,0,(belt_width-slop)*j])
                 cube([(pitch/2)*.8,thick+1, belt_width],center=true);
+        }
+        
+        //zip tie slot
+        translate([0,0,base_thick/2])
+        rotate([0,90,0])
+        #rotate_extrude(){
+            translate([thick/2+1.25,0,0]) square([2,4], center=true);
         }
     }
 }

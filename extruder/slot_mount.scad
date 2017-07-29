@@ -3,7 +3,7 @@ include <../functions.scad>
 use <../beam.scad>
 use <../gantry/gantry.scad>
 
-part = 1;
+part = 2;
 
 
 //this is the bare attachment - doesn't mount anything
@@ -16,10 +16,15 @@ if(part == 1){
     rotate([0,0,90]) attachment_aero(diff_ir = true);
 }
 
+
 if(part == 2){
+    belt_clamp();
 }
 
 
+module belt_clamp(){
+    
+}
 
 
 
