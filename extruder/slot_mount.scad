@@ -3,7 +3,7 @@ include <../functions.scad>
 use <../beam.scad>
 use <../gantry/gantry.scad>
 
-part = 2;
+part = 1;
 
 
 //this is the bare attachment - doesn't mount anything
@@ -74,6 +74,13 @@ module attachment_aero(diff_ir = false){
                 translate([0,motor_drop-motor_w/2-wall/2-.25,base_height+wall/2]) cube([brace_width,wall,wall+.1],center=true);
                 translate([0,motor_drop-motor_w/2-wall/2-.25,base_height+wall/2+brace_height]) cube([wall,wall,wall+.1],center=true);
             }
+            
+            //we want some way to hold wires up top - so let's draw a cylinder in
+            translate([0,slot_len*1.5,0]) cylinder(r=6.5, h=motor_w);
+            //and put a nubbin on top
+            hull() translate([0,-5,motor_w/2])
+                    for(i=[0:1]) mirror([0,0,i]) hull()
+                for(j=[-3,3]) translate([0,j,motor_w/2-m3_rad-wall/2]) rotate([0,90,0]) cylinder(r=m3_rad+wall/2, h=wall, center=true);
         }
         
         //motor holes
@@ -87,6 +94,7 @@ module attachment_aero(diff_ir = false){
             }
         
         //clear the screwheadhole
-        translate([0,slot_len*1.5,base_height]) cylinder(r=5, h=50);
+        translate([0,slot_len*1.5,base_height-.1]) cylinder(r=5, h=50);
+        translate([0,slot_len*1.5,-.1]) cylinder(r=m5_rad, h=50);
     }
 }

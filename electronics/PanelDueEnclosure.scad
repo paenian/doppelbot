@@ -247,7 +247,6 @@ $fn=50;  // 50 is good for printing, reduce to render faster while experimenting
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // CODE
-mirror([0,1,0]) 
 mirror([Front ? 1:0,0,0])
 {
 	difference()
@@ -255,24 +254,35 @@ mirror([Front ? 1:0,0,0])
 		union()
 		{
 			RoundBox(MLen+2*MWall,MWid+2*MWall,MHt+MBase,MRad,MWall,MBase);
+            //mounting holes
 			translate([0,MWid/2,0])
 				difference() {
 					union(){
-                        for(i=[-90,-90+27]) translate([i,0,0]) difference(){
+                        //top hole
+                        for(i=[-107+18]) translate([i,0,0]) difference(){
                             RoundCube(M5clear*3+MWall*3,2*(MActualLip+MWall),MBase+MHt,MRad);
                             translate([0,10+MWall,-overlap]) cylinder(r=M5clear,h=100);
                             translate([0,10+MWall,-overlap]) cylinder(r=M5capclear,h=MBase+MHt-10);
                         }
                         
+                        //right holes
+                        for(i=[10]) translate([MLen/2,-MWid-2.5+i,0]) rotate([0,0,-90]) difference(){
+                            RoundCube(M5clear*3+MWall*3,2*(MActualLip+MWall),MBase+MHt,MRad);
+                            translate([0,10+MWall,-overlap]) cylinder(r=M5clear,h=100);
+                            translate([0,10+MWall,-overlap]) cylinder(r=M5capclear,h=MBase+MHt-10);
+                        }
                     }
 					//translate([-200,-200,MLipThickness]) cube([400,400,50]);
-					translate([-200,-200,-overlap]) cube([400,200,50]);
+					translate([0,-MWid/2,0]) cube([MLen,MWid,100], center=true);
 			}
+            
+            
+            
 			translate([LCDpos[0],LCDpos[1],0]) LCDmnt();
 			translate([PCBpos[0],PCBpos[1],0]) rotate([0,0,PCBrot]) PCBmnt();
 		}
 		translate([LCDpos[0],LCDpos[1],0]) LCDcutout();
-		#translate([PCBpos[0],PCBpos[1],0]) rotate([0,0,PCBrot]) USBcutout();
+		translate([PCBpos[0],PCBpos[1],0]) rotate([0,0,PCBrot]) USBcutout();
 		if (Encoder) {
 			translate([PCBpos[0],PCBpos[1],0]) rotate([0,0,PCBrot]) ShaftCutout();
 		}
@@ -286,7 +296,7 @@ mirror([Front ? 1:0,0,0])
 	if (ShowPCB){
 		translate([PCBpos[0],PCBpos[1],PCBheight+LCDheight+MBez]) rotate([0,0,PCBrot]) PCBshape();
 	}
-	#translate([PCBpos[0],PCBpos[1],0]) rotate([0,0,PCBrot]) ResetGuides();
+	translate([PCBpos[0],PCBpos[1],0]) rotate([0,0,PCBrot]) ResetGuides();
 }
 
 module RoundBox(Len,Wid,Ht,Rad,Wall,Base)
