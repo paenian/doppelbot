@@ -17,7 +17,7 @@ separator_length = 79;
 
 
 //render everything
-part=1;
+part=0;
 
 //parts for laser cutting
 if(part == 0)
@@ -80,6 +80,6 @@ module belt_separator(){
         }
         
         //screwholes
-        for(i=[0,1]) mirror([i,0,0]) translate([beam,0,6]) mirror([0,0,1]) screw_hole_m5();
+        for(i=[0,1]) mirror([i,0,0]) translate([beam,0,7]) mirror([0,0,1]) screw_hole_m5();
     }
 }
