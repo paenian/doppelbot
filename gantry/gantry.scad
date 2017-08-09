@@ -681,19 +681,21 @@ module belt_attach_holes(carriage_len = 60){
     translate([0,-beam/2,0])
     for(i=[0:1]) mirror([i,0,0]) translate([carriage_len/2+.25,0,0]){
         hull(){
-            #cube([belt_width*2,thick,belt_width], center=true);
+            cube([belt_width*2,thick,belt_width], center=true);
             translate([-wall*1.5,0,wall]) cube([belt_width*2,thick,.1], center=true);
         }
-        
-        *cube([belt_width*2,thick,30], center=true);
-        translate([-wall*1.5,0,15+wall]) cube([belt_width*2,thick,30], center=true);
-        
-        //cut out the backside a smidge
-        *translate([25-wall*2-belt_width,0,0]) cube([50,thick,belt_width*2], center=true);
     }
 }
 
-module vertical_gantry_carriage(){
+module belt_attach_flat(carriage_len = 60){
+    wall = 6;
+    thick = belt_thick+3;
+    translate([0,-beam/2,0])
+    cube([carriage_len*2,thick,belt_width], center=true);
+
+}
+
+module vertical_gantry_carriage(v_mount = true, belt_holes = true){
     wall=6;
     min_rad = 2;
     carriage_len = 60;
@@ -715,29 +717,28 @@ module vertical_gantry_carriage(){
             //guide wheels
             difference(){
                 guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false, spring_material=false, spring_compression=1);
-                
-                
-                //round the front corners
-                *for(i=[0,1]) mirror([i,0,0]) translate([cyclops_width/2+min_rad,beam/2+m5_rad+wall+1,0]) difference(){
-                    translate([-min_rad-1,0,-wall]) cube([min_rad+1, min_rad+1, wall*5]);
-                    cylinder(r=min_rad, h=wall*11, center=true);
-                }
             }
             
             //mount for the attachments
-            attachment_mount(solid=1, jut=mount_standoff, wall=wall, extra_thick=1);
+            if(v_mount == true){
+                attachment_mount(solid=1, jut=mount_standoff, wall=wall, extra_thick=1);
             
-            %translate([0,0,wall+10]) attachment_base();
+                %translate([0,0,wall+10]) attachment_base();
+            }
 
             
         } //Holes below here
         
         //slots to loop the belt around & clamp in place
-        belt_attach_holes();
+        if(belt_holes == true){
+            belt_attach_holes();
+        }
         
         //attachment holes
-        //mount for the attachments
-        attachment_mount(solid=0, jut=mount_standoff, wall=wall+.1);
+        if(v_mount == true){
+            //mount for the attachments
+            attachment_mount(solid=0, jut=mount_standoff, wall=wall+.1);
+        }
         
         //guide wheels
         //translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1])
@@ -764,6 +765,8 @@ module vertical_gantry_carriage_rear(){
     min_rad = 2;
     carriage_len = 60;
     carriage_spread = -15;
+    
+    mount_standoff = 2;
     
     idler_spread = idler_flange_rad*2+belt_width*2;
     idler_jut = idler_extension_y+(m5_rad-idler_rad);
