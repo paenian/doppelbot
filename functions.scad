@@ -9,6 +9,20 @@ module cap_cylinder(r=1, h=1, center=false){
 	}
 }
 
+//holes for the motor
+module motor_holes(screw_rad = m3_rad+slop/2, screw_w = motor_screw_sep, slot=2, height = wall*3){
+    bump_rad = 12;
+    
+    cylinder(r=bump_rad, h=height, center=true);
+    %translate([0,0,-20]) cylinder(r=pulley_flange_rad, h=height*2);
+    for(i=[0:90:359]) rotate([0,0,i]) translate([screw_w/2, screw_w/2, 0]){
+        hull(){
+            translate([-slot/2,-slot/2,0]) cylinder(r=screw_rad, h=height, center=true);
+            translate([slot/2,slot/2,0]) cylinder(r=screw_rad, h=height, center=true);
+        }
+    }
+}
+
 module screw_hole_m3(cap=false, onion=0, height=wall){
     screw_hole(cap=cap, onion=onion, cap_height=m3_cap_height, rad=m3_rad, cap_rad=m3_cap_rad, height=height);
 }

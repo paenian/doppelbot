@@ -73,6 +73,7 @@ belt_width = 1.5;
 motor_w = 42;
 motor_r = 52/2;
 motor_y = frame_y/2-beam-pulley_rad-belt_width; //distance motors are from the center.
+motor_screw_sep = 31;
 
 
 
