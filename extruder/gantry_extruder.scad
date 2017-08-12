@@ -8,7 +8,7 @@ use <../gantry/gantry.scad>
 wall = 6;
 
 //flange in front of the aero
-flange_thick = 3;
+flange_thick = 4;
 motor_z = -5;
 motor_y = 5;
 motor_x = -9-wall;
@@ -24,8 +24,8 @@ belt_gap = 19;
     carriage_len = 60;
     carriage_spread = -15;
 
-//aero_carriage();
-rear_carriage();
+aero_carriage();
+//rear_carriage();
 
 
 echo(motor_width);
