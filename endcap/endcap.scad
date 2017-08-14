@@ -39,7 +39,7 @@ num_clips = 1;          //for one clip, minimum is 60.
 wall_inset = (plate_sep+mdf_wall)/2+15;
 wall_inset = side_plate_width/2-mdf_wall*1.5;
 
-z_offset = 18; //applies to both the lead screw and the smooth rods - they're inline.
+z_offset = 18-mdf_wall; //applies to both the lead screw and the smooth rods - they're inline.
 z_bump = 18; //bump for the motor mount, to give it more strength
 
 
@@ -52,7 +52,6 @@ screw_rad = m3_rad;
 
 //render everything
 part=10;
-
 
 //parts for laser cutting
 if(part == 0)
@@ -76,25 +75,27 @@ if(part == 5)
 if(part == 6)
     bottom_wall_projected();
 if(part == 61)
-    bottom_wall_projected(support=true);
+    bottom_wall_projected(support=false);
 if(part == 7)
     corner_plate_projected();
 if(part == 71)
     corner_plate_projected(cover=true);
+if(part == 8)
+    corner_brace_projected();
 
 //view the assembly
 if(part == 10){
-    assembled_endcap(motor=true);
+    assembled_endcap(motor=true, corner_endplate = false);
     
     translate([0,0,200]) 
-    mirror([0,0,1]) assembled_endcap(motor=false);
+    mirror([0,0,1]) assembled_endcap(motor=false, corner_endplate = false);
 }
 
 //assemble
 module assembled_endcap(motor=false){
-    end_plate_connected();
+    //end_plate_connected();
     support_plate_connected(motor=motor);
-    if(motor==true){
+    *if(motor==true){
         support_plate_cover_connected();
     }
     if(corner_endplate==true){
@@ -102,7 +103,7 @@ module assembled_endcap(motor=false){
     }else{
         *cross_plates();
     }
-    vertical_walls_connected();
+    //vertical_walls_connected();
     top_wall_connected(motor=motor);
     
     bottom_wall_connected(support=motor);
@@ -112,6 +113,12 @@ module assembled_endcap(motor=false){
  * The plate files don't have cutouts for their intersections
  * with other plates - those are added here, in the layout.
  */
+module corner_brace_projected(){
+    projection(){
+        corner_brace();
+    }
+}
+
 module end_plate_projected(){
     echo("Cut One per End");
     projection(){
@@ -158,7 +165,8 @@ module support_plate_cover_projected(){
 module support_plate_connected(motor=false){
     difference(){
         //the support plate
-        translate([0,0,plate_sep+mdf_wall]) support_plate(motor=motor);
+        //translate([0,0,mdf_wall])
+        support_plate(motor=motor);
             
         //holes for all the stiffening cross plates
         *if(corner_endplate==true){
@@ -264,11 +272,11 @@ module top_wall_connected(motor=true){
         top_plate(motor=motor);
     
         //this subtacts the connectors from whatever part comes next.
-        end_plate_connectors(gender=FEMALE, endcap=true);
-        translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
+        end_plate_connectors(gender=FEMALE);
+        *translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
         //also gets hit by the verts
-        for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,wall_inset]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
+        *for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,wall_inset]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
     }
 }
 
@@ -284,8 +292,8 @@ module bottom_wall_connected(support=false){
         bottom_plate(support=support);
     
         //this subtacts the connectors from whatever part comes next.
-        end_plate_connectors(gender=FEMALE, endcap=true);
-        translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
+        end_plate_connectors(gender=FEMALE);
+        //translate([0,0,plate_sep+mdf_wall]) end_plate_connectors(gender=FEMALE);
     
     //also gets hit by the verts
         *for(i=[-frame_y/2-mdf_wall/2,frame_y/2+mdf_wall/2]) translate([i,0,wall_inset]) rotate([0,90,0]) vertical_plate_connectors(gender=FEMALE);
@@ -324,15 +332,15 @@ module idler_mount(){
     //correct for the difference in radii of the idler and pulley radii
     translate([0,pulley_rad-idler_rad,0]) {
         //outer pulley
-        translate([idler_rad*3,0,0]){ //should be times 2, but 3 spreads the belts out more - at the cost of longer 
-            cylinder(r=m5_rad, h=wall*3, center=true);
+        translate([idler_flange_rad*2.75+1,0,0]){ // 
+            cylinder(r=m5_rad, h=mdf_wall, center=true);
             %translate([0,0,-mdf_wall*3]) cylinder(r=idler_rad, h=idler_thick);
             %translate([0,0,-mdf_wall*3]) cylinder(r=idler_flange_rad, h=1);
         }
     
         //inner pulley
-        translate([idler_rad*.5,-pulley_rad*2,0]){
-            cylinder(r=m5_rad, h=wall*3, center=true);
+        translate([idler_flange_rad+1,-pulley_rad*2,0]){
+            cylinder(r=m5_rad, h=mdf_wall, center=true);
             %translate([0,0,-mdf_wall*3]) cylinder(r=idler_rad, h=idler_thick);
             %translate([0,0,-mdf_wall*3]) cylinder(r=idler_flange_rad, h=1);
         }
@@ -376,9 +384,14 @@ module top_plate_connectors(gender=MALE, solid=1){
     }
     
     if(gender==FEMALE){
-        //lets make those belt lines into holes
-        rotate([90,0,0]) rotate([0,90,0]) for(j=[-pulley_rad,pulley_rad]) for(i=[0:1]) mirror([i,0,0]) translate([motor_y+j,-beam/2-mdf_wall/2,0]){
+        //lets make those belt lines into a big idler hole
+        *rotate([90,0,0]) rotate([0,90,0]) for(j=[-pulley_rad,pulley_rad]) for(i=[0:1]) mirror([i,0,0]) translate([motor_y+j,-beam/2-mdf_wall/2,0]){
             cube([belt_width+wall/2,belt_thick+wall/2,50], center=true);
+        }
+        
+        //pulley/idler hole
+        rotate([90,0,0]) rotate([0,90,0]) for(i=[0:1]) mirror([i,0,0]) translate([motor_y,-beam/2-mdf_wall/2,0]){
+            cube([(pulley_flange_rad+1)*2,beam,50], center=true);
         }
     }
 }
@@ -433,19 +446,25 @@ module support_plate_cover(){
 
 //the uppermost plate.  Includes mounts for the motors on one side, and idlers on the other
 module top_plate(motor=true){
-    motor_offset = plate_sep/2+mdf_wall*2+pulley_flange_rad+1;
+    
+    %translate([10-mdf_wall/2,-frame_y/2+10,0]) cube([20,20,20], center=true);
+    
+    //motor_offset = plate_sep/2+mdf_wall*2+pulley_flange_rad+1;
+    motor_offset = beam+pulley_flange_rad-1;
+    idler_offset = -mdf_wall*1.5-idler_flange_rad-belt_width;
+    
     difference(){
         union(){
-            cube([side_plate_width, frame_y+mdf_wall*3, mdf_wall], center=true);
+            cube([side_plate_width, frame_y, mdf_wall], center=true);
             
             //xy motor/idler sticky-outy
             for(i=[0:1]) mirror([0,i,0]) hull() translate([motor_offset,motor_y,0])
             if(motor==true){    //motor mounts
                 rotate([0,0,-45]) motor_mount(screw_rad = screw_rad+mdf_wall/2, wall=wall/3);
-                translate([-mdf_wall,0,0]) rotate([0,0,-45]) motor_mount(screw_rad = screw_rad+mdf_wall, wall=wall/3);
+                //translate([-mdf_wall,0,0]) rotate([0,0,-45]) motor_mount(screw_rad = screw_rad+mdf_wall, wall=wall/3);
             }else{              //idler mounts
-                idler_mount(m5_rad = m5_rad+mdf_wall/2, wall=wall/3);
-                translate([-mdf_wall*3,0,0]) idler_mount(m5_rad = m5_rad+mdf_wall*2, wall=wall/3);
+                *idler_mount(m5_rad = m5_rad+mdf_wall/2, wall=wall/3);
+                translate([-motor_offset+idler_offset,0,0]) idler_mount(m5_rad = m5_rad+mdf_wall, wall=wall/3);
             }
             
             //the z motor mounts
@@ -462,14 +481,14 @@ module top_plate(motor=true){
         if(motor==true){    //motor mounts
             rotate([0,0,-45]) motor_mount();
         }else{              //idler mounts
-            idler_mount();
+            translate([-motor_offset+idler_offset,0,0]) idler_mount(mdf_wall = mdf_wall+1);
         }
         
         //smooth rod mounts
         smooth_rod_holes(solid=-1);
         
         //beam holes
-        beam_holes(frame_z = frame_y);
+        translate([-mdf_wall/2,0,0]) beam_holes(frame_z = frame_y);
         
         //hole for the Z rod
         //translate([-plate_sep/2-z_offset,0,0]) cylinder(r=4+slop, h=mdf_wall*3, center=true);
@@ -483,7 +502,7 @@ module top_plate(motor=true){
 //there aren't any...
 module bottom_plate_connectors(gender=MALE, solid=1, support=false){
     if(num_clips == 2){
-        for(j=[0,1]) for(i=[-1,1]){
+        *for(j=[0,1]) for(i=[-1,1]){
             mirror([0,j,0]) translate([mdf_tab*i,frame_y/2,0]) if(gender == MALE){
                 mirror([0,1,0]) pinconnector_male(solid=solid);
             }else{
@@ -492,7 +511,7 @@ module bottom_plate_connectors(gender=MALE, solid=1, support=false){
         }
     }
     if(num_clips == 1){
-        for(j=[0,1])
+        *for(j=[0,1])
             mirror([0,j,0]) translate([0,frame_y/2,0]) if(gender == MALE){
                 mirror([0,1,0]) pinconnector_male(solid=solid);
             }else{
@@ -528,6 +547,7 @@ module z_motor_mounts(solid=1){
         }
     }
 }
+
 
 module z_idler_mounts(solid=1){
     for(i=[-1:1]) {
@@ -569,7 +589,7 @@ module bottom_plate(support=false){
         smooth_rod_holes(solid=-1);
         
         //beam holes
-        beam_holes(frame_z = frame_y);
+        translate([-mdf_wall/2,0,0]) beam_holes(frame_z = frame_y);
     }
 }
 
@@ -607,25 +627,27 @@ module vertical_plate(){
 
 module end_plate_connectors(gender = MALE, solid=1, endcap=false){
     for(i=[0,1]) for(j=[0,1]) mirror([i,0,0]) mirror([0,j,0]) {
+        //top outer connectors
         translate([(frame_y/2-beam*5),-frame_z/2,0]) if(gender == MALE){
             pinconnector_male(solid=solid);
         }else{
             pinconnector_female();
         }
         
-        translate([-frame_y/2,(-frame_z/2+beam*5),0]) rotate([0,0,-90]) if(gender == MALE){
-            pinconnector_male(solid=solid);
-        }else{
-            pinconnector_female();
-        }
-        
-        //middle connector, on the support plate only
+        //top middle connector
         if(endcap==false && i==0){
             translate([0,-frame_z/2,0]) if(gender == MALE){
                 pinconnector_male(solid=solid);
             }else{
                 pinconnector_female();
             }
+        }
+        
+        //side connectors - deprecated
+        *translate([-frame_y/2,(-frame_z/2+beam*5),0]) rotate([0,0,-90]) if(gender == MALE){
+            pinconnector_male(solid=solid);
+        }else{
+            pinconnector_female();
         }
     }
 }
@@ -662,19 +684,33 @@ module end_plate(corners=false, endcap=false){
 module extra_beam_coutout(){
     for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0])
         for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2,0])
+<<<<<<< HEAD
             for(k=[0:1]){
+=======
+            for(k=[0:0]){
+>>>>>>> db1e3c206c2f72f9a16b8039fea2aef3c7ae70e8
                 //vertical beam
                 translate([-beam/2,-beam*2-beam/2-k*beam,0]) endScrew();
                 //front to back beam
                 translate([-beam-beam/2-beam*k,-beam-beam/2,0]) endScrew();
             }
+<<<<<<< HEAD
             
     //center holes
     for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2-beam/2,0,0]) endScrew();
     for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2-beam*1.5,0]) endScrew();
+=======
+    //center screw holes
+    for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0]){
+        translate([-beam/2,0,0]) endScrew();
+    }
+    for(i=[0:1]) mirror([0,i,0]) translate([0,frame_z/2,0]){
+        translate([0,-beam/2-beam,0]) endScrew();
+    }
+>>>>>>> db1e3c206c2f72f9a16b8039fea2aef3c7ae70e8
 }
 
-module beam_cutout(screws=true, beams=false){
+module beam_cutout(screws=true, beams=false, hybrid=true){
     if(beams==true){
         union(){
             for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0])
@@ -688,13 +724,22 @@ module beam_cutout(screws=true, beams=false){
                     difference(){
                         union(){
                             for(k=[0:1]){
-                                translate([-beam/2,-beam/2-k*beam,0]) beamHoles(slop=0);
+                                translate([-beam/2,-beam/2-k*beam,0]) beamHoles(slop=.3);
                                 }
                             }
-                            for(l=[-1:1]){
-                                translate([-beam/2,-beam-beam*l,0]) rotate([0,0,180/8]) cylinder(r=beam/2-2.1, h=30, center=true, $fn=8);
+                            for(l=[0,-90, 180]){
+                                translate([-beam/2,-beam-beam/2,0]) rotate([0,0,l]) translate([0,-beam/2,0]) rotate([0,0,180/8]) cylinder(r=beam/2-2.1, h=30, center=true, $fn=8);
                             }
                         }
+    }
+    
+    if(hybrid==true){
+        union(){
+            for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0])
+                for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2+beam/2,0]){
+                    translate([-beam/2+.5,-beam+.5,0]) cube([beam+1, beam+1, mdf_wall*4], center=true);
+                }
+        }
     }
 }
 
@@ -790,7 +835,7 @@ module electronics_mounts(){
 module support_plate(slots=false, motor=false){
     difference(){
         end_plate();
-        beam_cutout(screws=false, beams=true);
+        beam_cutout(hybrid=true, screws=false);
         
         if(motor == true){
             electronics_mounts();
@@ -907,4 +952,18 @@ module cross_plates(){
 
 module holes(){
     cylinder(r=5, h=mdf_wall*2, center=true, $fn=7);
+}
+
+module corner_brace(){
+    difference(){
+        hull(){
+            cylinder(r=beam/2, h=mdf_wall, center=true);
+            translate([beam*2, 0, 0]) cylinder(r=beam/2, h=mdf_wall, center=true);
+            translate([0,beam*2, 0]) cylinder(r=beam/2, h=mdf_wall, center=true);
+        }
+        
+        //holes
+        for(i=[0:2]) translate([i*beam,0,0]) cylinder(r=m5_rad, h=mdf_wall+1, center=true);
+        for(i=[0:2]) translate([0,i*beam,0]) cylinder(r=m5_rad, h=mdf_wall+1, center=true);    
+    }
 }

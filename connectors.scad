@@ -1,4 +1,4 @@
-/* 
+ /* 
  * connectors for the MDF panels.
  * 
  */
@@ -6,7 +6,7 @@
 
 include <configuration.scad>
 include <functions.scad>
-include <write.scad>
+include <Writescad/write.scad>
 
 //all connectors are centered.
 

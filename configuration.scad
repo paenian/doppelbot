@@ -66,13 +66,16 @@ foot_height = 25.4;  //extra meat on the legs
 
 echo("BOM: 4, reg rail, 2020", frame_x, "Frame");
 
+belt_thick = 9;
+belt_width = 1.5;
+
 //motor size and placement variables
 motor_w = 42;
 motor_r = 52/2;
-motor_y = frame_y/2-beam-pulley_rad; //distance motors are from the center.
+motor_y = frame_y/2-beam-pulley_rad-belt_width; //distance motors are from the center.
+motor_screw_sep = 31;
 
-belt_thick = 9;
-belt_width = 1.5;
+
 
 
 //gantry - might want to make it bigger
