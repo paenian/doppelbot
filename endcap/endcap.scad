@@ -684,22 +684,12 @@ module end_plate(corners=false, endcap=false){
 module extra_beam_coutout(){
     for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0])
         for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2,0])
-<<<<<<< HEAD
-            for(k=[0:1]){
-=======
             for(k=[0:0]){
->>>>>>> db1e3c206c2f72f9a16b8039fea2aef3c7ae70e8
                 //vertical beam
                 translate([-beam/2,-beam*2-beam/2-k*beam,0]) endScrew();
                 //front to back beam
                 translate([-beam-beam/2-beam*k,-beam-beam/2,0]) endScrew();
             }
-<<<<<<< HEAD
-            
-    //center holes
-    for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2-beam/2,0,0]) endScrew();
-    for(j=[0:1]) mirror([0,j,0]) translate([0,frame_z/2-beam*1.5,0]) endScrew();
-=======
     //center screw holes
     for(i=[0:1]) mirror([i,0,0]) translate([frame_y/2,0,0]){
         translate([-beam/2,0,0]) endScrew();
@@ -707,7 +697,6 @@ module extra_beam_coutout(){
     for(i=[0:1]) mirror([0,i,0]) translate([0,frame_z/2,0]){
         translate([0,-beam/2-beam,0]) endScrew();
     }
->>>>>>> db1e3c206c2f72f9a16b8039fea2aef3c7ae70e8
 }
 
 module beam_cutout(screws=true, beams=false, hybrid=true){

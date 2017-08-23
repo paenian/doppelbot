@@ -25,6 +25,7 @@ belt_gap = 19;
     carriage_spread = -15;
 
 aero_carriage();
+//chimaera_carriage();
 //rear_carriage();
 
 
@@ -63,13 +64,73 @@ module belt_zips(){
     zip_sep = carriage_len;
     inset = 5;
     
-    for(i=[0:1]) mirror([0,i,0]) translate([0,carriage_len/2,0])
+    %cube([100,100,9], center=true);
+    
+    for(i=[0:1]) mirror([0,i,0]) translate([-wall/2-.5,carriage_len/2,0]) scale([.666,1,1]) 
     rotate([90,0,0]) rotate_extrude(){
         translate([belt_thick/2+2.25,0,0]) {
             square([1.5,inset*2], center=true);
             translate([0,inset,0]) square([3,4], center=true);
         }
     }
+}
+
+//carriage to mount a single Chimaera or Cyclops extruder
+module chimaera_carriage(diff_ir = true){
+    diff_ir_z = diff_ir_z-5;
+    
+    echo(diff_ir_z);
+    difference(){
+        union(){
+            //the carriage
+            vertical_gantry_carriage(v_mount  = false, belt_holes = false, nut_traps=true);
+            
+            //mount the chimaera
+            translate([-wall,0,-beam]) rotate([0,0,90]) chimaera_helper(solid = 1, jut = 1, height = 5, proud = 5);
+            
+            //mount a cable chain
+            hull(){
+                hull() translate([0,0,beam/2]) rotate([0,0,90]) rotate([90,0,0]) cablechain_bracket(solid=1, wall=flange_thick);
+                    
+                translate([motor_x-10,0,motor_z+motor_width/2+chain_width/2+flange_thick+.666-10]) rotate([0,0,90]) rotate([90,0,0]) cablechain_bracket(solid=1, wall=flange_thick);
+            }
+            
+            //mount a depth sensor
+            if(diff_ir == true){
+                hull(){
+                    translate([-wall/2,0,0]) rotate([0,0,0]) diff_ir(solid=1, wall=wall);
+                    translate([-wall/2,0,diff_ir_z]) rotate([90,0,0]) diff_ir(solid=1, wall=wall);
+                }
+            }            
+        }
+        
+        //chimaera holes
+            translate([-wall,0,-beam]) rotate([0,0,90]) chimaera_helper(solid = -1, jut = 1, height = 5, proud = 5, onion=false);
+        
+        //cable chain holes
+        translate([motor_x-10,0,motor_z+motor_width/2+chain_width/2+flange_thick+.666-10]) rotate([0,0,90]) rotate([90,0,0]) cablechain_bracket(solid=-1, wall=flange_thick);
+        
+        //depth sensor holes
+        if(diff_ir == true){
+            translate([-wall/2,0,diff_ir_z]) rotate([90,0,0]) diff_ir(solid=0, wall=wall);
+        }
+        
+              
+        //groove for the belt
+        rotate([0,0,90]) rotate([-90,0,0]) belt_attach_flat();
+        
+        //instead of belt clamp, just some zip ties - one on each end
+        translate([0,0,beam/2]) belt_zips();
+                       
+        //cutout above the belt - for looks
+        hull(){
+            translate([0,0,beam/2+beam]) cube([12,belt_gap,beam], center=true);
+            translate([0,0,beam/2*2.6+beam/2+belt_thick/2+1.4]) cube([12,51,beam], center=true);
+        }
+        
+        //flatten the back
+        translate([100,0,0]) cube([200,200,200], center=true);
+    }     
 }
 
 //carriage to mount a single Titan Aero extruder
@@ -87,6 +148,9 @@ module aero_carriage(diff_ir = true){
                 translate([motor_x-motor_width/2,motor_y,motor_z]) rotate([90,0,0]) motor_holes(screw_rad = 6.5, slot = 0, height = flange_thick);
                 translate([-motor_width/2+wall-.6,motor_y,motor_z]) rotate([90,0,0]) motor_holes(screw_rad = .1, slot = 0, height = flange_thick);
             }
+            
+            //chamfer the back to strengthen
+            translate([-wall,motor_y,motor_z]) cylinder(r=5, h=motor_width+wall, center=true, $fn=4);
             
             //brace above the motor
             hull(){
@@ -145,7 +209,7 @@ module aero_carriage(diff_ir = true){
 }
 
 //back of the carraige, to match; has the belt tensioning system.
-module rear_carriage(diff_ir = true){    
+module rear_carriage(){    
     difference(){
         union(){
             //the carriage

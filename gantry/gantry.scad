@@ -29,7 +29,7 @@ carriage_thick = 6;
 stretcher_mount_sep = 40;
 
 //render everything
-part = 7;
+part = 3;
 
 //parts for laser cutting
 if(part == 0)
@@ -289,7 +289,8 @@ module gantry_carriage(){
             
             //guide wheels
             difference(){
-                guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false, spring_inset = spring_inset);
+                guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false, spring_inset = spring_inset, nut_traps=true, extra_thick=3);
+                
                 
                 
                 //round the front corners
@@ -310,7 +311,7 @@ module gantry_carriage(){
         
         //guide wheels
         //translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1])
-        guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len, spring_inset = spring_inset);
+        guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len, spring_inset = spring_inset, nut_traps=1, extra_thick=3);
         
         //idler screws
         translate([0,0,mdf_wall/2]) idler_mounts(solid=0);
@@ -318,11 +319,7 @@ module gantry_carriage(){
         //holes for the beam
         //for(i=[-beam/2, beam/2]) translate([0,i,-1]) cap_cylinder(r=m5_rad, h=20);
         
-<<<<<<< HEAD
-        //belt path
-=======
-        //belt path - deprecated.
->>>>>>> db1e3c206c2f72f9a16b8039fea2aef3c7ae70e8
+        //belt path - deprecated
         translate([0,-beam/2,0]) cube([100,belt_thick+4,wall/2], center=true);
         
         //flatten the bottom
@@ -332,7 +329,7 @@ module gantry_carriage(){
 }
 }
 
-module chimaera_helper(solid = 1, jut = 1, height = 5, proud = 2){
+module chimaera_helper(solid = 1, jut = 1, height = 5, proud = 2, onion=true){
     hole_sep = 9;
     hole_zsep = 10;
     wall =5;
@@ -349,7 +346,11 @@ module chimaera_helper(solid = 1, jut = 1, height = 5, proud = 2){
             }
             
             if(solid<=0) translate([0,0,-.1]) {
-                translate([0,0,ind_jut+.25]) cap_cylinder(r=m3_rad, h=wall*2);
+                if(onion == true){
+                    translate([0,0,ind_jut+.25]) cap_cylinder(r=m3_rad, h=wall*2);
+                }else{
+                    translate([0,0,ind_jut+.25]) cap_cylinder(r=m3_rad, h=wall*5, center=true);
+                }
                 translate([0,0,-height]) cap_cylinder(r=m3_cap_rad, h=m3_cap_height+wall);
             }
         }
@@ -463,16 +464,20 @@ module attachment_mount(solid = 1, jut = 0, wall=wall, extra_top = 1, cutout = t
     //%cube([bot_width, 90, 15], center=true);
     
     //if(solid == 1){
-        translate([0,drop,0]) hull(){
-            for(i=[0,1]) mirror([i,0,0]) translate([(bot_width-rad*2)/2+thick/2*solid,height,0]){
-                //lower sides
-                translate([0,0,wall]) cylinder(r1=bot_rad, r2=rad+extra_thick, h=thick);
-                if(solid == 1) cylinder(r=bot_rad, h=wall+.1);
+        difference(){
+            translate([0,drop,0]) hull(){
+                for(i=[0,1]) mirror([i,0,0]) translate([(bot_width-rad*2)/2+thick/2*solid,height,0]){
+                    //lower sides
+                    translate([0,0,wall]) cylinder(r1=bot_rad, r2=rad+extra_thick, h=thick);
+                    if(solid == 1) cylinder(r=bot_rad, h=wall+.1);
                     
-                //upper sides
-                translate([0,0,wall]) rotate([0,0,side_angle]) translate([0,-height+(solid-extra_top)*bot_rad,0]) cylinder(r1=bot_rad, r2=rad+extra_thick, h=thick);
-                if(solid == 1) rotate([0,0,side_angle]) translate([0,-height,0]) cylinder(r1=bot_rad, r2=rad, h=wall+.1);
+                    //upper sides
+                    translate([0,0,wall]) rotate([0,0,side_angle]) translate([0,-height+(solid-extra_top)*bot_rad,0]) cylinder(r1=bot_rad, r2=rad+extra_thick, h=thick);
+                    if(solid == 1) rotate([0,0,side_angle]) translate([0,-height,0]) cylinder(r1=bot_rad, r2=rad, h=wall+.1);
+                }
             }
+        //cut off the bottom
+        translate([0,50+beam+m5_rad+wheel_rad,0]) cube([100,100,100], center=true);
         }
     //}
     echo(solid);
@@ -484,18 +489,20 @@ module attachment_mount(solid = 1, jut = 0, wall=wall, extra_top = 1, cutout = t
         
         //slot for the locking screw
         hull(){
-            for(i=[0,1]) translate([0,i*slot_len,0]) cylinder(r=m5_rad-slop*(i-1), h=wall*2.1, center=true);
+            for(i=[0,1]) translate([0,i*slot_len+1,0]) cylinder(r=m5_rad-slop*(i-1), h=wall*2.1, center=true);
         }
         
         //slot for the locking nut
         hull(){
-            for(i=[0,1]) translate([0,i*slot_len,-.1]) rotate([0,0,45]) cylinder(r=m5_sq_nut_rad+slop-slop*(i-1), h=wall/2, $fn=4);
+            for(i=[0,1]) translate([0,i*slot_len+1,-.1]) rotate([0,0,45]) cylinder(r=m5_sq_nut_rad+slop-slop*(i-1), h=wall/2, $fn=4);
         }
         
         //hole to insert the locking nut
         hull(){
             for(i=[0,1]) translate([0,-slot_len/2,0]) rotate([0,0,45]) cylinder(r=m5_sq_nut_rad+slop*2, h=wall*2.1, $fn=4, center=true);
         }
+        
+
     }
 }
 }
@@ -570,48 +577,10 @@ module chimaera_holder(solid=0, jut=0){
     }
 }
 
-<<<<<<< HEAD
-module belt_tensioner_mount(carriage_len=50){
-    thick = belt_thick+5;
-    base_thick = 6;
-    screw_jut = base_thick+m3_cap_rad+1;
-    
-    translate([-carriage_len/4, -beam/2, 0]) difference(){
-        #hull(){
-            cube([wall,thick,screw_jut*2+base_thick], center=true);
-            translate([-wall,0,0]) cube([wall*2,thick,wall], center=true);
-        }
-        
-        #translate([-wall,0,screw_jut]) rotate([0,90,0]) screw_hole_m3(height = wall*3);
-    }
-}
-
-module belt_tensioner(){
-}
-
-module belt_attach_holes(carriage_len = 50){
-    thick = belt_thick+3;
-    translate([0,-beam/2,0])
-    for(i=[0:1]) mirror([i,0,0]) translate([carriage_len/2-wall,0,0]){
-        cube([belt_width*2,thick,30], center=true);
-        translate([-wall*2,0,0]) cube([belt_width*2,thick,30], center=true);
-        
-        //cut out the backside a smidge
-        cube([wall*4,thick,belt_width*2], center=true);
-    }
-}
-
-module vertical_gantry_carriage(){
-    wall=5;
-    min_rad = 2;
-    carriage_len = 50;
-    carriage_spread = -10;
-=======
 module belt_tensioner_mount(carriage_len=60){
     thick = belt_thick+2;
     base_thick = carriage_thick;
     screw_jut = base_thick+m3_cap_rad+belt_width*2+1;
->>>>>>> db1e3c206c2f72f9a16b8039fea2aef3c7ae70e8
     
     width = 5;
     
@@ -642,34 +611,6 @@ module belt_tensioner_clamp(carriage_len=60){
     rotate([0,0,-90]) 
     difference(){
         union(){
-<<<<<<< HEAD
-            //belt tensioner mount
-            belt_tensioner_mount();
-            
-            //guide wheels
-            difference(){
-                guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false);
-                
-                
-                //round the front corners
-                *for(i=[0,1]) mirror([i,0,0]) translate([cyclops_width/2+min_rad,beam/2+m5_rad+wall+1,0]) difference(){
-                    translate([-min_rad-1,0,-wall]) cube([min_rad+1, min_rad+1, wall*5]);
-                    cylinder(r=min_rad, h=wall*11, center=true);
-                }
-            }
-            
-            //lovingly triple-screw the hotend
-            translate([0,hotend_drop,wall]) rotate([90,0,0]) chimaera_holder(solid=1, jut=1);
-
-            
-        } //Holes below here
-        
-        //slots to loop the belt around & clamp in place
-        belt_attach_holes();
-        
-        //hotend holder
-        translate([0,hotend_drop,wall]) rotate([90,0,0]) chimaera_holder(solid=-1);
-=======
             hull(){
                 translate([-wall/2,0,height/2]) cube([wall,thick+extra_thick,height], center=true);
                 translate([-wall,0,base_thick/2]) cube([wall*2,thick+extra_thick,base_thick], center=true);
@@ -678,7 +619,6 @@ module belt_tensioner_clamp(carriage_len=60){
             //meat for the belt clamp
             translate([-wall-clamp_len/2,0,base_thick/2]) cube([wall*2+clamp_len,thick+extra_thick,base_thick], center=true);
         }
->>>>>>> db1e3c206c2f72f9a16b8039fea2aef3c7ae70e8
         
         //nut hole
         #translate([-wall,-extra_thick,screw_jut]) rotate([0,-90,0]) nut_hole_m3(height = wall*3);
@@ -837,48 +777,6 @@ module vertical_gantry_carriage_rear(){
     rotate([0,0,90]) rotate([-90,0,0]) {
     %translate([0,0,-beam/2-1]) cube([120,beam*2,beam],center=true);
     difference(){
-<<<<<<< HEAD
-        union(){
-            //idler mounts
-            *for(i=[-1,1]) translate([idler_front,0,0]) hull(){
-                translate([idler_spread*i/2,-4,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2+1, h=5, center=true);
-                %translate([idler_spread*i/2,-6,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=idler_flange_rad, h=8);
-                
-                translate([idler_spread*i/2,-4,1]) rotate([90,0,0]) cylinder(r=m5_rad+wall/2, h=2, center=true);                
-            
-                translate([idler_spread*i*0,20,-m5_rad]) rotate([90,0,0]) cylinder(r=m5_rad+wall, h=2, center=true);
-            }
-            
-            //belt stretcher bumps
-            *translate([idler_front,-10,idler_extension_y+10]) rotate([90,0,0]) belt_stretcher_2(mount_sep = stretcher_mount_sep);
-            *translate([idler_front,-10,wall-.1]) belt_stretcher_2_bumps(mount_sep = stretcher_mount_sep, solid=1);
-            
-            //guide wheels
-            guide_wheel_helper(solid=1, span=2, gantry_length=carriage_len, gantry_spread = carriage_spread, cutout=false);
-
-            //induction sensor mount
-            *translate([induction_rear,15,15+induction_jut]) hull(){
-                rotate([90,0,0]) rotate([0,0,90]) mirror([0,1,0]) mirror([0,0,1]) extruder_mount(solid=1, m_height=ind_height+6,  hotend_rad=ind_rad, wall=3);
-                translate([0,18,-15-induction_jut]) rotate([90,0,0]) cylinder(r=ind_rad-2, h=ind_height+6+wall+4);
-            }
-            
-        } //Holes below here
-        
-        *translate([idler_front,-10,wall-.1]) belt_stretcher_2_bumps(mount_sep = stretcher_mount_sep, solid = -1);
-        
-        //induction sensor holes
-        *translate([induction_rear,16,15+induction_jut]) rotate([90,0,0]) rotate([0,0,90]) mirror([0,1,0]) mirror([0,0,1]) extruder_mount(solid=0, m_height=ind_height+6,  hotend_rad=ind_rad, wall=3);
-        
-        //guide wheels
-        //translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1])
-        guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len);
-        
-        //idler screws
-        *translate([idler_front,0,0]) translate([0,0,mdf_wall/2]) idler_mounts(solid=0, idler_extension_x = idler_spread/2, idler_extension_y = idler_jut, m5_rad=m5_rad-slop);
-        
-        //holes for the beam
-        *for(i=[-1,1]) translate([idler_front,0,0]) translate([idler_spread*i/2,0,idler_extension_y+1]) rotate([90,0,0]) cylinder(r=m5_rad-slop, h=20, center=true);
-=======
         union(){            
             //belt tensioner mount
             belt_tensioner_mount();
@@ -897,7 +795,6 @@ module vertical_gantry_carriage_rear(){
         //guide wheels
         //translate([0,0,mdf_wall-1]) rotate([0,0,180]) mirror([0,0,1])
         guide_wheel_helper(solid=-1, span=2, gantry_spread = carriage_spread, gantry_length=carriage_len, spring_compression=1);
->>>>>>> db1e3c206c2f72f9a16b8039fea2aef3c7ae70e8
         
         //flatten the bottom
         translate([0,0,-50]) cube([100,100,100],center=true);
@@ -1337,11 +1234,7 @@ module hotend_carriage(){
     }
 }
 
-<<<<<<< HEAD
-module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_rad = 0, eccentric=false, spring_inset = 2){
-=======
-module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_rad = 0, eccentric=false, spring_inset = 2, spring_compression=.5, spring_material=true, nut_traps=false){
->>>>>>> db1e3c206c2f72f9a16b8039fea2aef3c7ae70e8
+module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_rad = 0, eccentric=false, spring_inset = 2, spring_compression=1, spring_material=true, nut_traps=false, extra_thick=0){
     min_rad=3;
     wall=carriage_thick;
     
@@ -1351,6 +1244,8 @@ module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_r
     //total distance between the wheels
     wheel_vert_sep = span*beam + wheel_inner_rad*2 - eccentric_offset - spring_compression;
     spring_vert_sep = wheel_vert_sep/2 - m5_cap_rad-3.5;
+    
+    echo("Wheel vert sep = ", wheel_vert_sep);
     
     if(solid >= 0){
         //sketch in the wheels
@@ -1371,16 +1266,16 @@ module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_r
         //the rounded corners
         for(i=[-1,1]) translate([i*gantry_length/2,0,0]){
             //top
-            translate([0,-wheel_vert_sep/2,0]) cylinder(r=wheel_inner_rad+1, h=wall);
+            translate([0,-wheel_vert_sep/2,0]) cylinder(r=wheel_inner_rad+1, h=wall+extra_thick);
             
             //bottom
-            translate([i*gantry_spread/2,wheel_vert_sep/2,0]) cylinder(r=wheel_inner_rad+1, h=wall);
+            translate([i*gantry_spread/2,wheel_vert_sep/2,0]) cylinder(r=wheel_inner_rad+1, h=wall+extra_thick);
             
             if(nut_traps == true){
                 //top
-                translate([0,-wheel_vert_sep/2,wall-.1]) cylinder(r1=wheel_inner_rad+1, r2=wheel_inner_rad+.25, h=m5_nut_height-1);
+                translate([0,-wheel_vert_sep/2,wall+extra_thick-.1]) cylinder(r1=wheel_inner_rad+1, r2=wheel_inner_rad+.25, h=m5_nut_height-1);
                 //bottom
-                translate([i*gantry_spread/2,wheel_vert_sep/2,wall-.1]) cylinder(r1=wheel_inner_rad+1, r2=wheel_inner_rad+.25, h=m5_nut_height-1);
+                translate([i*gantry_spread/2,wheel_vert_sep/2,wall+extra_thick-.1]) cylinder(r1=wheel_inner_rad+1, r2=wheel_inner_rad+.25, h=m5_nut_height-1);
             }
             
             //extra material for the springs
@@ -1407,29 +1302,25 @@ module guide_wheel_helper(solid=0, span=1, cutout=true, gantry_spread = 0, cap_r
     if(solid <= 0){
         for(i=[-1,1]) translate([i*gantry_length/2,0,-.1]){
             //upper wheels
-            translate([0,-wheel_vert_sep/2,0]) cylinder(r=m5_rad, h=wall+1);
+            translate([0,-wheel_vert_sep/2,0]) cylinder(r=m5_rad, h=wall+extra_thick+1);
             
             if(nut_traps == false){
-                translate([0,-wheel_vert_sep/2,wall-1]) cylinder(r1=m5_cap_rad+.25, r2=m5_cap_rad+.5, h=wall+1);
+                translate([0,-wheel_vert_sep/2,wall+extra_thick-1]) cylinder(r1=m5_cap_rad+.25, r2=m5_cap_rad+.5, h=wall+1);
             }else{
-                translate([0,-wheel_vert_sep/2,wall-1]) cylinder(r1=m5_sq_nut_rad, r2=m5_sq_nut_rad+.5, h=wall+1, $fn=4);
+                translate([0,-wheel_vert_sep/2,wall+extra_thick-1]) cylinder(r1=m5_sq_nut_rad, r2=m5_sq_nut_rad+.5, h=wall+1, $fn=4);
             }
             
             //lower wheels
-            translate([i*gantry_spread/2,wheel_vert_sep/2,0]) cylinder(r=m5_rad, h=wall+1);
+            translate([i*gantry_spread/2,wheel_vert_sep/2,0]) cylinder(r=m5_rad, h=wall+extra_thick+1);
             if(nut_traps == false){
-                translate([i*gantry_spread/2,wheel_vert_sep/2,wall-1]) cylinder(r1=m5_cap_rad+.25, r2=m5_cap_rad+.5, h=wall+1);
+                translate([i*gantry_spread/2,wheel_vert_sep/2,wall+extra_thick-1]) cylinder(r1=m5_cap_rad+.25, r2=m5_cap_rad+.5, h=wall+1);
             }else{
-                translate([i*gantry_spread/2,wheel_vert_sep/2,wall-1]) cylinder(r1=m5_sq_nut_rad, r2=m5_sq_nut_rad+.5, h=wall+1, $fn=4);
+                translate([i*gantry_spread/2,wheel_vert_sep/2,wall+extra_thick-1]) cylinder(r1=m5_sq_nut_rad, r2=m5_sq_nut_rad+.5, h=wall+1, $fn=4);
             }
             
             //a little plastic spring
             if(eccentric == false){
-<<<<<<< HEAD
-                #translate([i*(gantry_spread/2+spring_inset),spring_vert_sep,0]) scale([6,.5,1]) rotate([0,0,30*(i-1)]) cylinder(r=eccentric_rad, h=wall*2+1, $fn=3);
-=======
                 translate([i*(gantry_spread/2+spring_inset),spring_vert_sep,0]) scale([6,.5,1]) rotate([0,0,30*(i-1)]) cylinder(r=eccentric_rad, h=wall*2+1, $fn=3);
->>>>>>> db1e3c206c2f72f9a16b8039fea2aef3c7ae70e8
             }
         }
     }
