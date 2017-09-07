@@ -23,11 +23,13 @@ side_length = rail_sep - beam;
 bed_screw_offset = (m5_washer_rad-mdf_wall)/2;  //this is used to make sure that the side-tensioning screws of the bed plates don't protrude - so that the top plate and side plates are flush, but the screw cap and nut don't stick up past the top.
 
 //render everything
-part=6;
+part=55;
 
 //parts for laser cutting
 if(part == 0)
     bed_top_projected();
+if(part == 55)
+    bed_double_top_projected();
 if(part == 1)
     bed_inside_projected();
 if(part == 2)
@@ -156,6 +158,22 @@ module bed_top_projected(){
     }
 }
 
+module bed_double_top_projected(){
+    projection(){
+        bed_double_top_connected();
+    }
+}
+
+module bed_double_top_connected(){
+    difference(){
+        //the top plaqte
+        bed_double_top();     
+            
+        //holes for all the stiffening support plates
+        
+    }
+}
+
 module bed_single_top_connected(){
     difference(){
         //the top plaqte
@@ -258,6 +276,34 @@ module smooth_rod_connectors(solid=1){
             //rod hole - for the whole connector, not just the rod
             cylinder(r=19/2+slop, h=mdf_wall*3, center=true);
         }
+    }
+}
+
+module bed_double_top(){
+    offset = -10;
+    
+    difference(){
+        union(){
+            translate([offset,0,0])
+            cube([top_single_width, top_length, mdf_wall], center=true);
+            
+            leadscrew_flange(solid=1, top_width = top_single_width);
+            
+            //attach to the smooth rods for straight bed movement
+            smooth_rod_connectors(solid=1, top_width = top_single_width);
+            
+            *bed_top_connectors(solid=1, top_width = top_single_width, single=true);
+        }
+        
+        leadscrew_flange(solid=-1, top_width = top_single_width);
+        
+        smooth_rod_connectors(solid=-1, top_width = top_single_width);
+        
+        *bed_top_connectors(solid=-1, top_width = top_single_width, single=true);
+        
+        //beam holes
+        translate([offset,0,0])
+        for(i=[-1,1]) for(j=[-1,1]) translate([j*(top_single_width/2-beam/4),i*rail_sep/2,0]) cylinder(r=m5_rad, h=mdf_wall*2, center=true);
     }
 }
 
