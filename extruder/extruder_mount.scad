@@ -67,12 +67,12 @@ module belt_zips(solid=0){
     
     //%cube([100,100,9], center=true);
     
-    for(i=[0:1]) mirror([0,i,0]) translate([-wall/2-.5,carriage_len/2,0]) scale([.666,1,1]) {
+    for(i=[0:1]) mirror([0,i,0]) translate([-wall/2-.25,carriage_len/2,0]) scale([.666,1,1]) {
         if(solid == 1){
             rotate([90,0,0]) cylinder(r=belt_thick/2+2.25+1, h=20, center=true);
         }else{
             translate([-1,0,0]) rotate([90,0,0]) rotate_extrude(){
-                translate([belt_thick/2+2.25,0,0]) {
+                translate([belt_thick/2+2.75,0,0]) {
                     square([1.5,inset*2], center=true);
                     translate([0,inset,0]) square([3,4], center=true);
                 }
@@ -80,6 +80,144 @@ module belt_zips(solid=0){
         }
     }
 }
+
+//clamp to hold the hotend in
+screw_mount_screw_sep = 25;
+screw_mount_rad = 6.5;
+
+
+*translate([-70,-11,-9]) groovemount_screw_clamp();
+*rotate([90,0,0]) difference(){
+    translate([-70,0,0]) groovemount_screw();
+    translate([-70,0,0]) groovemount_screw(solid=0);
+}
+
+module groovemount_screw_clamp(){
+    groove_lift = 1;
+    wall = 3;
+    dia = 16;
+    rad = dia/2+slop;
+    mink = 1;
+    inset = 3;
+    groove = 9+2;
+    thick = rad-1;
+    length = 10;
+    
+    
+    difference(){
+        hull(){
+            //screwhole mounts
+            for(i=[0,1]) mirror([i,0,0]) translate([screw_mount_screw_sep/2,7,0]) cylinder(r=screw_mount_rad, h=thick);
+        }
+        
+        //screwholes
+        for(i=[0,1]) mirror([i,0,0]) translate([screw_mount_screw_sep/2,7,-1]) cylinder(r=m5_rad+slop, h=wall*4);
+        
+       //hotend inset
+       render() translate([0,3,rad+groove_lift]) rotate([-90,0,0]) {           
+           //top part
+           translate([0,0,-inset-2]) hull(){
+               cap_cylinder(r=4+slop, h=wall);
+               translate([0,-3,0]) cap_cylinder(r=4+slop, h=wall);
+           }
+           
+           //the groove
+           translate([0,0,-inset]) hull(){
+               cap_cylinder(r=12/2+slop*3, h=13, $fn=90);
+               translate([0,-3,0]) cap_cylinder(r=12/2+slop*3, h=13, $fn=90);
+           }
+           
+           translate([0,0,-inset]) difference(){
+               cap_cylinder(r=rad, h=4+groove+.2, $fn=90);
+               translate([0,0,4.25]) cylinder(r=rad+1, h=6-slop*3);
+           }
+       }
+    }
+}
+
+module groovemount_screw(solid=1,e3d=1, height = 19){
+    dia = 16;
+    rad = dia/2+slop;
+    mink = 1;
+    inset = 3;
+    groove = 9+2;
+    thick = 5;
+    length = 10;
+    
+    bowden_tube_rad = 2.5;
+    
+    
+    screw_inset = 4.2;
+    screw_offset = rad+1;
+    screw_height = rad+m3_nut_height+wall;
+
+    filament_height = 14;
+
+    if(solid){
+        //body
+        //hull(){
+            *translate([0,filament_height,0]) rotate([90,0,0])  cylinder(r=4, h=.1, center=true);
+            
+            
+            
+            //screwmount mount
+            translate([0,0,-inset+4.25+6/2-slop]) hull(){
+                for(i=[0,1]) mirror([i,0,0]) translate([screw_mount_screw_sep/2,7,0]) rotate([90,0,0]) cylinder(r=screw_mount_rad, h=height, center=true);
+            
+                //stiffen the top
+                translate([0,height/2+5,10]) cube([screw_mount_screw_sep,4,25], center=true);
+            }
+        //}
+    }else{
+        
+        //screwmount
+        translate([0,0,-inset+4.25+6/2-slop]){
+            for(i=[0,1]) mirror([i,0,0]) translate([screw_mount_screw_sep/2,7,0]) rotate([90,0,0]) {
+                translate([0,0,-wall+m5_nut_height/2+.5+.3]) rotate([0,0,180]) cap_cylinder(r=m5_rad, h=25);
+                translate([0,0,-28+-wall+m5_nut_height/2+.5+.3]) rotate([0,0,180]) cap_cylinder(r=m5_rad, h=25);
+                translate([0,0,-wall]) rotate([0,0,45]) cylinder(r2=m5_sq_nut_rad, r1=m5_sq_nut_rad+1, h=m5_nut_height+1, center=true, $fn=4);
+                
+                %translate([0,0,+2]) cylinder(r=m3_rad, h=25.4*3/4);
+            }
+        }
+        
+        //hotend holes
+       render(){
+           //PTFE tube hole
+           translate([0,0,-inset-wall*2]) {
+               cap_cylinder(r=bowden_tube_rad, h=wall*3);
+               translate([0,-3+.75,wall*1.5])
+               hull(){
+                cube([1,wall*2,wall*3], center=true);
+                translate([0,-bowden_tube_rad,0]) cube([bowden_tube_rad*2,wall*2,wall*3], center=true);
+               }
+           }
+           //top part
+           translate([0,0,-inset-2]) hull(){
+               cap_cylinder(r=4+slop, h=wall);
+               translate([0,-3,0]) cap_cylinder(r=4+slop, h=wall);
+           }
+           
+           //the groove
+           translate([0,0,-inset]) hull(){
+               cap_cylinder(r=12/2+slop*3, h=13, $fn=90);
+               translate([0,-3,0]) cap_cylinder(r=12/2+slop*3, h=13, $fn=90);
+           }
+           
+           translate([0,0,-inset]) difference(){
+               cap_cylinder(r=rad, h=4+groove+.2+10, $fn=90);
+               translate([0,0,4.25]) cylinder(r=rad+1, h=6-slop*3);
+           }
+       }
+        
+        //backstop
+        translate([0,0,-inset]) cylinder(r=rad+slop*2, h=slop*2);
+        
+        //clamp cutout
+        translate([0,-rad-1.5,-inset+20]) cube([rad*2+wall*3+20,rad*2,100], center=true);
+    }
+}
+
 
 //carriage to mount a single Chimaera or Cyclops extruder
 module chimaera_carriage(diff_ir = true){
@@ -141,6 +279,8 @@ module chimaera_carriage(diff_ir = true){
 
 //carriage to mount a single Bowden type extruder.
 module bowden_carriage(diff_ir = true){    
+    extruder_drop = 7;
+    
     difference(){
         union(){
             //the carriage
@@ -155,6 +295,7 @@ module bowden_carriage(diff_ir = true){
             }
             
             //mount the extruder!
+            rotate([0,0,-90]) translate([0,-20,-extruder_drop]) groovemount_screw();
             
             //extra meat for the zip tie belt
             intersection(){
@@ -182,6 +323,9 @@ module bowden_carriage(diff_ir = true){
             }            
         }
         
+        //mount the extruder!
+        rotate([0,0,-90]) translate([0,-20,-extruder_drop]) groovemount_screw(solid = 0);
+        
         //motor mounting holes
         translate([motor_x-motor_width/2,motor_y,motor_z]) rotate([90,0,0]) motor_holes(slot = .75, height = flange_thick+1);
         
@@ -194,7 +338,7 @@ module bowden_carriage(diff_ir = true){
         }
         
         //groove for the belt
-        rotate([0,0,90]) rotate([-90,0,0]) belt_attach_flat();
+        //rotate([0,0,90]) rotate([-90,0,0]) belt_attach_flat();
         
         //instead of belt clamp, just some zip ties - one on each end
         translate([0,0,beam/2]) belt_zips();
