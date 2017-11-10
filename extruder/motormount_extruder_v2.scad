@@ -470,7 +470,7 @@ module bowden_tap(solid=1){
 			//tap this to hold the bowden.
 			cap_cylinder(bowden_tap_rad, 15);
                         //crop the top
-                        translate([0,-25-wall-bowden_tap_rad,0]) cube([50,50,50],center=true);
+                        translate([0,-25-wall*1.5-bowden_tap_rad,0]) cube([50,50,50],center=true);
 		}
 	}
 }

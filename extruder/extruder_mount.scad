@@ -27,7 +27,8 @@ belt_gap = 19;
 //aero_carriage();
 //chimaera_carriage();
 //rear_carriage();
-bowden_carriage();
+rotate([0,90,0]) bowden_carriage();
+//groovemount_screw_clamp();
 
 
 echo(motor_width);
@@ -86,7 +87,7 @@ screw_mount_screw_sep = 25;
 screw_mount_rad = 6.5;
 
 
-*translate([-70,-11,-9]) groovemount_screw_clamp();
+
 *rotate([90,0,0]) difference(){
     translate([-70,0,0]) groovemount_screw();
     translate([-70,0,0]) groovemount_screw(solid=0);
@@ -287,7 +288,7 @@ module chimaera_carriage(diff_ir = true){
 //carriage to mount a single Bowden type extruder.
 module bowden_carriage(diff_ir = true){    
     extruder_drop = 7-9;
-    extruder_jut = 23;
+    extruder_jut = 23+5;
     
     difference(){
         union(){
@@ -295,7 +296,7 @@ module bowden_carriage(diff_ir = true){
             difference(){
                 vertical_gantry_carriage(v_mount = false, belt_holes = false, nut_traps=true);
                 
-                //cutout above the belt - for looks only
+                //cutout above the belt - for looks
                 hull(){
                     translate([0,0,beam/2+beam]) cube([20,belt_gap,beam], center=true);
                     translate([0,0,beam/2*2.6+beam/2+belt_thick/2+1.4]) cube([20,51,beam], center=true);
@@ -334,9 +335,6 @@ module bowden_carriage(diff_ir = true){
         //mount the extruder!
         rotate([0,0,-90]) translate([0,-extruder_jut,-extruder_drop]) groovemount_screw(solid = 0,height=extruder_jut);
         
-        //motor mounting holes
-        translate([motor_x-motor_width/2,motor_y,motor_z]) rotate([90,0,0]) motor_holes(slot = .75, height = flange_thick+1);
-        
         //cable chain holes
         translate([motor_x,20,motor_z+motor_width/2+chain_width/2+flange_thick+2]) rotate([0,0,90]) rotate([90,0,0]) cablechain_bracket(solid=-1, wall=flange_thick+1);
         
@@ -344,9 +342,6 @@ module bowden_carriage(diff_ir = true){
         if(diff_ir == true){
             translate([-wall/2,0,diff_ir_z]) rotate([0,0,0]) rotate([90,0,0]) diff_ir(solid=0, wall=wall);
         }
-        
-        //groove for the belt
-        //rotate([0,0,90]) rotate([-90,0,0]) belt_attach_flat();
         
         //instead of belt clamp, just some zip ties - one on each end
         translate([0,0,beam/2]) belt_zips();
