@@ -51,7 +51,7 @@ nut_rad = 632_nut_rad;
 632_cap_height = 2+slop;
 632_nut_height = 5;
 
-bowden_tap_rad = 9.2/2;
+bowden_tap_rad = 9.2/2-.1;
 bowden_tube_rad = 2.1;
 
 
@@ -461,7 +461,7 @@ module bowden_tap(solid=1){
 		
 		}else{
 			//slit
-			translate([0,-10,thick/2+1-.01]) cube([bowden_tap_rad*2,20,thick+2], center=true);
+			translate([0,-10,thick/2-.01]) cube([bowden_tap_rad*2,20,thick+2-2], center=true);
                         translate([0,-10-wall-.1,-thick/2+1-.01]) cube([bowden_tap_rad*2,20,thick+2], center=true);
                         cylinder(r1=bowden_tap_rad, r2=bowden_tap_rad+.5, h=.5);
 			translate([0,0,.5]) cap_cylinder(bowden_tap_rad+.5, thick+1.5);
