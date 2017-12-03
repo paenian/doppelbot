@@ -33,7 +33,7 @@ module cooling_fan_mount(){
     difference(){
         union(){
             //attach to the hotend clamp
-            hull() for(i=[0,1]) mirror([i,0,0]) translate([mount_screw_sep/2+1,0,0]) cylinder(r=mount_rad, h=thick);
+            hull() for(i=[0,1]) mirror([i,0,0]) translate([mount_s crew_sep/2+1,0,0]) cylinder(r=mount_rad, h=thick);
                 
             translate(hotend_fan_offset) hotend_fan_mount();
             
