@@ -12,3 +12,6 @@ The basic design uses two lasercut endcaps, joined by OpenBuilds V-Rail.  The la
 I'm experimenting with 9mm belts and over-built 3d printed carriages, to increase rigidity.
 
 Also experimenting with a continous build system, wherein you can print dozens of objects in a row without human intervention.
+
+[[/images/complete_machine.jpg|Doppelbot running its first print]]
+![Picture of the Doppelbot](https://raw.githubusercontent.com/wiki/paenian/doppelbot/images/complete_machine.jpg "Doppelbot!")
