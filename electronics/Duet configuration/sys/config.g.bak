@@ -31,8 +31,8 @@ M92 X80 Y80 Z1600					; Set axis steps/mm
 M92 E170:170						; Set extruder steps/mm
 M106 P2 T50 H1 S255					; Set temperature controlled fan2
 
-M906 X1000 Y1000 Z1000 E800	; Set motor currents (mA)
-M201 X3000 Y3000 Z50 E1500	; Accelerations (mm/s^2)
+M906 X1000 Y1000 Z1000 E1200	; Set motor currents (mA)
+M201 X3000 Y3000 Z30 E1500	; Accelerations (mm/s^2)
 M203 X30000 Y30000 Z150 E3600	; Maximum speeds (mm/min)
 M566 X600 Y600 Z30 E20		; Maximum jerk speeds mm/minute
 M208 X300 Y300 Z300		; set axis maxima (adjust to suit your machine)
@@ -43,7 +43,7 @@ M83				; ...but relative extruder moves
 
 ; Z probe
 M558 P1 X0 Y0 Z1                    ; Analog Z probe, also used for homing the Z axis
-G31 X0 Y20 Z2.0 P500                      ; Set the probe height and threshold (put your own values here)
+G31 X0 Y20 Z1.9 P500                      ; Set the probe height and threshold (put your own values here)
 
 ; The following M557 commands are not needed if you are using a bed.g file to perform bed compensation
 ;*** Adjust the XY coordinates in the following M557 commands to suit your build and the position of the Z probe

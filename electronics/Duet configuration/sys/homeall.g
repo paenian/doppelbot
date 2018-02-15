@@ -4,6 +4,7 @@
 ; Adjust the bed upper and lower limits in config.g (M208 commands) to get the correct homing positions
 
 G91                       ; relative mode
+G1 Z5			  ; lift Z 5mm
 G1 S1 X-320 Y-320 F5000   ; coarse home X or Y
 G1 S1 X-320               ; coarse home X
 G1 S1 Y-320               ; coarse home Y
